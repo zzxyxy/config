@@ -5,6 +5,52 @@
 
   vars:
     user: ameszely
+    envs: |
+      PATH=$PATH:/home/{{ user }}/tools/wq
+      alias gitg="git log --all --decorate --oneline --graph"
+      alias klogf="kubectl logs -f "
+      alias egrep='egrep --color=auto'
+      alias fgrep='fgrep --color=auto'
+      alias grep='grep --color=auto'
+      alias helga='helm list | grep '
+      alias hgv='helm get values '
+      alias kdcat='kubectl describe deploy'
+      alias kddcat='kubectl get -o yaml deploy'
+      alias kddown='kubectl scale deploy  --replicas=0'
+      alias kdrm='kubectl delete deploy'
+      alias kdup='kubectl scale deploy  --replicas=1'
+      alias kdvi='kubectl edit deploy'
+      alias kex='kubectl exec -it'
+      alias kicat='kubectl describe ingress'
+      alias kimi='python3 /oper/imagetags.py'
+      alias kirm='kubectl delete ingress'
+      alias kivi='kubectl edit ingress'
+      alias klogs='kubectl logs'
+      alias kpcat='kubectl describe po'
+      alias kpdcat='kubectl get -o yaml po'
+      alias kprm='kubectl delete po'
+      alias kpvi='kubectl edit po'
+      alias kscat='kubectl describe service'
+      alias ksrm='kubectl delete service'
+      alias ksvi='kubectl edit service'
+      alias l='ls -CF'
+      alias la='ls -A'
+      alias ll='ls -lah'
+      alias llh='helm list'
+      alias llkc='kubectl get configmap'
+      alias llkd='kubectl get deploy'
+      alias llki='kubectl get ingress'
+      alias llkp='kubectl get po'
+      alias llks='kubectl get services'
+      alias ls='ls --color=auto'
+      alias plog='bash ~/.pod-logger.sh'
+      alias plogp='bash ~/.pod-logger-prev.sh'
+      alias xo='/oper/xo'
+      alias f="kubectl logs -f `kubectl get po --sort-by=.status.startTime | tail -1 | awk '{ print $1 }'`"
+      alias h="helm"
+      alias k="kubectl"
+      alias t="terraform"
+      EDITOR=vim
 
   tasks:
     - name: change user shell to zsh
@@ -58,46 +104,9 @@
     - name: Insert/Update aliases in bashrc
       blockinfile:
         path: /home/{{ user }}/.bashrc
-        block: |
-          PATH=$PATH:/home/{{ user }}/tools/wq
-          alias gitg="git log --all --decorate --oneline --graph"
-          alias klogf="kubectl logs -f "
-          alias egrep='egrep --color=auto'
-          alias fgrep='fgrep --color=auto'
-          alias grep='grep --color=auto'
-          alias helga='helm list | grep '
-          alias hgv='helm get values '
-          alias kdcat='kubectl describe deploy'
-          alias kddcat='kubectl get -o yaml deploy'
-          alias kddown='kubectl scale deploy  --replicas=0'
-          alias kdrm='kubectl delete deploy'
-          alias kdup='kubectl scale deploy  --replicas=1'
-          alias kdvi='kubectl edit deploy'
-          alias kex='kubectl exec -it'
-          alias kicat='kubectl describe ingress'
-          alias kimi='python3 /oper/imagetags.py'
-          alias kirm='kubectl delete ingress'
-          alias kivi='kubectl edit ingress'
-          alias klogs='kubectl logs'
-          alias kpcat='kubectl describe po'
-          alias kpdcat='kubectl get -o yaml po'
-          alias kprm='kubectl delete po'
-          alias kpvi='kubectl edit po'
-          alias kscat='kubectl describe service'
-          alias ksrm='kubectl delete service'
-          alias ksvi='kubectl edit service'
-          alias l='ls -CF'
-          alias la='ls -A'
-          alias ll='ls -lah'
-          alias llh='helm list'
-          alias llkc='kubectl get configmap'
-          alias llkd='kubectl get deploy'
-          alias llki='kubectl get ingress'
-          alias llkp='kubectl get po'
-          alias llks='kubectl get services'
-          alias ls='ls --color=auto'
-          alias plog='bash ~/.pod-logger.sh'
-          alias plogp='bash ~/.pod-logger-prev.sh'
-          alias xo='/oper/xo'
-          alias f="kubectl logs -f `kubectl get po --sort-by=.status.startTime | tail -1 | awk '{ print $1 }'`"
-          EDITOR=vim
+        block: "{{ envs }}"
+
+    - name: Insert/Update aliases in profile
+      blockinfile:
+        path: /home/{{ user }}/.profile
+        block: "{{ envs }}"
