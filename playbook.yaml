@@ -1,0 +1,43 @@
+- name: Manage kubernetes servers
+  hosts:
+  - Freya
+  vars:
+    secret_dir: "{{ lookup('env','SECRET_DIR') }}"
+  pre_tasks:
+    - name: Set hostname
+      become: true
+      ansible.builtin.hostname:
+        name: "{{ hostname }}"
+    - name: install packages
+      become: true
+      apt:
+        state: present
+        name:
+          - gpg
+          - mc
+          - nano
+          - net-tools
+          - vim
+
+  roles:
+    - {role: bertvv.samba, become: yes}
+
+  tasks:
+    - name: get_vars
+      include_vars:
+        file: "{{ secret_dir }}/passwds.yml"
+
+    - name: Create a kodi
+      become: true
+      user:
+        name: kodi
+        password: "{{ m_kodi }}"
+        group: users
+        groups:
+          - users
+        state: present
+        shell: /bin/bash
+        system: no
+        createhome: yes
+        home: /home/kodi
+        uid: 9000

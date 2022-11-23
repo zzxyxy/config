@@ -5,4 +5,4 @@ collections:
 - name: ivansible.devel
 
 roles:
-  []
+- { role: bertvv.samba, become: yes }
