@@ -32,3 +32,70 @@ nfs_server_shares:
       - 172.21.0.0/16
       - 192.168.10.0/24
     options: (rw,sync)
+          $ANSIBLE_VAULT;1.1;AES256
+          33313833376531306138333762616163313038633236343362346464616363616163613538366161
+          6234356565613638643431636636333739396437663965390a666138626163663761383663613934
+          63303831653863366536653364656437613939666538633761323138313363356539666634326432
+          3633353236623166620a633838663132633961346264633662646664363234393365663633396438
+          3163
+
+samba_netbios_name: FREYA
+samba_server_string: 'Welcome to the Freya file server'
+samba_workgroup: znet
+samba_realm: int.zxyxy.net
+samba_load_homes: true
+samba_load_printers: false
+samba_create_varwww_symlinks: true
+samba_wins_support: false
+samba_domain_master: false
+samba_preferred_master: true
+samba_mitigate_cve_2017_7494: false
+#samba_global_include: global-include.conf
+
+
+samba_shares:
+  - name: share
+    comment: 'Share'
+    path: /storage01/share
+    create_mode: 660
+    force_create_mode: 660
+    directory_mode: 770
+    force_directory_mode: 770
+    group: users
+    writeable: yes
+    browseable: yes
+#    include_file: share-include.conf
+
+#  - name: vault
+#    comment: 'Vault for sensitive files'
+#    path: /storage02/vault
+#    write_list: zxyxy, lilla
+#    read_list: zxyxy, lilla
+#    create_mode: 660
+#    force_create_mode: 660
+#    directory_mode: 770
+#    force_directory_mode: 770
+#    group: vault
+#    browseable: yes
+#
+#  - name: torrent
+#    comment: 'shares for torrent downloadings'
+#    path: /storage03/torrent
+#    create_mode: 666
+#    force_create_mode: 666
+#    directory_mode: 777
+#    force_directory_mode: 777
+#    group: users
+#    browseable: yes
+#
+#  - name: z
+#    comment: 'z shares'
+#    path: /storage01/z
+#    create_mode: 600
+#    force_create_mode: 600
+#    directory_mode: 700
+#    force_directory_mode: 700
+#    browseable: yes
+#    write_list: zxyxy
+#    read_list: zxyxy
+#

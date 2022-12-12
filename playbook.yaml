@@ -8,6 +8,8 @@
 #  - { role: geerlingguy.helm, become: yes }
   - { role: bertvv.samba, become: yes }
   - { role: apkawa.nfs, become: yes }
+  vars:
+    secret_dir: "{{ lookup('env','SECRET_DIR') }}"
   pre_tasks:
     - name: Set hostname
       become: true
@@ -126,3 +128,23 @@
         owner: root
         group: root
         mode: 0750
+
+#  tasks:
+#    - name: get_vars
+#      include_vars:
+#        file: "{{ secret_dir }}/passwds.yml"
+#
+#    - name: Create a kodi
+#      become: true
+#      user:
+#        name: kodi
+#        password: "{{ m_kodi }}"
+#        group: users
+#        groups:
+#          - users
+#        state: present
+#        shell: /bin/bash
+#        system: no
+#        createhome: yes
+#        home: /home/kodi
+#        uid: 9000
