@@ -5,4 +5,9 @@ collections:
 - name: ivansible.devel
 
 roles:
-  []
+# - name: geerlingguy.docker
+- name: geerlingguy.kubernetes
+- name: geerlingguy.helm
+- name: bertvv.samba
+- name: apkawa.nfs
+- name: mrlesmithjr.nodejs

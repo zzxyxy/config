@@ -1,0 +1,128 @@
+---
+- name: Manage kubernetes servers
+  hosts:
+  - Freya
+  roles:
+  - { role: geerlingguy.docker, become: yes }
+#  - { role: geerlingguy.kubernetes, become: yes }
+#  - { role: geerlingguy.helm, become: yes }
+  - { role: bertvv.samba, become: yes }
+  - { role: apkawa.nfs, become: yes }
+  pre_tasks:
+    - name: Set hostname
+      become: true
+      ansible.builtin.hostname:
+        name: "{{ hostname }}"
+    - name: install packages
+      become: true
+      apt:
+        state: present
+        name:
+          - cron
+          - git
+          - screen
+          - sshfs
+          - gpg
+          - mc
+          - nano
+          - net-tools
+          - prometheus-node-exporter
+          - prometheus-process-exporter
+          - rsync
+          - vim
+          - wsdd
+          - winbind
+
+    - name: create /root/bin
+      become: true
+      file:
+        path: /root/bin
+        state: directory
+
+    - name: Copy duck script
+      become: true
+      ansible.builtin.copy:
+        src: files/freya/duck.sh
+        dest: /root/bin/duck.sh
+        owner: root
+        group: root
+        mode: 0700
+
+    - name: Duckdns schedule
+      become: true
+      ansible.builtin.cron:
+        name: "Duckdns"
+        minute: "*/15"
+        job: "bash /root/bin/duck.sh >/dev/null 2>&1"
+
+#    - name: WSDD config
+#      become: true
+#      ansible.builtin.lineinfile:
+#        path: /etc/wsdd.conf
+#        regexp: '^WSDD_PARAMS='
+#        line: "WSDD_PARAMS=-n freya.int.zxyxy.net -p -H 4"
+#      register: wsddconfig
+#
+#    - name: wsdd-service
+#      become: true
+#      service:
+#        name: wsdd
+#        state: started
+#        enabled: yes
+#
+#    - name: wsdd-service
+#      become: true
+#      service:
+#        name: wsdd
+#        state: restarted
+#      when: wsddconfig.changed
+
+    - name: winbind-service
+      become: true
+      service:
+        name: winbind
+        state: started
+        enabled: yes
+
+    - name: Create vault group
+      become: true
+      group:
+        name: vault
+        state: present
+
+    - name: ansible create storage01 directory
+      become: true
+      file:
+        path: /storage01
+        state: directory
+        mode: 0777
+
+    - name: ansible create storage02 directory
+      become: true
+      file:
+        path: /storage02
+        state: directory
+        mode: 0777
+
+    - name: ansible create storage03 directory
+      become: true
+      file:
+        path: /storage03
+        state: directory
+        mode: 0777
+
+    - name: ansible create prometheus directory
+      become: true
+      file:
+        path: /storage01/prometheus
+        state: directory
+        mode: 0770
+
+    - name: Copy prometheus config file
+      become: true
+      ansible.builtin.copy:
+        src: files/freya/prometheus.yml
+        dest: /storage01/etc/
+        owner: root
+        group: root
+        mode: 0750

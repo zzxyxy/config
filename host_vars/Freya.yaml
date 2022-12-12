@@ -1,0 +1,34 @@
+hostname: Freya
+ansible_host: zxyxyhome.duckdns.org
+ansible_user: ansible
+ansible_ssh_private_key_file: ansible.key
+ansible_become_password: !vault |
+        $ANSIBLE_VAULT;1.1;AES256
+        65656463306538363037333664656331303933386539343639306334623133383133626537303661
+        3962323335386666353563376339323631633430633364650a396531636635633137336237323234
+        30663237326266323063303538646662623465616661373464373530646363666565373865616638
+        6537663837613664640a373262643830383730373965363636346466366537666361646236613535
+        3666
+
+nfs_client: no
+nfs_server: yes
+
+nfs_server_shares:
+  - path: /storage01
+    allow:
+      - 172.20.0.0/16
+      - 172.21.0.0/16
+      - 192.168.10.0/24
+    options: (rw,sync)
+  - path: /storage02
+    allow:
+      - 172.20.0.0/16
+      - 172.21.0.0/16
+      - 192.168.10.0/24
+    options: (rw,sync)
+  - path: /storage03
+    allow:
+      - 172.20.0.0/16
+      - 172.21.0.0/16
+      - 192.168.10.0/24
+    options: (rw,sync)
