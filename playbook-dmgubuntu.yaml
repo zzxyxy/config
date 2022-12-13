@@ -15,14 +15,19 @@
       become: true
       apt:
         name:
-          - vim
+          - build-essential
+          -
+          - cmake
           - git
+          - glibc-source
+          - libglib2.0-dev
           - mc
           - openjdk-17-jdk
           - zsh
           - tmux
           - screen
           - python3-venv
+          - vim
         state: present
         update_cache: yes
 
