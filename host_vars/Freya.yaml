@@ -20,12 +20,12 @@ nfs_server_shares:
       - 172.21.0.0/16
       - 192.168.10.0/24
     options: (rw,sync,no_subtree_check)
-#  - path: /storage02
-#    allow:
-#      - 172.20.0.0/16
-#      - 172.21.0.0/16
-#      - 192.168.10.0/24
-#    options: (rw,sync)
+  - path: /storage02
+    allow:
+      - 172.20.0.0/16
+      - 172.21.0.0/16
+      - 192.168.10.0/24
+    options: (rw,sync,no_subtree_check)
 #  - path: /storage03
 #    allow:
 #      - 172.20.0.0/16

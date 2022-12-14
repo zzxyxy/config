@@ -134,6 +134,49 @@
         state: directory
         mode: 0770
 
+    - name: ansible create transmission directory
+      become: true
+      file:
+        path: /storage02/kube/torrent-z/download
+        state: directory
+        mode: 0777
+
+    - name: ansible create transmission directory
+      become: true
+      file:
+        path: /storage02/kube/torrent-z/incomplette
+        state: directory
+        mode: 0777
+
+    - name: ansible create transmission directory
+      become: true
+      file:
+        path: /storage02/kube/torrent-z/toDownload
+        state: directory
+        mode: 0777
+
+    - name: ansible create transmission directory
+      become: true
+      file:
+        path: /storage02/kube/torrent-a/download
+        state: directory
+        mode: 0777
+
+    - name: ansible create transmission directory
+      become: true
+      file:
+        path: /storage02/kube/torrent-a/incomplette
+        state: directory
+        mode: 0777
+
+    - name: ansible create transmission directory
+      become: true
+      file:
+        path: /storage02/kube/torrent-a/toDownload
+        state: directory
+        mode: 0777
+
+
     - name: Copy prometheus config file
       become: true
       ansible.builtin.copy:
@@ -142,6 +185,7 @@
         owner: root
         group: root
         mode: 0750
+
 
 #  tasks:
 #    - name: get_vars
