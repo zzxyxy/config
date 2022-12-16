@@ -16,14 +16,14 @@ nfs_server: yes
 nfs_server_shares:
   - path: /storage01
     allow:
-      - 172.20.0.0/16
-      - 172.21.0.0/16
+      - 127.0.0.1/8
+      - 172.0.0.0/8
       - 192.168.10.0/24
     options: (rw,sync,no_subtree_check)
   - path: /storage02
     allow:
-      - 172.20.0.0/16
-      - 172.21.0.0/16
+      - 127.0.0.1/8
+      - 172.0.0.0/8
       - 192.168.10.0/24
     options: (rw,sync,no_subtree_check)
 #  - path: /storage03
