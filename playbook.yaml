@@ -7,7 +7,7 @@
 #  - { role: geerlingguy.kubernetes, become: yes }
 #  - { role: geerlingguy.helm, become: yes }
   - { role: bertvv.samba, become: yes }
-  - { role: apkawa.nfs, become: yes }
+#  - { role: apkawa.nfs, become: yes }
   vars:
     secret_dir: "{{ lookup('env','SECRET_DIR') }}"
   pre_tasks:
@@ -25,6 +25,7 @@
           - screen
           - sshfs
           - gpg
+          - make
           - mc
           - nano
           - net-tools

@@ -16,7 +16,6 @@
       apt:
         name:
           - build-essential
-          -
           - cmake
           - git
           - glibc-source

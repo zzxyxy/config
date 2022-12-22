@@ -19,25 +19,18 @@ nfs_server_shares:
       - 127.0.0.1/8
       - 172.0.0.0/8
       - 192.168.10.0/24
-    options: (rw,sync,no_subtree_check)
+    options: (rw,sync,no_subtree_check,no_root_squash)
   - path: /storage02
     allow:
       - 127.0.0.1/8
       - 172.0.0.0/8
       - 192.168.10.0/24
-    options: (rw,sync,no_subtree_check)
+    options: (rw,sync,no_subtree_check,no_root_squash)
 #  - path: /storage03
 #    allow:
 #      - 172.20.0.0/16
 #      - 172.21.0.0/16
 #      - 192.168.10.0/24
-#    options: (rw,sync)
-#          $ANSIBLE_VAULT;1.1;AES256
-#          33313833376531306138333762616163313038633236343362346464616363616163613538366161
-#          6234356565613638643431636636333739396437663965390a666138626163663761383663613934
-#          63303831653863366536653364656437613939666538633761323138313363356539666634326432
-#          3633353236623166620a633838663132633961346264633662646664363234393365663633396438
-#          3163
 
 samba_netbios_name: FREYA
 samba_server_string: 'Welcome to the Freya file server'
