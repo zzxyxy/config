@@ -6,7 +6,9 @@ collections:
 
 roles:
 - role: bertvv.samba
-- role: geerlingguy.docker
-- role: geerlingguy.kubernetes
-- role: geerlingguy.helm
 - role: gantsign.kubernetes
+# - name: geerlingguy.docker
+- name: geerlingguy.kubernetes
+- name: geerlingguy.helm
+- name: apkawa.nfs
+- name: mrlesmithjr.nodejs

@@ -1,0 +1,4 @@
+scrape_configs:
+  - job_name: 'freya_monitor'
+    static_configs:
+    - targets: ['172.21.0.2:9100']

@@ -1,6 +1,10 @@
+---
 - name: Manage kubernetes servers
   hosts:
   - Freya
+  roles:
+  - { role: geerlingguy.docker, become: yes }
+  - { role: bertvv.samba, become: yes }
   vars:
     secret_dir: "{{ lookup('env','SECRET_DIR') }}"
   pre_tasks:
@@ -13,13 +17,20 @@
       apt:
         state: present
         name:
+          - cron
+          - git
+          - screen
+          - sshfs
           - gpg
+          - make
           - mc
           - nano
           - net-tools
+          - prometheus-node-exporter
+          - prometheus-process-exporter
+          - rsync
           - vim
           - rinetd
-
   roles:
     - {role: bertvv.samba, become: yes}
     - { role: geerlingguy.docker, become: yes }
@@ -30,16 +41,177 @@
         file: "{{ secret_dir }}/passwds.yml"
 
     - name: Create a kodi
+          - wsdd
+          - winbind
+
+    - name: create /root/bin
       become: true
-      user:
-        name: kodi
-        password: "{{ m_kodi }}"
-        group: users
-        groups:
-          - users
+      file:
+        path: /root/bin
+        state: directory
+
+    - name: Copy duck script
+      become: true
+      ansible.builtin.copy:
+        src: files/freya/duck.sh
+        dest: /root/bin/duck.sh
+        owner: root
+        group: root
+        mode: 0700
+
+    - name: Duckdns schedule
+      become: true
+      ansible.builtin.cron:
+        name: "Duckdns"
+        minute: "*/15"
+        job: "bash /root/bin/duck.sh >/dev/null 2>&1"
+
+#    - name: WSDD config
+#      become: true
+#      ansible.builtin.lineinfile:
+#        path: /etc/wsdd.conf
+#        regexp: '^WSDD_PARAMS='
+#        line: "WSDD_PARAMS=-n freya.int.zxyxy.net -p -H 4"
+#      register: wsddconfig
+#
+#    - name: wsdd-service
+#      become: true
+#      service:
+#        name: wsdd
+#        state: started
+#        enabled: yes
+#
+#    - name: wsdd-service
+#      become: true
+#      service:
+#        name: wsdd
+#        state: restarted
+#      when: wsddconfig.changed
+
+    - name: winbind-service
+      become: true
+      service:
+        name: winbind
+        state: started
+        enabled: yes
+
+    - name: Create vault group
+      become: true
+      group:
+        name: vault
         state: present
-        shell: /bin/bash
-        system: no
-        createhome: yes
-        home: /home/kodi
-        uid: 9000
+
+    - name: ansible create storage01 directory
+      become: true
+      file:
+        path: /storage01
+        state: directory
+        mode: 0777
+
+    - name: ansible create storage02 directory
+      become: true
+      file:
+        path: /storage02
+        state: directory
+        mode: 0777
+
+    - name: ansible create storage03 directory
+      become: true
+      file:
+        path: /storage03
+        state: directory
+        mode: 0777
+
+    - name: ansible create kube prometheus directory
+      become: true
+      file:
+        path: /storage01/kube/prometheus
+        state: directory
+        mode: 0777
+
+    - name: ansible create kube grafana directory
+      become: true
+      file:
+        path: /storage01/kube/grafana
+        state: directory
+        mode: 0777
+
+    - name: ansible create prometheus directory
+      become: true
+      file:
+        path: /storage01/prometheus
+        state: directory
+        mode: 0770
+
+    - name: ansible create transmission directory
+      become: true
+      file:
+        path: /storage02/kube/torrent-z/download
+        state: directory
+        mode: 0777
+
+    - name: ansible create transmission directory
+      become: true
+      file:
+        path: /storage02/kube/torrent-z/incomplette
+        state: directory
+        mode: 0777
+
+    - name: ansible create transmission directory
+      become: true
+      file:
+        path: /storage02/kube/torrent-z/toDownload
+        state: directory
+        mode: 0777
+
+    - name: ansible create transmission directory
+      become: true
+      file:
+        path: /storage02/kube/torrent-a/download
+        state: directory
+        mode: 0777
+
+    - name: ansible create transmission directory
+      become: true
+      file:
+        path: /storage02/kube/torrent-a/incomplette
+        state: directory
+        mode: 0777
+
+    - name: ansible create transmission directory
+      become: true
+      file:
+        path: /storage02/kube/torrent-a/toDownload
+        state: directory
+        mode: 0777
+
+
+    - name: Copy prometheus config file
+      become: true
+      ansible.builtin.copy:
+        src: files/freya/prometheus.yml
+        dest: /storage01/etc/
+        owner: root
+        group: root
+        mode: 0750
+
+
+#  tasks:
+#    - name: get_vars
+#      include_vars:
+#        file: "{{ secret_dir }}/passwds.yml"
+#
+#    - name: Create a kodi
+#      become: true
+#      user:
+#        name: kodi
+#        password: "{{ m_kodi }}"
+#        group: users
+#        groups:
+#          - users
+#        state: present
+#        shell: /bin/bash
+#        system: no
+#        createhome: yes
+#        home: /home/kodi
+#        uid: 9000
