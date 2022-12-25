@@ -1,8 +1,12 @@
 ---
 collections:
 - name: pandemonium1986.k8s_toolbox
-- name: serdigital64.infrastructure
-- name: ivansible.devel
+# - name: serdigital64.infrastructure
+# - name: ivansible.devel
 
 roles:
-- { role: bertvv.samba, become: yes }
+- role: bertvv.samba
+- role: geerlingguy.docker
+- role: geerlingguy.kubernetes
+- role: geerlingguy.helm
+- role: gantsign.kubernetes

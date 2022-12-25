@@ -18,10 +18,12 @@
           - nano
           - net-tools
           - vim
+          - rinetd
 
   roles:
     - {role: bertvv.samba, become: yes}
-
+    - { role: geerlingguy.docker, become: yes }
+    - { role: geerlingguy.helm, become: yes }
   tasks:
     - name: get_vars
       include_vars:

@@ -1,0 +1,38 @@
+---
+- name: wsl debian setting
+  become: yes
+  hosts:
+    - localhost
+  collections:
+    - pandemonium1986.k8s_toolbox
+    - serdigital64.infrastructure
+    - ivansible.devel
+
+  tasks:
+    - name: Install packages
+      become: true
+      apt:
+        name:
+          - build-essential
+          - vim
+          - git
+          - mc
+          - nodejs
+          - openjdk-17-jdk
+          - zsh
+          - tmux
+          - screen
+          - python3-venv
+          - neovim
+          - haskell-platform
+        state: present
+        update_cache: yes
+
+    - name: install python virtual env
+      become: true
+      pip:
+        name:
+          - virtualenv
+
+
+#
