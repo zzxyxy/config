@@ -17,8 +17,11 @@
       apt:
         state: present
         name:
+          - auditd
           - cron
           - git
+          - selinux-basics
+          - selinux-policy-default
           - screen
           - sshfs
           - gpg
@@ -40,9 +43,9 @@
       include_vars:
         file: "{{ secret_dir }}/passwds.yml"
 
-    - name: Create a kodi
-          - wsdd
-          - winbind
+#    - name: Create a kodi
+#          - wsdd
+#          - winbind
 
     - name: create /root/bin
       become: true
