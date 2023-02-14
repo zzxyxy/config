@@ -22,6 +22,7 @@
           - zsh
           - tmux
           - screen
+          - snapd
           - python3-venv
           - neovim
           - haskell-platform
@@ -34,5 +35,9 @@
         name:
           - virtualenv
 
-
+    - name: Create snap symbolic link
+      file:
+        src: /snap
+        dest: /var/lib/snapd/snap
+        state: link
 #
