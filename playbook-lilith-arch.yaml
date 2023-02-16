@@ -1,0 +1,314 @@
+---
+- name: manage packages
+  hosts: localhost
+  collections:
+    - kewlfft.aur
+  vars:
+    secret_dir: "{{ lookup('env','SECRET_DIR') }}"
+    docker_distribution: archlinux
+    docker_ansible_requirements: true
+  pre_tasks:
+    #    - name: get_vars
+    # include_vars:
+    #   file: "{{ secret_dir }}/passwds.yml"
+
+    - name: Upgrade system
+      community.general.pacman:
+        update_cache: yes
+        upgrade: yes
+
+    - name: Remove packages
+      become: true
+      pacman:
+        name:
+          - virtualbox-host-modules-arch
+        state: absent
+
+    - name: Install packages
+      become: true
+      pacman:
+        name:
+          - arandr
+          - avahi
+          - base-devel
+          - boost
+          - blueman
+          - bluez
+          - bluez-utils
+          - bluez-tools
+          - caja
+          - calibre
+          - chromium
+          - cups
+          - dmenu
+          - fakeroot
+          - linux-lts-headers
+          - xf86-video-intel
+          - xterm         
+          - lightdm
+          - i3-wm
+          - lightdm-gtk-greeter
+          - mate-terminal
+          - sudo
+          - mc
+          - i3status
+          - keepass
+#- autofs
+          - sshfs
+          - jdk11-openjdk
+          - network-manager-applet
+          - mplayer
+          - kodi
+          - pasystray
+          - texlive-bin
+          - texlive-core
+          - texlive-langextra
+          - texlive-pictures
+          - texstudio
+          - pulseaudio-bluetooth
+          - pavucontrol
+          - k3b
+          - okular
+          - openssh
+          - tmux
+          - screen
+          - xdotool
+          - gtk2
+          - clang
+          - gperf
+          - llvm
+          - npm
+          - pipewire
+          - python-protobuf
+          - ncurses
+          - ntp
+          - boost-libs
+          - pulseaudio-bluetooth
+          - zip
+          - ant
+          - junit
+          - neovim
+          - nfs-utils
+          - gvfs-nfs
+          - python-setuptools
+          - vim
+          - virtualbox
+          - virtualbox-host-dkms
+          - vlc
+          - zsh
+        state: present
+
+    - name: Python install packages
+      become: true
+      pip:
+        name:
+          - virtualenv
+          - pylint
+        state: present
+
+    - name: install OKI filter
+      become: yes
+      copy: 
+        src: files/whitetulip/OK400PCL.ppd
+        dest: /usr/share/ppd
+        mode: 0444
+
+    - name: install OKI filter
+      become: yes
+      copy: 
+        src: files/whitetulip/rastertookimonochrome
+        dest: /usr/lib/cups/filter/
+        mode: 0755
+
+    - name: enable bluetooth
+      service:
+        name: bluetooth
+        enabled: yes
+        state: started
+
+    - name: enable ssh
+      service:
+        name: sshd
+        enabled: yes
+        state: started
+
+    - name: enable ntp
+      service:
+        name: ntpd
+        enabled: yes
+        state: started
+
+    - name: Print server service running
+      become: true
+      service:
+        name: cups
+        state: started
+        enabled: yes
+
+    - name: avahi service running
+      become: true
+      service:
+        name: avahi-daemon
+        state: started
+        enabled: yes
+
+    - name: Create Hack font directory 
+      ansible.builtin.file:
+        path: /usr/share/fonts/Hack
+        state: directory
+        mode: '0755'
+
+    - name: Install hack regular font
+      copy:
+        src: files/Hack-Regular.ttf
+        dest: /usr/share/fonts/Hack
+        force: no
+
+    - name: Install hack bold font
+      copy:
+        src: files/Hack-Bold.ttf
+        dest: /usr/share/fonts/Hack
+        force: no
+
+    - name: Install hack italic font
+      copy:
+        src: files/Hack-Italic.ttf
+        dest: /usr/share/fonts/Hack
+        force: no
+
+    - name: Install hack bold italic font
+      copy:
+        src: files/Hack-BoldItalic.ttf
+        dest: /usr/share/fonts/Hack
+        force: no
+
+# ---- AUR packages
+  
+    - name: Create the `aur_builder` user
+      become: yes
+      ansible.builtin.user:
+        name: aur_builder
+        create_home: yes
+        group: wheel
+
+    - name: Allow the `aur_builder` user to run `sudo pacman` without a password
+      become: yes
+      ansible.builtin.lineinfile:
+        path: /etc/sudoers.d/11-install-aur_builder
+        line: 'aur_builder ALL=(ALL) NOPASSWD: /usr/bin/pacman'
+        create: yes
+        validate: 'visudo -cf %s'
+
+    - name: Install vscode
+      aur:
+        name: visual-studio-code-bin
+        use: makepkg
+        state: present
+      become: yes
+      become_user: aur_builder
+
+        #    - name: Install ncurses
+        #      aur:
+        #        name: ncurses
+        #        use: makepkg
+        #        state: present
+        #      become: yes
+        #      become_user: aur_builder
+
+        #    - name: Install ncurses5-compat-libs
+        #      aur:
+        #        name: ncurses5-compat-libs
+        #        use: makepkg
+        #        state: present
+        #      become: yes
+        #      become_user: aur_builder
+
+#      - name: Install autofs
+#      aur:
+#        name: autofs
+#        use: makepkg
+#        state: present
+#      become: yes
+#      become_user: aur_builder
+
+  roles:
+  - { role: acehko.docker, become: yes }
+  - { role: gantsign.minikube, become: yes }
+  - { role: andrewrothstein.kubectl, become: yes }
+  - { role: andrewrothstein.go, become: yes }
+  tasks:
+    #    - name: Create a zxyxy
+    #      become: true
+    #      user:
+    #        name: zxyxy
+    #        password: "{{ zxyxy_pwd }}"
+    #        group: users
+    #        groups: 
+    #          - users
+    #          - wheel
+    #          - docker
+    #          - vboxusers
+    #        state: present
+    #        shell: /bin/zsh      
+    #        system: no            
+    #        createhome: yes       
+    #        home: /home/zxyxy     
+    #        uid: 10000
+
+# -------- autofs
+
+    - name: whitetulip storage01 directory
+      become: true
+      file:
+        path: /mnt/whitetulip/storage01
+        state: directory
+        mode: 0777
+
+    - name: whitetulip storage02 directory
+      become: true
+      file:
+        path: /mnt/whitetulip/storage02
+        state: directory
+        mode: 0777
+
+    - name: whitetulip storage02 directory
+      become: true
+      file:
+        path: /mnt/whitetulip/storage02
+        state: directory
+        mode: 0777
+
+#    - name: authorized_keys for zxyxy
+#      become: yes
+#      copy:
+#        src: files/Lilith/autowhitetulip
+#        dest: /etc/autofs/autowhitetulip
+#        owner: root
+#        mode: 0644
+
+
+ #    - name: nfs master setting
+ #     become: true
+ #     lineinfile:
+ #       name: /etc/auto.master
+ #       regexp: '^/mnt/nfs'
+ #       line: /mnt/nfs	/etc/auto.nfs --timeout=30,--ghost
+ #       state: present
+ #
+ #   - name: copy auto.nfs
+ #     become: true
+ #     ansible.builtin.copy:
+ #       src: files/Lilith/auto.nfs
+ #       dest: /etc
+ #     register: nfs_mount
+ #
+ #   - name: Autofs enable
+ #     become: true
+ #     service:
+ #       name: autofs
+ #       enabled: yes
+ #       state: restarted
+ #     when: nfs_mount.changed
+ #
+ # roles:
+ # - z-virtualbox
