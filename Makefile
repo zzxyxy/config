@@ -5,7 +5,7 @@ dmg:
 	sudo ansible-playbook playbook-dmgubuntu.yaml
 
 dmgprofile:
-	ansible-playbook playbook-dmgprofile.yaml --ask-become-pass
+	ansible-playbook playbook-heitec-profile.yaml --ask-become-pass
 
 lilith:
 	sudo ansible-playbook playbook-lilithubuntu.yaml

@@ -51,7 +51,7 @@
       alias k="kubectl"
       alias t="terraform"
       EDITOR=vim
-      export TF_VAR_tags={"DMGMoriScope"   = "DIGITAL-Services", "DMGMoriService" = "WERKBLiQ"}
+      export TF_VAR_tags='{"DMGMoriScope"   = "DIGITAL-Services", "DMGMoriService" = "WERKBLiQ"}'
 
   tasks:
     - name: change user shell to zsh
