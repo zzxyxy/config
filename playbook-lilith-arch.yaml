@@ -39,16 +39,20 @@
           - caja
           - calibre
           - chromium
+          - cronie
           - cups
           - dmenu
           - fakeroot
+          - fuse2fs
+          - fuse2
           - linux-lts-headers
           - xf86-video-intel
-          - xterm         
+          - xterm
           - lightdm
           - i3-wm
           - lightdm-gtk-greeter
           - mate-terminal
+          - net-tools
           - sudo
           - mc
           - i3status
@@ -65,6 +69,7 @@
           - texlive-langextra
           - texlive-pictures
           - texstudio
+          - tigervnc
           - pulseaudio-bluetooth
           - pavucontrol
           - k3b
@@ -106,19 +111,25 @@
           - pylint
         state: present
 
-    - name: install OKI filter
-      become: yes
-      copy: 
-        src: files/whitetulip/OK400PCL.ppd
-        dest: /usr/share/ppd
-        mode: 0444
+          #    - name: install OKI filter
+          #      become: yes
+          # copy:
+          #src: files/whitetulip/OK400PCL.ppd
+          #     dest: /usr/share/ppd
+          #       mode: 0444
 
-    - name: install OKI filter
-      become: yes
-      copy: 
-        src: files/whitetulip/rastertookimonochrome
-        dest: /usr/lib/cups/filter/
-        mode: 0755
+          #   - name: install OKI filter
+          #    become: yes
+          #  copy:
+          #     src: files/whitetulip/rastertookimonochrome
+          #     dest: /usr/lib/cups/filter/
+          #     mode: 0755
+
+    - name: enable cron
+      service:
+        name: cronie
+        enabled: yes
+        state: started
 
     - name: enable bluetooth
       service:
@@ -152,7 +163,7 @@
         state: started
         enabled: yes
 
-    - name: Create Hack font directory 
+    - name: Create Hack font directory
       ansible.builtin.file:
         path: /usr/share/fonts/Hack
         state: directory
@@ -183,7 +194,7 @@
         force: no
 
 # ---- AUR packages
-  
+
     - name: Create the `aur_builder` user
       become: yes
       ansible.builtin.user:
@@ -243,16 +254,16 @@
     #        name: zxyxy
     #        password: "{{ zxyxy_pwd }}"
     #        group: users
-    #        groups: 
+    #        groups:
     #          - users
     #          - wheel
     #          - docker
     #          - vboxusers
     #        state: present
-    #        shell: /bin/zsh      
-    #        system: no            
-    #        createhome: yes       
-    #        home: /home/zxyxy     
+    #        shell: /bin/zsh
+    #        system: no
+    #        createhome: yes
+    #        home: /home/zxyxy
     #        uid: 10000
 
 # -------- autofs

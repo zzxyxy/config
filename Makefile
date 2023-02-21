@@ -8,7 +8,7 @@ dmgprofile:
 	ansible-playbook playbook-dmgprofile.yaml --ask-become-pass
 
 lilith:
-	sudo ansible-playbook playbook-lilithubuntu.yaml
+	sudo ansible-playbook playbook-lilith-arch.yaml
 
 req:
 	ansible-galaxy install -r requirements.yaml
