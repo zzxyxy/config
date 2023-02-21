@@ -4,17 +4,6 @@
   vars:
     docker_distribution: archlinux
     docker_ansible_requirements: true
-    helm_cache_path:            "/var/cache/github"
-    helm_installation_path:     "/usr/local/bin/helm"
-    helm_version:               "v3.11.1"
-    k9s_cache_path:             "/var/cache/github"
-    k9s_installation_path:      "/usr/local/bin/k9s"
-    k9s_version:                "v0.27.3"
-    kubectl_version:            "1.26.1"
-    kubectx_installation_path:  "/usr/local/bin/kubectx"
-    kubectx_version:            "master"
-    stern_installation_path:    "/usr/local/bin/stern"
-    stern_version:              "1.23.0"
   pre_tasks:
     - name: Upgrade system
       become: true
@@ -71,6 +60,7 @@
         name:
           - virtualenv
           - pylint
+          - ansible
         state: present
   roles:
   - { role: andrewrothstein.go, become: yes }
