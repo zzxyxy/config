@@ -1,0 +1,70 @@
+---
+- name: manage packages
+  hosts: localhost
+  vars:
+    docker_distribution: archlinux
+    docker_ansible_requirements: true
+  pre_tasks:
+    - name: Upgrade system
+      become: true
+      community.general.pacman:
+        update_cache: yes
+        upgrade: yes
+
+    - name: Remove packages
+      become: true
+      pacman:
+        name:
+          - virtualbox-host-modules-arch
+        state: absent
+
+    - name: Install packages
+      become: true
+      pacman:
+        name:
+          - ant
+          - base-devel
+          - boost
+          - boost-libs
+          - blueman
+          - clang
+          - gtk2
+          - gperf
+          - junit
+          - kubectx
+          - kubens
+          - kubectl
+          - linux-lts-headers
+          - mc
+          - npm
+          - ncurses
+          - ntp
+          - openssh
+          - python-setuptools
+          - sudo
+          - sshfs
+          - terraform
+          - jdk11-openjdk
+          - tmux
+          - screen
+          - vim
+          - vlc
+          - zsh
+          - zip
+          - wget
+        state: present
+
+    - name: Python install packages
+      become: true
+      pip:
+        name:
+          - virtualenv
+          - pylint
+          - ansible
+        state: present
+  roles:
+  - { role: andrewrothstein.go, become: yes }
+  - { role: andrewrothstein.k9s, become: yes }
+  - { role: andrewrothstein.kubernetes-helm, become: yes }
+  - { role: andrewrothstein.kubelogin, become: yes }
+  - { role: buluma.azure_cli, become: yes }

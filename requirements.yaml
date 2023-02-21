@@ -12,3 +12,9 @@ roles:
 - name: geerlingguy.helm
 - name: apkawa.nfs
 - name: mrlesmithjr.nodejs
+- name: andrewrothstein.kubectl
+- name: andrewrothstein.go
+- name: andrewrothstein.k9s
+- name: andrewrothstein.kubernetes-helm
+- name: andrewrothstein.kubelogin
+- name: buluma.azure_cli

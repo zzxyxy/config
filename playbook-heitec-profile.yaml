@@ -51,10 +51,7 @@
       alias k="kubectl"
       alias t="terraform"
       EDITOR=vim
-      export TF_VAR_AKS_SERVICE_PRINCIPAL_APP_ID=0e360fe2-3c0b-43e8-9feb-60629a6f5689
-      export TF_VAR_AKS_SERVICE_PRINCIPAL_CLIENT_SECRET=aRYZ4iOC3zSexf7zzNHA5Z6ZwUpHfijj_6
-      export TF_VAR_AKS_SERVICE_PRINCIPAL_OBEJCT_ID=92a376d6-9bfd-41e3-840d-89e807b9c5e2
-      export TF_VAR_tags={"DMGMoriScope"   = "DIGITAL-Services", "DMGMoriService" = "WERKBLiQ"}
+      export TF_VAR_tags='{"DMGMoriScope"   = "DIGITAL-Services", "DMGMoriService" = "WERKBLiQ"}'
 
   tasks:
     - name: change user shell to zsh
@@ -109,8 +106,16 @@
       blockinfile:
         path: /home/{{ user }}/.bashrc
         block: "{{ envs }}"
+        create: true
+
+    - name: Insert/Update aliases in bashrc
+      blockinfile:
+        path: /home/{{ user }}/.zshrc
+        block: "{{ envs }}"
+        create: true
 
     - name: Insert/Update aliases in profile
       blockinfile:
         path: /home/{{ user }}/.profile
         block: "{{ envs }}"
+        create: true
