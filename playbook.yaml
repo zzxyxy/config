@@ -2,46 +2,36 @@
 - name: Manage kubernetes servers
   hosts:
   - Freya
-  roles:
-  - { role: geerlingguy.docker, become: yes }
-  - { role: bertvv.samba, become: yes }
-  vars:
-    secret_dir: "{{ lookup('env','SECRET_DIR') }}"
   pre_tasks:
     - name: Set hostname
       become: true
       ansible.builtin.hostname:
         name: "{{ hostname }}"
+
+    - name: Upgrade system
+      become: true
+      community.general.pacman:
+        update_cache: yes
+        upgrade: yes
+
     - name: install packages
       become: true
-      apt:
+      pacman:
         state: present
         name:
-          - auditd
           - cron
           - git
-          - selinux-basics
-          - selinux-policy-default
           - screen
           - sshfs
-          - gpg
           - make
           - mc
           - nano
           - net-tools
-          - prometheus-node-exporter
-          - prometheus-process-exporter
           - rsync
           - vim
-          - rinetd
-  roles:
-    - {role: bertvv.samba, become: yes}
-    - { role: geerlingguy.docker, become: yes }
-    - { role: geerlingguy.helm, become: yes }
+          - samba
+          - fail2ban
   tasks:
-    - name: get_vars
-      include_vars:
-        file: "{{ secret_dir }}/passwds.yml"
 
 #    - name: Create a kodi
 #          - wsdd
@@ -69,6 +59,74 @@
         minute: "*/15"
         job: "bash /root/bin/duck.sh >/dev/null 2>&1"
 
+    - name: Copy samba config
+      become: true
+      ansible.builtin.copy:
+        src: files/freya/smb.conf
+        dest: /etc/samba/smb.conf
+        owner: root
+        group: root
+        mode: 0770
+      register: sambeconfig
+
+    - name: smb-service
+      become: true
+      service:
+        name: smb
+        state: started
+        enabled: yes
+
+    - name: nmb-service
+      become: true
+      service:
+        name: nmb
+        state: started
+        enabled: yes
+
+    - name: smb-service
+      become: true
+      service:
+        name: smb
+        state: restarted
+        enabled: yes
+      when: sambeconfig.changed
+
+    - name: nmb-service
+      become: true
+      service:
+        name: nmb
+        state: restarted
+        enabled: yes
+      when: sambeconfig.changed
+
+
+
+    - name: Copy sshd jail config
+      become: true
+      ansible.builtin.copy:
+        src: files/freya/sshd.local
+        dest: /etc/fail2ban/jail.d/sshd.local
+        owner: root
+        group: root
+        mode: 0770
+      register: sshdjail
+
+    - name: fail2ban-service
+      become: true
+      service:
+        name: fail2ban
+        state: started
+        enabled: yes
+
+    - name: fail2ban-service
+      become: true
+      service:
+        name: fail2ban
+        state: restarted
+        enabled: yes
+      when: sshdjail.changed
+
+
 #    - name: WSDD config
 #      become: true
 #      ansible.builtin.lineinfile:
@@ -91,13 +149,13 @@
 #        state: restarted
 #      when: wsddconfig.changed
 
-    - name: winbind-service
-      become: true
-      service:
-        name: winbind
-        state: started
-        enabled: yes
-
+#    - name: winbind-service
+#      become: true
+#      service:
+#        name: winbind
+#        state: started
+#        enabled: yes
+#
     - name: Create vault group
       become: true
       group:
@@ -187,16 +245,6 @@
         path: /storage02/kube/torrent-a/toDownload
         state: directory
         mode: 0777
-
-
-    - name: Copy prometheus config file
-      become: true
-      ansible.builtin.copy:
-        src: files/freya/prometheus.yml
-        dest: /storage01/etc/
-        owner: root
-        group: root
-        mode: 0750
 
 
 #  tasks:

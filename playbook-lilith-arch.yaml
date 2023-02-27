@@ -21,7 +21,10 @@
       become: true
       pacman:
         name:
+          - virtualbox
           - virtualbox-host-modules-arch
+          - kodi
+          - virtualbox-host-dkms
         state: absent
 
     - name: Install packages
@@ -38,10 +41,13 @@
           - bluez-tools
           - caja
           - calibre
+          - cdrdao
+          - cdrtools
           - chromium
           - cronie
           - cups
           - dmenu
+          - dvd+rw-tools
           - fakeroot
           - fuse2fs
           - fuse2
@@ -51,18 +57,20 @@
           - lightdm
           - i3-wm
           - lightdm-gtk-greeter
+          - libmtp
           - mate-terminal
           - net-tools
           - sudo
           - mc
+          - mtpfs
           - i3status
+          - k3b
           - keepass
 #- autofs
           - sshfs
           - jdk11-openjdk
           - network-manager-applet
           - mplayer
-          - kodi
           - pasystray
           - texlive-bin
           - texlive-core
@@ -94,11 +102,12 @@
           - junit
           - neovim
           - nfs-utils
+          - gvfs
           - gvfs-nfs
+          - gvfs-mtp
+          - gvfs-smb
           - python-setuptools
           - vim
-          - virtualbox
-          - virtualbox-host-dkms
           - vlc
           - zsh
         state: present
