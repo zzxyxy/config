@@ -2,6 +2,8 @@
 - name: Manage kubernetes servers
   hosts:
   - Freya
+  collections:
+    - kewlfft.aur
   pre_tasks:
     - name: Set hostname
       become: true
@@ -20,6 +22,7 @@
         state: present
         name:
           - cron
+          - fakeroot
           - git
           - screen
           - sshfs
@@ -28,6 +31,7 @@
           - nano
           - net-tools
           - nfs-utils
+          - prometheus-node-exporter
           - rsync
           - vim
           - samba
@@ -37,6 +41,8 @@
   roles:
     - { role: geerlingguy.docker, become: yes }
     - { role: andrewrothstein.k3d, became: yes }
+    - { role: andrewrothstein.kubernetes-helm, become: yes }
+    - { role: andrewrothstein.kubectl, become: yes }
 
   tasks:
     - name: create /root/bin
@@ -141,9 +147,27 @@
       register: nfs
 
     - name: Reload nfs exports
+      become: true
       ansible.builtin.command:
         cmd: /usr/bin/exportfs -arv
       when: nfs.changed
+
+    - name: nfs-service
+      become: true
+      service:
+        name: nfs-server
+        state: started
+        enabled: yes
+
+# prometheus exporter
+    - name: prometheus-node-exporter-service
+      become: true
+      service:
+        name: prometheus-node-exporter
+        state: started
+        enabled: yes
+
+
 
 
 #    - name: WSDD config
@@ -267,24 +291,27 @@
         state: directory
         mode: 0777
 
-
-
-#  tasks:
-#    - name: get_vars
-#      include_vars:
-#        file: "{{ secret_dir }}/passwds.yml"
+#    - name: Create the `aur_builder` user
+#      become: yes
+#      ansible.builtin.user:
+#        name: aur_builder
+#        create_home: yes
+#        group: wheel
 #
-#    - name: Create a kodi
-#      become: true
-#      user:
-#        name: kodi
-#        password: "{{ m_kodi }}"
-#        group: users
-#        groups:
-#          - users
+#    - name: Allow the `aur_builder` user to run `sudo pacman` without a password
+#      become: yes
+#      ansible.builtin.lineinfile:
+#        path: /etc/sudoers.d/11-install-aur_builder
+#        line: 'aur_builder ALL=(ALL) NOPASSWD: /usr/bin/pacman'
+#        create: yes
+#        validate: 'visudo -cf %s'
+#
+#    - name: Install rinetd
+#      aur:
+#        name: rinetd
+#        use: makepkg
 #        state: present
-#        shell: /bin/bash
-#        system: no
-#        createhome: yes
-#        home: /home/kodi
-#        uid: 9000
+#        ignore_arch: yes
+#      become: yes
+#      become_user: aur_builder
+#

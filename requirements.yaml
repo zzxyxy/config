@@ -1,6 +1,7 @@
 ---
 collections:
 - name: pandemonium1986.k8s_toolbox
+- name: kewlfft.aur
 # - name: serdigital64.infrastructure
 # - name: ivansible.devel
 
