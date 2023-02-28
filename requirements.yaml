@@ -7,7 +7,7 @@ collections:
 roles:
 - role: bertvv.samba
 - role: gantsign.kubernetes
-# - name: geerlingguy.docker
+- name: geerlingguy.docker
 - name: geerlingguy.kubernetes
 - name: geerlingguy.helm
 - name: apkawa.nfs
@@ -18,3 +18,4 @@ roles:
 - name: andrewrothstein.kubernetes-helm
 - name: andrewrothstein.kubelogin
 - name: buluma.azure_cli
+- name: andrewrothstein.k3d

@@ -6,7 +6,7 @@
   vars:
     user: ameszely
     envs: |
-      PATH=$PATH:/home/{{ user }}/tools/wq
+      PATH=$PATH:/home/{{ user }}/bin
       alias gitg="git log --all --decorate --oneline --graph"
       alias klogf="kubectl logs -f "
       alias egrep='egrep --color=auto'
@@ -119,3 +119,10 @@
         path: /home/{{ user }}/.profile
         block: "{{ envs }}"
         create: true
+
+    - name: whitetulip bin
+      become:
+      file:
+        path: ~/bin
+        state: directory
+        mode: 0770

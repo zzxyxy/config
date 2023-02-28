@@ -27,22 +27,25 @@
           - mc
           - nano
           - net-tools
+          - nfs-utils
           - rsync
           - vim
           - samba
           - fail2ban
+
+
+  roles:
+    - { role: geerlingguy.docker, become: yes }
+    - { role: andrewrothstein.k3d, became: yes }
+
   tasks:
-
-#    - name: Create a kodi
-#          - wsdd
-#          - winbind
-
     - name: create /root/bin
       become: true
       file:
         path: /root/bin
         state: directory
 
+# DUCKDNS
     - name: Copy duck script
       become: true
       ansible.builtin.copy:
@@ -59,6 +62,7 @@
         minute: "*/15"
         job: "bash /root/bin/duck.sh >/dev/null 2>&1"
 
+# SAMBA
     - name: Copy samba config
       become: true
       ansible.builtin.copy:
@@ -99,8 +103,7 @@
         enabled: yes
       when: sambeconfig.changed
 
-
-
+# FAIL2BAN
     - name: Copy sshd jail config
       become: true
       ansible.builtin.copy:
@@ -125,6 +128,22 @@
         state: restarted
         enabled: yes
       when: sshdjail.changed
+
+# NFS SHARE
+    - name: Add nfs exports
+      become: true
+      ansible.builtin.copy:
+        src: files/freya/exports
+        dest: /etc/exports
+        owner: root
+        group: root
+        mode: 0770
+      register: nfs
+
+    - name: Reload nfs exports
+      ansible.builtin.command:
+        cmd: /usr/bin/exportfs -arv
+      when: nfs.changed
 
 
 #    - name: WSDD config
@@ -156,6 +175,8 @@
 #        state: started
 #        enabled: yes
 #
+
+# Folders to create
     - name: Create vault group
       become: true
       group:
@@ -245,6 +266,7 @@
         path: /storage02/kube/torrent-a/toDownload
         state: directory
         mode: 0777
+
 
 
 #  tasks:

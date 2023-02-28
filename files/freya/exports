@@ -1,0 +1,2 @@
+/storage01   10.0.0.0/8(rw,sync,no_subtree_check,no_root_squash)  127.0.0.1/8(rw,sync,no_subtree_check,no_root_squash)  172.0.0.0/8(rw,sync,no_subtree_check,no_root_squash)  192.168.10.0/24(rw,sync,no_subtree_check,no_root_squash)
+/storage02   10.0.0.0/8(rw,sync,no_subtree_check,no_root_squash)  127.0.0.1/8(rw,sync,no_subtree_check,no_root_squash)  172.0.0.0/8(rw,sync,no_subtree_check,no_root_squash)  192.168.10.0/24(rw,sync,no_subtree_check,no_root_squash)
