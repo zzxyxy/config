@@ -21,7 +21,9 @@
       pacman:
         state: present
         name:
+          - base-devel
           - cron
+          - fail2ban
           - fakeroot
           - git
           - screen
@@ -35,8 +37,6 @@
           - rsync
           - vim
           - samba
-          - fail2ban
-
 
   roles:
     - { role: geerlingguy.docker, become: yes }
@@ -167,39 +167,6 @@
         state: started
         enabled: yes
 
-
-
-
-#    - name: WSDD config
-#      become: true
-#      ansible.builtin.lineinfile:
-#        path: /etc/wsdd.conf
-#        regexp: '^WSDD_PARAMS='
-#        line: "WSDD_PARAMS=-n freya.int.zxyxy.net -p -H 4"
-#      register: wsddconfig
-#
-#    - name: wsdd-service
-#      become: true
-#      service:
-#        name: wsdd
-#        state: started
-#        enabled: yes
-#
-#    - name: wsdd-service
-#      become: true
-#      service:
-#        name: wsdd
-#        state: restarted
-#      when: wsddconfig.changed
-
-#    - name: winbind-service
-#      become: true
-#      service:
-#        name: winbind
-#        state: started
-#        enabled: yes
-#
-
 # Folders to create
     - name: Create vault group
       become: true
@@ -291,27 +258,51 @@
         state: directory
         mode: 0777
 
-#    - name: Create the `aur_builder` user
-#      become: yes
-#      ansible.builtin.user:
-#        name: aur_builder
-#        create_home: yes
-#        group: wheel
-#
-#    - name: Allow the `aur_builder` user to run `sudo pacman` without a password
-#      become: yes
-#      ansible.builtin.lineinfile:
-#        path: /etc/sudoers.d/11-install-aur_builder
-#        line: 'aur_builder ALL=(ALL) NOPASSWD: /usr/bin/pacman'
-#        create: yes
-#        validate: 'visudo -cf %s'
-#
-#    - name: Install rinetd
-#      aur:
-#        name: rinetd
-#        use: makepkg
-#        state: present
-#        ignore_arch: yes
-#      become: yes
-#      become_user: aur_builder
-#
+# create aur_builder to install aur packages
+    - name: Create the `aur_builder` user
+      become: yes
+      ansible.builtin.user:
+        name: aur_builder
+        create_home: yes
+        group: wheel
+
+    - name: Allow the `aur_builder` user to run `sudo pacman` without a password
+      become: yes
+      ansible.builtin.lineinfile:
+        path: /etc/sudoers.d/11-install-aur_builder
+        line: 'aur_builder ALL=(ALL) NOPASSWD: /usr/bin/pacman'
+        create: yes
+        validate: 'visudo -cf %s'
+
+# WSDD2
+    - name: Install wsdd2
+      aur:
+        name: wsdd2
+        use: makepkg
+        state: present
+        ignore_arch: yes
+      become: yes
+      become_user: aur_builder
+
+    - name: WSDD config
+      become: true
+      ansible.builtin.lineinfile:
+        path: /etc/wsdd.conf
+        regexp: '^WSDD_PARAMS='
+        line: "WSDD_PARAMS=-n freya.int.zxyxy.net -p -H 4"
+        create: yes
+      register: wsddconfig
+
+    - name: wsdd-service
+      become: true
+      service:
+        name: wsdd2
+        state: started
+        enabled: yes
+
+    - name: wsdd-service
+      become: true
+      service:
+        name: wsdd2
+        state: restarted
+      when: wsddconfig.changed
