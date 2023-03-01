@@ -68,4 +68,5 @@
   - { role: andrewrothstein.k9s, become: yes }
   - { role: andrewrothstein.kubernetes-helm, become: yes }
   - { role: andrewrothstein.kubelogin, become: yes }
+  - { role: andrewrothstein.istio, become: yes }
   - { role: buluma.azure_cli, become: yes }
