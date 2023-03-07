@@ -15,8 +15,14 @@
       become: true
       pacman:
         name:
+          - cabal-fmt
+          - cabal-install
+          - ghc
+          - ghc-static
+          - ghc-libs
           - virtualbox-host-modules-arch
         state: absent
+        force: yes
 
     - name: Install packages
       become: true
