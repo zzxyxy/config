@@ -1,0 +1,8 @@
+all:
+  children:
+    server:
+      hosts:
+        Freya: {}
+    router:
+      hosts:
+        vmrouter: {}

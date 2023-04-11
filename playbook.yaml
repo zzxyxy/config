@@ -1,0 +1,316 @@
+---
+- name: Manage kubernetes servers
+  hosts:
+  - Freya
+  collections:
+    - kewlfft.aur
+  pre_tasks:
+    - name: Set hostname
+      become: true
+      ansible.builtin.hostname:
+        name: "{{ hostname }}"
+
+    - name: Upgrade system
+      become: true
+      community.general.pacman:
+        update_cache: yes
+        upgrade: yes
+
+    - name: install packages
+      become: true
+      pacman:
+        state: present
+        name:
+          - base-devel
+          - cronie
+          - fail2ban
+          - fakeroot
+          - git
+          - screen
+          - sshfs
+          - make
+          - mc
+          - nano
+          - net-tools
+          - nfs-utils
+          - prometheus-node-exporter
+          - rsync
+          - vim
+          - samba
+
+  roles:
+    - { role: geerlingguy.docker, become: yes }
+    - { role: andrewrothstein.k3d, became: yes }
+    - { role: andrewrothstein.kubernetes-helm, become: yes }
+    - { role: andrewrothstein.kubectl, become: yes }
+
+  tasks:
+    - name: create /root/bin
+      become: true
+      file:
+        path: /root/bin
+        state: directory
+
+# CRON
+    - name: cron-service
+      become: true
+      service:
+        name: cronie
+        state: started
+        enabled: yes
+
+# DUCKDNS
+    - name: Copy duck script
+      become: true
+      ansible.builtin.copy:
+        src: files/freya/duck.sh
+        dest: /root/bin/duck.sh
+        owner: root
+        group: root
+        mode: 0700
+
+    - name: Duckdns schedule
+      become: true
+      ansible.builtin.cron:
+        name: "Duckdns"
+        minute: "*/15"
+        job: "bash /root/bin/duck.sh >/dev/null 2>&1"
+
+# SAMBA
+    - name: Copy samba config
+      become: true
+      ansible.builtin.copy:
+        src: files/freya/smb.conf
+        dest: /etc/samba/smb.conf
+        owner: root
+        group: root
+        mode: 0770
+      register: sambeconfig
+
+    - name: smb-service
+      become: true
+      service:
+        name: smb
+        state: started
+        enabled: yes
+
+    - name: nmb-service
+      become: true
+      service:
+        name: nmb
+        state: started
+        enabled: yes
+
+    - name: smb-service
+      become: true
+      service:
+        name: smb
+        state: restarted
+        enabled: yes
+      when: sambeconfig.changed
+
+    - name: nmb-service
+      become: true
+      service:
+        name: nmb
+        state: restarted
+        enabled: yes
+      when: sambeconfig.changed
+
+# FAIL2BAN
+    - name: Copy sshd jail config
+      become: true
+      ansible.builtin.copy:
+        src: files/freya/sshd.local
+        dest: /etc/fail2ban/jail.d/sshd.local
+        owner: root
+        group: root
+        mode: 0770
+      register: sshdjail
+
+    - name: fail2ban-service
+      become: true
+      service:
+        name: fail2ban
+        state: started
+        enabled: yes
+
+    - name: fail2ban-service
+      become: true
+      service:
+        name: fail2ban
+        state: restarted
+        enabled: yes
+      when: sshdjail.changed
+
+# NFS SHARE
+    - name: Add nfs exports
+      become: true
+      ansible.builtin.copy:
+        src: files/freya/exports
+        dest: /etc/exports
+        owner: root
+        group: root
+        mode: 0770
+      register: nfs
+
+    - name: Reload nfs exports
+      become: true
+      ansible.builtin.command:
+        cmd: /usr/bin/exportfs -arv
+      when: nfs.changed
+
+    - name: nfs-service
+      become: true
+      service:
+        name: nfs-server
+        state: started
+        enabled: yes
+
+# prometheus exporter
+    - name: prometheus-node-exporter-service
+      become: true
+      service:
+        name: prometheus-node-exporter
+        state: started
+        enabled: yes
+
+# Folders to create
+    - name: Create vault group
+      become: true
+      group:
+        name: vault
+        state: present
+
+    - name: ansible create storage01 directory
+      become: true
+      file:
+        path: /storage01
+        state: directory
+        mode: 0777
+
+    - name: ansible create storage02 directory
+      become: true
+      file:
+        path: /storage02
+        state: directory
+        mode: 0777
+
+    - name: ansible create storage03 directory
+      become: true
+      file:
+        path: /storage03
+        state: directory
+        mode: 0777
+
+    - name: ansible create kube prometheus directory
+      become: true
+      file:
+        path: /storage01/kube/prometheus
+        state: directory
+        mode: 0777
+
+    - name: ansible create kube grafana directory
+      become: true
+      file:
+        path: /storage01/kube/grafana
+        state: directory
+        mode: 0777
+
+    - name: ansible create prometheus directory
+      become: true
+      file:
+        path: /storage01/prometheus
+        state: directory
+        mode: 0770
+
+    - name: ansible create transmission directory
+      become: true
+      file:
+        path: /storage02/kube/torrent-z/download
+        state: directory
+        mode: 0777
+
+    - name: ansible create transmission directory
+      become: true
+      file:
+        path: /storage02/kube/torrent-z/incomplette
+        state: directory
+        mode: 0777
+
+    - name: ansible create transmission directory
+      become: true
+      file:
+        path: /storage02/kube/torrent-z/toDownload
+        state: directory
+        mode: 0777
+
+    - name: ansible create transmission directory
+      become: true
+      file:
+        path: /storage02/kube/torrent-a/download
+        state: directory
+        mode: 0777
+
+    - name: ansible create transmission directory
+      become: true
+      file:
+        path: /storage02/kube/torrent-a/incomplette
+        state: directory
+        mode: 0777
+
+    - name: ansible create transmission directory
+      become: true
+      file:
+        path: /storage02/kube/torrent-a/toDownload
+        state: directory
+        mode: 0777
+
+# create aur_builder to install aur packages
+    - name: Create the `aur_builder` user
+      become: yes
+      ansible.builtin.user:
+        name: aur_builder
+        create_home: yes
+        group: wheel
+
+    - name: Allow the `aur_builder` user to run `sudo pacman` without a password
+      become: yes
+      ansible.builtin.lineinfile:
+        path: /etc/sudoers.d/11-install-aur_builder
+        line: 'aur_builder ALL=(ALL) NOPASSWD: /usr/bin/pacman'
+        create: yes
+        validate: 'visudo -cf %s'
+
+# WSDD2
+    - name: Install wsdd2
+      aur:
+        name: wsdd2
+        use: makepkg
+        state: present
+        ignore_arch: yes
+      become: yes
+      become_user: aur_builder
+
+    - name: WSDD config
+      become: true
+      ansible.builtin.lineinfile:
+        path: /etc/wsdd.conf
+        regexp: '^WSDD_PARAMS='
+        line: "WSDD_PARAMS=-n freya.int.zxyxy.net -p -H 4"
+        create: yes
+      register: wsddconfig
+
+    - name: wsdd-service
+      become: true
+      service:
+        name: wsdd2
+        state: started
+        enabled: yes
+
+    - name: wsdd-service
+      become: true
+      service:
+        name: wsdd2
+        state: restarted
+      when: wsddconfig.changed
