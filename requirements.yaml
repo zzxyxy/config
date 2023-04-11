@@ -3,6 +3,8 @@ collections:
 - name: pandemonium1986.k8s_toolbox
 - name: serdigital64.infrastructure
 - name: ivansible.devel
-
 roles:
-  []
+- name: andrewrothstein.k3s
+- name: andrewrothstein.k3d
+- name: andrewrothstein.kubectl
+- name: andrewrothstein.go

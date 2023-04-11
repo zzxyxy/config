@@ -1,0 +1,35 @@
+---
+- name: manage packages
+  become: yes
+  hosts:
+  - localhost
+  roles:
+  - { role: andrewrothstein.kubectl, become: yes }
+  - { role: andrewrothstein.go, become: yes }
+  - { role: andrewrothstein.k3s, become: yes }
+  - { role: andrewrothstein.k3d, become: yes }
+  tasks:
+    - name: Install packages
+      become: true
+      apt:
+        name:
+          - git
+          - mc
+          - npm
+          - nodejs
+          - openjdk-17-jdk
+          - python3.10
+          - screen
+          - sshfs
+          - zsh
+          - tmux
+          - vim
+        state: present
+
+    - name: install python virtual env
+      become: true
+      pip:
+        name:
+          - virtualenv
+          - pylint
+          - jedi
