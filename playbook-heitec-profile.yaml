@@ -50,6 +50,7 @@
       alias h="helm"
       alias k="kubectl"
       alias t="terraform"
+      alias nodes="kubectl get nodes -o json | jq \".items[]|{name:.metadata.name, version:.status.nodeInfo.kubeletVersion, taints:.spec.taints}\""
       EDITOR=vim
       export TF_VAR_tags='{"DMGMoriScope"   = "DIGITAL-Services", "DMGMoriService" = "WERKBLiQ"}'
 
@@ -86,12 +87,6 @@
         dest: "/home/{{ user }}/.zshrc"
         owner: "{{ user }}"
         mode: 0644
-
-    - name: Link kuberetes config
-      file:
-        src: "/mnt/c/Users/{{ user }}/.kube"
-        dest: "/home/{{ user }}/.kube"
-        state: link
 
     - name: copy ssh
       copy:
