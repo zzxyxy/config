@@ -50,9 +50,13 @@
       alias h="helm"
       alias k="kubectl"
       alias t="terraform"
-      alias nodes="kubectl get nodes -o json | jq \".items[]|{name:.metadata.name, version:.status.nodeInfo.kubeletVersion, taints:.spec.taints}\""
-      EDITOR=vim
+      alias nodes='kubectl get nodes -o json | jq ".items[]|{name:.metadata.name, version:.status.nodeInfo.kubeletVersion, taints:.spec.taints}"'
       export TF_VAR_tags='{"DMGMoriScope"   = "DIGITAL-Services", "DMGMoriService" = "WERKBLiQ"}'
+      export HELM_EXPERIMENTAL_OCI=1
+      export EDITOR=vim
+      export CLUSTER="/home/ameszely/Oper/cluster"
+      export OPERATIONS="/home/ameszely/Oper/operations"
+      export PATH=$PATH:/home/ameszely/bin
 
   tasks:
     - name: change user shell to zsh
@@ -114,6 +118,8 @@
         path: /home/{{ user }}/.profile
         block: "{{ envs }}"
         create: true
+
+    - local_action: replace dest=/home/{{ user }}/.zshrc regexp="\r"
 
     - name: whitetulip bin
       become:

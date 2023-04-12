@@ -125,12 +125,5 @@ build_prompt() {
 
 PROMPT='%{%f%b%k%}$(build_prompt) '
 
-export PATH=$PATH:/home/ameszely/bin
-
-#source '/home/ameszely/lib/azure-cli/az.completion'
-
-#
-export CLUSTER="/home/ameszely/Devel/cluster"
-export OPERATIONS="/home/ameszely/Devel/operations"
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
