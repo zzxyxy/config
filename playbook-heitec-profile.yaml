@@ -45,7 +45,6 @@
       alias ls='ls --color=auto'
       alias plog='bash ~/.pod-logger.sh'
       alias plogp='bash ~/.pod-logger-prev.sh'
-      alias xo='/oper/xo'
       alias f="kubectl logs -f `kubectl get po --sort-by=.status.startTime | tail -1 | awk '{ print $1 }'`"
       alias h="helm"
       alias k="kubectl"
@@ -127,3 +126,10 @@
         path: ~/bin
         state: directory
         mode: 0770
+
+    - name: copy xo
+      copy:
+        src: files/dmg/xo
+        dest: "/home/{{ user }}/bin/xo"
+        owner: "{{ user }}"
+        mode: 0755
