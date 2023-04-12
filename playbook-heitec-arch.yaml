@@ -20,6 +20,7 @@
           - ghc
           - ghc-static
           - ghc-libs
+          - protobuf
           - virtualbox-host-modules-arch
         state: absent
         force: yes
@@ -37,6 +38,7 @@
           - gtk2
           - gperf
           - junit
+          - jq
           - kubectx
           - kubens
           - kubectl
@@ -66,10 +68,21 @@
       become: true
       pip:
         name:
-          - virtualenv
-          - pylint
+          - google
+        state: absent
+
+    - name: Python install packages
+      become: true
+      pip:
+        name:
           - ansible
+          - grpcio-tools
+          - protobuf
+          - pylint
+          - scons
+          - virtualenv
         state: present
+
   collections:
     - kewlfft.aur
   roles:
