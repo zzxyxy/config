@@ -43,12 +43,18 @@
         update: yes
 
     - name: zshrc
-      become: yes
       copy:
         src: files/zshrc
         dest: "/home/{{ user }}/.zshrc"
         owner: "{{ user }}"
         mode: 0644
+
+    - name: gitconfig
+      copy:
+        src: files/zxyxy/gitconfig
+        dest: "/home/{{ user }}/.gitconfig"
+        owner: "{{ user }}"
+        mode: 0600
 
     - name: copy ssh
       copy:
