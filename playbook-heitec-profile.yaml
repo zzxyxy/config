@@ -45,13 +45,17 @@
       alias ls='ls --color=auto'
       alias plog='bash ~/.pod-logger.sh'
       alias plogp='bash ~/.pod-logger-prev.sh'
-      alias xo='/oper/xo'
       alias f="kubectl logs -f `kubectl get po --sort-by=.status.startTime | tail -1 | awk '{ print $1 }'`"
       alias h="helm"
       alias k="kubectl"
       alias t="terraform"
-      EDITOR=vim
+      alias nodes='kubectl get nodes -o json | jq ".items[]|{name:.metadata.name, version:.status.nodeInfo.kubeletVersion, taints:.spec.taints}"'
       export TF_VAR_tags='{"DMGMoriScope"   = "DIGITAL-Services", "DMGMoriService" = "WERKBLiQ"}'
+      export HELM_EXPERIMENTAL_OCI=1
+      export EDITOR=vim
+      export CLUSTER="/home/ameszely/Oper/cluster"
+      export OPERATIONS="/home/ameszely/Oper/operations"
+      export PATH=$PATH:/home/ameszely/bin
 
   tasks:
     - name: change user shell to zsh
@@ -87,12 +91,6 @@
         owner: "{{ user }}"
         mode: 0644
 
-    - name: Link kuberetes config
-      file:
-        src: "/mnt/c/Users/{{ user }}/.kube"
-        dest: "/home/{{ user }}/.kube"
-        state: link
-
     - name: copy ssh
       copy:
         src: /mnt/c/Users/{{ user }}/.ssh
@@ -120,9 +118,18 @@
         block: "{{ envs }}"
         create: true
 
+    - local_action: replace dest=/home/{{ user }}/.zshrc regexp="\r"
+
     - name: whitetulip bin
       become:
       file:
         path: ~/bin
         state: directory
         mode: 0770
+
+    - name: copy xo
+      copy:
+        src: files/dmg/xo
+        dest: "/home/{{ user }}/bin/xo"
+        owner: "{{ user }}"
+        mode: 0755

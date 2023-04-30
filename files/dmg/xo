@@ -1,0 +1,19 @@
+#!/usr/bin/env python3
+import subprocess
+import sys
+
+envs = {
+    "welive":    {"cluster": "wiqAksLiveCluster",    "namespace": "welive"},
+    "wepreprod": {"cluster": "wiqAksPreprodCluster", "namespace": "wepreprod"},
+    "weservice": {"cluster": "wiqAksServiceCluster", "namespace": "weservice"},
+    "wegreen":   {"cluster": "wiqAksGreenCluster",   "namespace": "wegreen"},
+}
+
+req = sys.argv[1]
+
+try:
+    print(envs[req]["cluster"])
+    subprocess.run(["kubectx", envs[req]["cluster"]])
+    subprocess.run(["kubens", envs[req]["namespace"]])
+except:
+    print("nooo")

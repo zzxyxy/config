@@ -22,7 +22,7 @@
         state: present
         name:
           - base-devel
-          - cron
+          - cronie
           - fail2ban
           - fakeroot
           - git
@@ -50,6 +50,14 @@
       file:
         path: /root/bin
         state: directory
+
+# CRON
+    - name: cron-service
+      become: true
+      service:
+        name: cronie
+        state: started
+        enabled: yes
 
 # DUCKDNS
     - name: Copy duck script

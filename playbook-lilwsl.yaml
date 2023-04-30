@@ -1,0 +1,95 @@
+---
+- name: manage packages
+  become: yes
+  hosts:
+    - localhost
+  roles:
+    - { role: andrewrothstein.kubectl, become: yes }
+    - { role: andrewrothstein.go, become: yes }
+    - { role: andrewrothstein.k3d, become: yes }
+  collections:
+    - kewlfft.aur
+  pre_tasks:
+    - name: Upgrade system
+      become: true
+      community.general.pacman:
+        update_cache: yes
+        upgrade: yes
+
+  tasks:
+    - name: Install packages
+      become: true
+      pacman:
+        name:
+          - git
+          - mc
+          - npm
+          - nodejs
+          - screen
+          - sshfs
+          - zsh
+          - tmux
+          - vim
+          - ant
+          - base-devel
+          - boost
+          - boost-libs
+          - blueman
+          - clang
+          - gtk2
+          - gperf
+          - junit
+          - kubectx
+          - kubens
+          - kubectl
+          - linux-lts-headers
+          - make
+          - mc
+          - npm
+          - ncurses
+          - ntp
+          - openssh
+          - python-setuptools
+          - sudo
+          - sshfs
+          - terraform
+          - traceroute
+          - jdk11-openjdk
+          - tmux
+          - screen
+          - vim
+          - vlc
+          - zsh
+          - zip
+          - wget
+        state: present
+
+    - name: install python virtual env
+      become: true
+      pip:
+        name:
+          - virtualenv
+          - pylint
+          - jedi
+          - ansible
+
+    - name: Ensure group "global-users" exists with correct gid
+      ansible.builtin.group:
+        name: global-users
+        state: present
+        gid: 100
+
+    - name: Add the user 'zxyxy'
+      ansible.builtin.user:
+        name: zxyxy
+        comment: zxyxy
+        uid: 10000
+        group: global-users
+        groups: root,wheel,audio,tty,git,daemon,network
+        shell: /bin/zsh
+
+    - name: enable wheel group in sudoers
+      ansible.builtin.lineinfile:
+        path: /etc/sudoers
+        regexp: '^%wheel ALL=(ALL:ALL) ALL'
+        line: '%wheel ALL=(ALL:ALL) ALL'
