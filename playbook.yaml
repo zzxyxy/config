@@ -122,7 +122,7 @@
 
     - name: fail2ban-service
       become: true
-      service:
+      service:!
         name: fail2ban
         state: started
         enabled: yes
