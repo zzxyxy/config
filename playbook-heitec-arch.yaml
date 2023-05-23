@@ -15,6 +15,7 @@
       become: true
       pacman:
         name:
+          - blueman
           - cabal-fmt
           - cabal-install
           - ghc
@@ -33,7 +34,6 @@
           - base-devel
           - boost
           - boost-libs
-          - blueman
           - clang
           - gtk2
           - gperf
@@ -79,18 +79,22 @@
           - grpcio-tools
           - protobuf
           - pylint
+          - pywinrm
           - scons
           - virtualenv
+          - xmltodict
         state: present
 
   collections:
     - kewlfft.aur
   roles:
   - { role: andrewrothstein.go, become: yes }
+  - { role: andrewrothstein.k3d, became: yes }
   - { role: andrewrothstein.k9s, become: yes }
   - { role: andrewrothstein.kubernetes-helm, become: yes }
   - { role: andrewrothstein.kubelogin, become: yes }
   - { role: andrewrothstein.istio, become: yes }
+  - { role: andrewrothstein.k3d, became: yes }
   - { role: buluma.azure_cli, become: yes }
 
   tasks:
