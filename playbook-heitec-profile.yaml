@@ -91,14 +91,14 @@
         owner: "{{ user }}"
         mode: 0644
 
-    - name: copy ssh
-      copy:
-        src: /mnt/c/Users/{{ user }}/.ssh
-        dest: /home/{{ user }}
-        directory_mode: "0700"
-        mode: "0600"
-      tags:
-        - dircontent
+#    - name: copy ssh
+#      copy:
+#        src: /mnt/c/Users/{{ user }}/.ssh
+#        dest: /home/{{ user }}
+#        directory_mode: "0700"
+#        mode: "0600"
+#      tags:
+#        - dircontent
 
     - name: Insert/Update aliases in bashrc
       blockinfile:
