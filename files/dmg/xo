@@ -3,6 +3,8 @@ import subprocess
 import sys
 
 envs = {
+    "wetest":    {"cluster": "wiqAksStagingCluster", "namespace": "wetest"},
+    "wedemo":    {"cluster": "wiqAksStagingCluster", "namespace": "wedemo"},
     "welive":    {"cluster": "wiqAksLiveCluster",    "namespace": "welive"},
     "wepreprod": {"cluster": "wiqAksPreprodCluster", "namespace": "wepreprod"},
     "weservice": {"cluster": "wiqAksServiceCluster", "namespace": "weservice"},

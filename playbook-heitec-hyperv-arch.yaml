@@ -36,6 +36,7 @@
           - boost-libs
           - blueman
           - clang
+          - docker
           - gtk2
           - gperf
           - junit
@@ -101,6 +102,14 @@
       become: yes
       service:
         name: sshd
+        state: started
+        enabled: yes
+
+  tasks:
+    - name: Enable docker
+      become: yes
+      service:
+        name: docker
         state: started
         enabled: yes
 

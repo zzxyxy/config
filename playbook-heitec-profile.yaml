@@ -133,3 +133,10 @@
         dest: "/home/{{ user }}/bin/xo"
         owner: "{{ user }}"
         mode: 0755
+
+    - name: gitconfig
+      copy:
+        src: files/dmg/gitconfig
+        dest: "/home/ameszely/.gitconfig"
+        owner: ameszely
+        mode: 0600
