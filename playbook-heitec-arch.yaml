@@ -64,26 +64,26 @@
           - wget
         state: present
 
-    - name: Python install packages
-      become: true
-      pip:
-        name:
-          - google
-        state: absent
-
-    - name: Python install packages
-      become: true
-      pip:
-        name:
-          - ansible
-          - grpcio-tools
-          - protobuf
-          - pylint
-          - pywinrm
-          - scons
-          - virtualenv
-          - xmltodict
-        state: present
+#    - name: Python install packages
+#      become: true
+#      pip:
+#        name:
+#          - google
+#        state: absent
+#
+#    - name: Python install packages
+#      become: true
+#      pip:
+#        name:
+#          - ansible
+#          - grpcio-tools
+#          - protobuf
+#          - pylint
+#          - pywinrm
+#          - scons
+#          - virtualenv
+#          - xmltodict
+#        state: present
 
   collections:
     - kewlfft.aur
