@@ -55,7 +55,7 @@
       export EDITOR=vim
       export CLUSTER="/home/ameszely/Oper/cluster"
       export OPERATIONS="/home/ameszely/Oper/operations"
-      export PATH=$PATH:/home/ameszely/bin
+      export PATH=$PATH:/home/ameszely/bin:/home/ameszely/.local/bin
 
   tasks:
     - name: change user shell to zsh
