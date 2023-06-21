@@ -4,7 +4,7 @@ all:
 dmgwsl:
 	ansible-playbook playbook-heitec-arch.yaml
 
-dmghyperv:
+dmg:
 	ansible-playbook playbook-heitec-hyperv-arch.yaml
 
 dmgprofile:

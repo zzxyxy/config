@@ -41,6 +41,7 @@
           - gperf
           - junit
           - jq
+          - keepass
           - kubectx
           - kubens
           - kubectl
@@ -155,40 +156,99 @@
       become: yes
       become_user: aur_builder
 
-#    - name: Install azure-cli-bin
-#      aur:
-#        name: azure-cli
-#        use: makepkg
-#        state: present
-#        ignore_arch: yes
-#      become: yes
-#      become_user: aur_builder
+    - name: Install vscode
+      aur:
+        name: visual-studio-code-bin
+        use: makepkg
+        state: present
+        ignore_arch: yes
+      become: yes
+      become_user: aur_builder
+
+    - name: Install brave-browser
+      aur:
+        name: brave-bin
+        use: makepkg
+        state: present
+        ignore_arch: yes
+      become: yes
+      become_user: aur_builder
+
+    - name: Install ms-edge
+      aur:
+        name: microsoft-edge-stable-bin
+        use: makepkg
+        state: present
+        ignore_arch: yes
+      become: yes
+      become_user: aur_builder
+
+    - name: Install google-chrome
+      aur:
+        name: google-chrome
+        use: makepkg
+        state: present
+        ignore_arch: yes
+      become: yes
+      become_user: aur_builder
+
+    - name: Install dbeaver
+      aur:
+        name: dbeaver-git
+        use: makepkg
+        state: present
+        ignore_arch: yes
+      become: yes
+      become_user: aur_builder
+
+    - name: Install azure-cli
+      aur:
+        name: azure-cli
+        use: makepkg
+        state: present
+        ignore_arch: yes
+      become: yes
+      become_user: aur_builder
+
+    - name: Install virtualbox-guest-iso-dev
+      aur:
+        name: virtualbox-guest-iso-dev
+        use: makepkg
+        state: present
+        ignore_arch: yes
+      become: yes
+      become_user: aur_builder
 
     - name: Create Hack font directory
+      become: yes
       ansible.builtin.file:
         path: /usr/share/fonts/Hack
         state: directory
         mode: '0755'
 
     - name: Install hack regular font
+      become: yes
       copy:
         src: files/Hack-Regular.ttf
         dest: /usr/share/fonts/Hack
         force: no
 
     - name: Install hack bold font
+      become: yes
       copy:
         src: files/Hack-Bold.ttf
         dest: /usr/share/fonts/Hack
         force: no
 
     - name: Install hack italic font
+      become: yes
       copy:
         src: files/Hack-Italic.ttf
         dest: /usr/share/fonts/Hack
         force: no
 
     - name: Install hack bold italic font
+      become: yes
       copy:
         src: files/Hack-BoldItalic.ttf
         dest: /usr/share/fonts/Hack
