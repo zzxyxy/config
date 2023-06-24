@@ -21,3 +21,4 @@ roles:
 - name: buluma.azure_cli
 - name: andrewrothstein.k3d
 - name: andrewrothstein.istio
+- name: acehko.docker

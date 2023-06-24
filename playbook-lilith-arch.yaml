@@ -13,6 +13,7 @@
     #   file: "{{ secret_dir }}/passwds.yml"
 
     - name: Upgrade system
+      become: true
       community.general.pacman:
         update_cache: yes
         upgrade: yes
@@ -25,6 +26,7 @@
           - virtualbox-host-modules-arch
           - kodi
           - virtualbox-host-dkms
+          - vivaldi
         state: absent
 
     - name: Install packages
@@ -47,6 +49,7 @@
           - cronie
           - cups
           - dmenu
+          - docker
           - dvd+rw-tools
           - fakeroot
           - fuse2fs
@@ -66,7 +69,7 @@
           - i3status
           - k3b
           - keepass
-#- autofs
+         #- autofs
           - sshfs
           - jdk11-openjdk
           - network-manager-applet
@@ -93,6 +96,10 @@
           - npm
           - pipewire
           - python-protobuf
+#          - python-grpcio-tools
+#          - python-pylint
+#          - python-setuptools
+#          - python-virtualenv
           - ncurses
           - ntp
           - boost-libs
@@ -112,51 +119,40 @@
           - zsh
         state: present
 
-    - name: Python install packages
-      become: true
-      pip:
-        name:
-          - virtualenv
-          - pylint
-        state: present
-
-          #    - name: install OKI filter
-          #      become: yes
-          # copy:
-          #src: files/whitetulip/OK400PCL.ppd
-          #     dest: /usr/share/ppd
-          #       mode: 0444
-
-          #   - name: install OKI filter
-          #    become: yes
-          #  copy:
-          #     src: files/whitetulip/rastertookimonochrome
-          #     dest: /usr/lib/cups/filter/
-          #     mode: 0755
-
     - name: enable cron
+      become: yes
       service:
         name: cronie
         enabled: yes
         state: started
 
     - name: enable bluetooth
+      become: yes
       service:
         name: bluetooth
         enabled: yes
         state: started
 
     - name: enable ssh
+      become: yes
       service:
         name: sshd
         enabled: yes
         state: started
 
     - name: enable ntp
+      become: yes
       service:
         name: ntpd
         enabled: yes
         state: started
+
+    - name: Enable docker
+      become: yes
+      service:
+        name: docker
+        state: started
+        enabled: yes
 
     - name: Print server service running
       become: true
@@ -173,36 +169,41 @@
         enabled: yes
 
     - name: Create Hack font directory
+      become: yes
       ansible.builtin.file:
         path: /usr/share/fonts/Hack
         state: directory
         mode: '0755'
 
     - name: Install hack regular font
+      become: yes
       copy:
         src: files/Hack-Regular.ttf
         dest: /usr/share/fonts/Hack
         force: no
 
     - name: Install hack bold font
+      become: yes
       copy:
         src: files/Hack-Bold.ttf
         dest: /usr/share/fonts/Hack
         force: no
 
     - name: Install hack italic font
+      become: yes
       copy:
         src: files/Hack-Italic.ttf
         dest: /usr/share/fonts/Hack
         force: no
 
     - name: Install hack bold italic font
+      become: yes
       copy:
         src: files/Hack-BoldItalic.ttf
         dest: /usr/share/fonts/Hack
         force: no
 
-# ---- AUR packages
+      # ---- AUR packages
 
     - name: Create the `aur_builder` user
       become: yes
@@ -219,43 +220,52 @@
         create: yes
         validate: 'visudo -cf %s'
 
+    - name: Disable lid auto suspend
+      become: yes
+      ansible.builtin.lineinfile:
+        path: /etc/systemd/logind.conf
+        line: 'HandleLidSwitch=ignore'
+      register: logindchange
+
+    - name: restart logind
+      become: true
+      service:
+        name: systemd-logind
+        state: restarted
+        enabled: yes
+      when: logindchange.changed
+
     - name: Install vscode
       aur:
         name: visual-studio-code-bin
         use: makepkg
-        state: present
+        state: latest
       become: yes
       become_user: aur_builder
 
-        #    - name: Install ncurses
-        #      aur:
-        #        name: ncurses
-        #        use: makepkg
-        #        state: present
-        #      become: yes
-        #      become_user: aur_builder
+    - name: Install brave-browser
+      aur:
+        name: brave-bin
+        use: makepkg
+        state: latest
+        ignore_arch: yes
+      become: yes
+      become_user: aur_builder
 
-        #    - name: Install ncurses5-compat-libs
-        #      aur:
-        #        name: ncurses5-compat-libs
-        #        use: makepkg
-        #        state: present
-        #      become: yes
-        #      become_user: aur_builder
+    - name: Install dbeaver
+      aur:
+        name: dbeaver-git
+        use: makepkg
+        state: latest
+        ignore_arch: yes
+      become: yes
+      become_user: aur_builder
 
-#      - name: Install autofs
-#      aur:
-#        name: autofs
-#        use: makepkg
-#        state: present
-#      become: yes
-#      become_user: aur_builder
 
   roles:
-  - { role: acehko.docker, become: yes }
-  - { role: gantsign.minikube, become: yes }
-  - { role: andrewrothstein.kubectl, become: yes }
-  - { role: andrewrothstein.go, become: yes }
+    - { role: andrewrothstein.kubectl, become: yes }
+    - { role: andrewrothstein.go, become: yes }
+#    - { role: acehko.docker, become: yes }
   tasks:
     #    - name: Create a zxyxy
     #      become: true

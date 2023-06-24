@@ -11,7 +11,7 @@ dmgprofile:
 	ansible-playbook playbook-heitec-profile.yaml --ask-become-pass
 
 lilith:
-	sudo ansible-playbook playbook-lilith-arch.yaml
+	ansible-playbook playbook-lilith-arch.yaml
 
 lilithwsl:
 	sudo ansible-playbook playbook-lilwsl.yaml

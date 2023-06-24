@@ -52,6 +52,7 @@
           - ncurses
           - ntp
           - openssh
+          - python-protobuf
           - python-grpcio-tools
           - python-pylint
           - python-setuptools
