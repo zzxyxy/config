@@ -41,6 +41,7 @@
           - bluez
           - bluez-utils
           - bluez-tools
+          - brightnessctl
           - caja
           - calibre
           - cdrdao
@@ -307,6 +308,14 @@
         path: /mnt/whitetulip/storage02
         state: directory
         mode: 0777
+
+    - name: backlight.rules to enable brigness settings
+      become: yes
+      copy:
+        src: files/lilith/backlight.rules
+        dest: /etc/udev/rules.d/backlight.rules
+        owner: root
+        mode: 0644
 
 #    - name: authorized_keys for zxyxy
 #      become: yes
