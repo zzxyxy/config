@@ -55,7 +55,7 @@
       export EDITOR=vim
       export CLUSTER="/home/ameszely/Oper/cluster"
       export OPERATIONS="/home/ameszely/Oper/operations"
-      export PATH=$PATH:/home/ameszely/bin
+      export PATH=$PATH:/home/ameszely/bin:/home/ameszely/.local/bin
 
   tasks:
     - name: change user shell to zsh
@@ -91,14 +91,14 @@
         owner: "{{ user }}"
         mode: 0644
 
-    - name: copy ssh
-      copy:
-        src: /mnt/c/Users/{{ user }}/.ssh
-        dest: /home/{{ user }}
-        directory_mode: "0700"
-        mode: "0600"
-      tags:
-        - dircontent
+#    - name: copy ssh
+#      copy:
+#        src: /mnt/c/Users/{{ user }}/.ssh
+#        dest: /home/{{ user }}
+#        directory_mode: "0700"
+#        mode: "0600"
+#      tags:
+#        - dircontent
 
     - name: Insert/Update aliases in bashrc
       blockinfile:
@@ -133,3 +133,10 @@
         dest: "/home/{{ user }}/bin/xo"
         owner: "{{ user }}"
         mode: 0755
+
+    - name: gitconfig
+      copy:
+        src: files/dmg/gitconfig
+        dest: "/home/ameszely/.gitconfig"
+        owner: ameszely
+        mode: 0600

@@ -1,0 +1,255 @@
+---
+- name: manage packages
+  hosts: localhost
+  vars:
+    docker_distribution: archlinux
+    docker_ansible_requirements: true
+  pre_tasks:
+    - name: Upgrade system
+      become: true
+      community.general.pacman:
+        update_cache: yes
+        upgrade: yes
+
+    - name: Remove packages
+      become: true
+      pacman:
+        name:
+          - cabal-fmt
+          - cabal-install
+          - ghc
+          - ghc-static
+          - ghc-libs
+          - protobuf
+          - virtualbox-host-modules-arch
+        state: absent
+        force: yes
+
+    - name: Install packages
+      become: true
+      pacman:
+        name:
+          - ansible
+          - ant
+          - base-devel
+          - boost
+          - boost-libs
+          - blueman
+          - clang
+          - docker
+          - gtk2
+          - gperf
+          - junit
+          - jq
+          - keepass
+          - kubectx
+          - kubens
+          - kubectl
+          - linux-lts-headers
+          - mc
+          - mosquitto
+          - npm
+          - ncurses
+          - ntp
+          - openssh
+          - python-grpcio-tools
+          - python-pylint
+          - python-setuptools
+          - python-virtualenv
+          - protobuf
+          - samba
+          - scons
+          - sudo
+          - sshfs
+          - terraform
+          - traceroute
+          - jdk11-openjdk
+          - tmux
+          - screen
+          - vim
+          - vlc
+          - zsh
+          - zip
+          - wget
+        state: present
+
+    - name: Install X packages
+      become: true
+      pacman:
+        name:
+          - arandr
+          - caja
+          - chromium
+          - xf86-video-intel
+          - dmenu
+          - xterm
+          - lightdm
+          - i3-wm
+          - lightdm-gtk-greeter
+          - libmtp
+          - mate-terminal
+          - i3status
+          - network-manager-applet
+          - mplayer
+          - pasystray
+          - okular
+          - gtk2
+        state: present
+
+  collections:
+    - kewlfft.aur
+  roles:
+  - { role: andrewrothstein.go, become: yes }
+  - { role: andrewrothstein.k9s, become: yes }
+  - { role: andrewrothstein.kubernetes-helm, become: yes }
+  - { role: andrewrothstein.kubelogin, become: yes }
+  - { role: andrewrothstein.istio, become: yes }
+#  - { role: buluma.azure_cli, become: yes }
+
+  tasks:
+    - name: Enable ssh
+      become: yes
+      service:
+        name: sshd
+        state: started
+        enabled: yes
+
+    - name: Enable docker
+      become: yes
+      service:
+        name: docker
+        state: started
+        enabled: yes
+
+# create aur_builder to install aur packages
+    - name: Create the `aur_builder` user
+      become: yes
+      ansible.builtin.user:
+        name: aur_builder
+        create_home: yes
+        group: wheel
+
+    - name: Allow the `aur_builder` user to run `sudo pacman` without a password
+      become: yes
+      ansible.builtin.lineinfile:
+        path: /etc/sudoers.d/11-install-aur_builder
+        line: 'aur_builder ALL=(ALL) NOPASSWD: /usr/bin/pacman'
+        create: yes
+        validate: 'visudo -cf %s'
+
+# kcat-cli
+    - name: Install avro-c
+      aur:
+        name: avro-c
+        use: makepkg
+        state: present
+        ignore_arch: yes
+      become: yes
+      become_user: aur_builder
+
+    - name: Install kafkacat
+      aur:
+        name: kcat-cli
+        use: makepkg
+        state: present
+        ignore_arch: yes
+      become: yes
+      become_user: aur_builder
+
+    - name: Install vscode
+      aur:
+        name: visual-studio-code-bin
+        use: makepkg
+        state: present
+        ignore_arch: yes
+      become: yes
+      become_user: aur_builder
+
+    - name: Install brave-browser
+      aur:
+        name: brave-bin
+        use: makepkg
+        state: present
+        ignore_arch: yes
+      become: yes
+      become_user: aur_builder
+
+    - name: Install ms-edge
+      aur:
+        name: microsoft-edge-stable-bin
+        use: makepkg
+        state: present
+        ignore_arch: yes
+      become: yes
+      become_user: aur_builder
+
+    - name: Install google-chrome
+      aur:
+        name: google-chrome
+        use: makepkg
+        state: present
+        ignore_arch: yes
+      become: yes
+      become_user: aur_builder
+
+    - name: Install dbeaver
+      aur:
+        name: dbeaver-git
+        use: makepkg
+        state: present
+        ignore_arch: yes
+      become: yes
+      become_user: aur_builder
+
+    - name: Install azure-cli
+      aur:
+        name: azure-cli
+        use: makepkg
+        state: present
+        ignore_arch: yes
+      become: yes
+      become_user: aur_builder
+
+    - name: Install virtualbox-guest-iso-dev
+      aur:
+        name: virtualbox-guest-iso-dev
+        use: makepkg
+        state: present
+        ignore_arch: yes
+      become: yes
+      become_user: aur_builder
+
+    - name: Create Hack font directory
+      become: yes
+      ansible.builtin.file:
+        path: /usr/share/fonts/Hack
+        state: directory
+        mode: '0755'
+
+    - name: Install hack regular font
+      become: yes
+      copy:
+        src: files/Hack-Regular.ttf
+        dest: /usr/share/fonts/Hack
+        force: no
+
+    - name: Install hack bold font
+      become: yes
+      copy:
+        src: files/Hack-Bold.ttf
+        dest: /usr/share/fonts/Hack
+        force: no
+
+    - name: Install hack italic font
+      become: yes
+      copy:
+        src: files/Hack-Italic.ttf
+        dest: /usr/share/fonts/Hack
+        force: no
+
+    - name: Install hack bold italic font
+      become: yes
+      copy:
+        src: files/Hack-BoldItalic.ttf
+        dest: /usr/share/fonts/Hack
+        force: no
