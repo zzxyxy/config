@@ -8,7 +8,7 @@ dmg:
 	ansible-playbook playbook-heitec-hyperv-arch.yaml
 
 dmgprofile:
-	ansible-playbook playbook-heitec-profile.yaml --ask-become-pass
+	ansible-playbook playbook-heitec-profile.yaml
 
 lilith:
 	sudo ansible-playbook playbook-lilith-arch.yaml
