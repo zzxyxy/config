@@ -90,6 +90,7 @@
           - libmtp
           - mate-terminal
           - i3status
+          - pavucontrol
           - network-manager-applet
           - mplayer
           - pasystray
