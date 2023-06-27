@@ -42,6 +42,8 @@
           - bluez-utils
           - bluez-tools
           - brightnessctl
+          - ca-certificates
+          - ca-certificates-mozilla
           - caja
           - calibre
           - cdrdao
