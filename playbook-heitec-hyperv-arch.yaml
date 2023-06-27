@@ -139,7 +139,6 @@
         create: yes
         validate: 'visudo -cf %s'
 
-# kcat-cli
     - name: Install avro-c
       aur:
         name: avro-c

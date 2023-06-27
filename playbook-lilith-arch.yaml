@@ -18,7 +18,7 @@
         update_cache: yes
         upgrade: yes
 
-    - name: Remove packages
+    - name: Remove pacman packages
       become: true
       pacman:
         name:
@@ -29,7 +29,7 @@
           - vivaldi
         state: absent
 
-    - name: Install packages
+    - name: Install pacman packages
       become: true
       pacman:
         name:
@@ -76,6 +76,7 @@
           - network-manager-applet
           - mplayer
           - pasystray
+          - postfix
           - texlive-bin
           - texlive-core
           - texlive-langextra
@@ -117,6 +118,7 @@
           - python-setuptools
           - vim
           - vlc
+          - wget
           - zsh
         state: present
 
@@ -236,32 +238,44 @@
         enabled: yes
       when: logindchange.changed
 
-    - name: Install vscode
+    - name: Install aur packages
       aur:
         name: visual-studio-code-bin
         use: makepkg
         state: latest
+      loop:
+        - brave-bin
+        - dbeaver-git
+        - postman-bin
+        - visual-studio-code-bin
       become: yes
       become_user: aur_builder
 
-    - name: Install brave-browser
+    - name: Install php82
       aur:
-        name: brave-bin
+        name: "{{ item }}"
         use: makepkg
-        state: latest
+        state: present
         ignore_arch: yes
+      loop:
+        - c-client
+        - php82
+        - php82-cli
+        - php82-curl
+        - php82-phar
+        - php82-pear
+        - php82-mysql
+        - php82-dba
+        - php82-composer
       become: yes
       become_user: aur_builder
 
-    - name: Install dbeaver
-      aur:
-        name: dbeaver-git
-        use: makepkg
-        state: latest
-        ignore_arch: yes
+    - name: php symlink
+      ansible.builtin.file:
+        src: /usr/bin/php82
+        dest: /usr/bin/php
+        state: link
       become: yes
-      become_user: aur_builder
-
 
   roles:
     - { role: andrewrothstein.kubectl, become: yes }
@@ -288,26 +302,16 @@
 
 # -------- autofs
 
-    - name: whitetulip storage01 directory
+    - name: whitetulip storage directorys
       become: true
       file:
-        path: /mnt/whitetulip/storage01
+        path: "{{ item }}"
         state: directory
         mode: 0777
-
-    - name: whitetulip storage02 directory
-      become: true
-      file:
-        path: /mnt/whitetulip/storage02
-        state: directory
-        mode: 0777
-
-    - name: whitetulip storage02 directory
-      become: true
-      file:
-        path: /mnt/whitetulip/storage02
-        state: directory
-        mode: 0777
+      loop:
+        - /mnt/whitetulip/storage01
+        - /mnt/whitetulip/storage02
+        - /mnt/whitetulip/storage03
 
     - name: backlight.rules to enable brigness settings
       become: yes
