@@ -35,6 +35,8 @@
           - boost
           - boost-libs
           - blueman
+          - ca-certificates
+          - ca-certificates-mozilla
           - clang
           - docker
           - gtk2
@@ -150,8 +152,21 @@
         - google-chrome
         - kcat-cli
         - microsoft-edge-stable-bin
+        - themix-gui-git
+        - themix-plugin-base16-git
+        - themix-icons-numix-git
+        - themix-theme-oomox-git
+        - themix-export-spotify-git
+        - themix-icons-archdroid-git
+        - themix-icons-gnome-colors-git
+        - themix-icons-papirus-git
+        - themix-icons-suru-plus-git
+        - themix-icons-suru-plus-aspromauros-git
+        - themix-import-images-git
+        - themix-full-git
         - virtualbox-guest-iso-dev
         - visual-studio-code-bin
+
       become: yes
       become_user: aur_builder
 
