@@ -96,6 +96,7 @@
           - pasystray
           - okular
           - gtk2
+          - xdotool
         state: present
 
   collections:
@@ -109,19 +110,15 @@
 #  - { role: buluma.azure_cli, become: yes }
 
   tasks:
-    - name: Enable ssh
+    - name: Enable services
       become: yes
       service:
-        name: sshd
+        name: "{{ item }}"
         state: started
         enabled: yes
-
-    - name: Enable docker
-      become: yes
-      service:
-        name: docker
-        state: started
-        enabled: yes
+      loop:
+        - docker
+        - sshd
 
 # create aur_builder to install aur packages
     - name: Create the `aur_builder` user
@@ -139,85 +136,22 @@
         create: yes
         validate: 'visudo -cf %s'
 
-# kcat-cli
-    - name: Install avro-c
+    - name: Install aur packages
       aur:
-        name: avro-c
+        name: "{{ item }}"
         use: makepkg
         state: present
         ignore_arch: yes
-      become: yes
-      become_user: aur_builder
-
-    - name: Install kafkacat
-      aur:
-        name: kcat-cli
-        use: makepkg
-        state: present
-        ignore_arch: yes
-      become: yes
-      become_user: aur_builder
-
-    - name: Install vscode
-      aur:
-        name: visual-studio-code-bin
-        use: makepkg
-        state: present
-        ignore_arch: yes
-      become: yes
-      become_user: aur_builder
-
-    - name: Install brave-browser
-      aur:
-        name: brave-bin
-        use: makepkg
-        state: present
-        ignore_arch: yes
-      become: yes
-      become_user: aur_builder
-
-    - name: Install ms-edge
-      aur:
-        name: microsoft-edge-stable-bin
-        use: makepkg
-        state: present
-        ignore_arch: yes
-      become: yes
-      become_user: aur_builder
-
-    - name: Install google-chrome
-      aur:
-        name: google-chrome
-        use: makepkg
-        state: present
-        ignore_arch: yes
-      become: yes
-      become_user: aur_builder
-
-    - name: Install dbeaver
-      aur:
-        name: dbeaver-git
-        use: makepkg
-        state: present
-        ignore_arch: yes
-      become: yes
-      become_user: aur_builder
-
-    - name: Install azure-cli
-      aur:
-        name: azure-cli
-        use: makepkg
-        state: present
-        ignore_arch: yes
-      become: yes
-      become_user: aur_builder
-
-    - name: Install virtualbox-guest-iso-dev
-      aur:
-        name: virtualbox-guest-iso-dev
-        use: makepkg
-        state: present
-        ignore_arch: yes
+      loop:
+        - azure-cli
+        - avro-c
+        - brave-bin
+        - dbeaver-git
+        - google-chrome
+        - kcat-cli
+        - microsoft-edge-stable-bin
+        - virtualbox-guest-iso-dev
+        - visual-studio-code-bin
       become: yes
       become_user: aur_builder
 
@@ -228,30 +162,14 @@
         state: directory
         mode: '0755'
 
-    - name: Install hack regular font
+    - name: Install hack font
       become: yes
       copy:
         src: files/Hack-Regular.ttf
         dest: /usr/share/fonts/Hack
         force: no
-
-    - name: Install hack bold font
-      become: yes
-      copy:
-        src: files/Hack-Bold.ttf
-        dest: /usr/share/fonts/Hack
-        force: no
-
-    - name: Install hack italic font
-      become: yes
-      copy:
-        src: files/Hack-Italic.ttf
-        dest: /usr/share/fonts/Hack
-        force: no
-
-    - name: Install hack bold italic font
-      become: yes
-      copy:
-        src: files/Hack-BoldItalic.ttf
-        dest: /usr/share/fonts/Hack
-        force: no
+      loop:
+        - files/Hack-Regular.ttf
+        - files/Hack-Bold.ttf
+        - files/Hack-Italic.ttf
+        - files/Hack-BoldItalic.ttf

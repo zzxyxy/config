@@ -139,3 +139,4 @@
         - { src: "files/dmg/i3config", dest: "/home/{{ user }}/.config/i3/config" }
         - { src: "files/dmg/i3status.conf", dest: "/home/{{ user }}/.i3status.conf" }
         - { src: "files/dmg/vimrc", dest: "/home/{{ user }}/.vimrc" }
+ 
