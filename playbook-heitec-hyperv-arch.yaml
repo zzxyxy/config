@@ -165,31 +165,54 @@
 #      become_user: aur_builder
 
     - name: Create Hack font directory
+      become: yes
       ansible.builtin.file:
         path: /usr/share/fonts/Hack
         state: directory
         mode: '0755'
 
     - name: Install hack regular font
+      become: yes
       copy:
         src: files/Hack-Regular.ttf
         dest: /usr/share/fonts/Hack
         force: no
 
     - name: Install hack bold font
+      become: yes
       copy:
         src: files/Hack-Bold.ttf
         dest: /usr/share/fonts/Hack
         force: no
 
     - name: Install hack italic font
+      become: yes
       copy:
         src: files/Hack-Italic.ttf
         dest: /usr/share/fonts/Hack
         force: no
 
     - name: Install hack bold italic font
+      become: yes
       copy:
         src: files/Hack-BoldItalic.ttf
         dest: /usr/share/fonts/Hack
         force: no
+
+    - name: Install visual-studio-code-bin
+      aur:
+        name: visual-studio-code-bin
+        use: makepkg
+        state: present
+        ignore_arch: yes
+      become: yes
+      become_user: aur_builder
+
+    - name: Install brave-bin
+      aur:
+        name: brave-bin
+        use: makepkg
+        state: present
+        ignore_arch: yes
+      become: yes
+      become_user: aur_builder
