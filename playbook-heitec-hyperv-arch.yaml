@@ -166,6 +166,21 @@
         - themix-full-git
         - virtualbox-guest-iso-dev
         - visual-studio-code-bin
+        - c-client
+        - php82
+        - php82-cli
+        - php82-curl
+        - php82-phar
+        - php82-pear
+        - php82-mysql
+        - php82-dba
+        - php82-composer
+        - 7-zip-full
+        - httpfs2-2gbplus
+        - httpdirfs
+#        - ttf-ms-win10-auto
+#        - ttf-ms-win11-auto
+#        - ttf-ms-fonts
 
       become: yes
       become_user: aur_builder
@@ -188,3 +203,14 @@
         - files/Hack-Bold.ttf
         - files/Hack-Italic.ttf
         - files/Hack-BoldItalic.ttf
+
+    - name: php symlink
+      ansible.builtin.file:
+        src: "{{ item.src }}"
+        dest: "{{ item.dest }}"
+        state: link
+        force: yes
+      become: yes
+      loop:
+        - { src: "/usr/bin/php82", dest: "/usr/bin/php"}
+        - { src: "/usr/bin/composer82", dest: "/usr/bin/composer"}
