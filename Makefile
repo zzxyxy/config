@@ -4,14 +4,14 @@ all:
 dmgwsl:
 	ansible-playbook playbook-heitec-arch.yaml
 
-dmghyperv:
+dmg:
 	ansible-playbook playbook-heitec-hyperv-arch.yaml
 
 dmgprofile:
-	ansible-playbook playbook-heitec-profile.yaml --ask-become-pass
+	ansible-playbook playbook-heitec-profile.yaml
 
 lilith:
-	sudo ansible-playbook playbook-lilith-arch.yaml
+	ansible-playbook playbook-lilith-arch.yaml
 
 lilithwsl:
 	sudo ansible-playbook playbook-lilwsl.yaml

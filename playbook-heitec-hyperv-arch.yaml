@@ -35,12 +35,15 @@
           - boost
           - boost-libs
           - blueman
+          - ca-certificates
+          - ca-certificates-mozilla
           - clang
           - docker
           - gtk2
           - gperf
           - junit
           - jq
+          - keepass
           - kubectx
           - kubens
           - kubectl
@@ -51,6 +54,7 @@
           - ncurses
           - ntp
           - openssh
+          - python-protobuf
           - python-grpcio-tools
           - python-pylint
           - python-setuptools
@@ -88,11 +92,13 @@
           - libmtp
           - mate-terminal
           - i3status
+          - pavucontrol
           - network-manager-applet
           - mplayer
           - pasystray
           - okular
           - gtk2
+          - xdotool
         state: present
 
   collections:
@@ -106,19 +112,15 @@
 #  - { role: buluma.azure_cli, become: yes }
 
   tasks:
-    - name: Enable ssh
+    - name: Enable services
       become: yes
       service:
-        name: sshd
+        name: "{{ item }}"
         state: started
         enabled: yes
-
-    - name: Enable docker
-      become: yes
-      service:
-        name: docker
-        state: started
-        enabled: yes
+      loop:
+        - docker
+        - sshd
 
 # create aur_builder to install aur packages
     - name: Create the `aur_builder` user
@@ -136,33 +138,37 @@
         create: yes
         validate: 'visudo -cf %s'
 
-# kcat-cli
-    - name: Install avro-c
+    - name: Install aur packages
       aur:
-        name: avro-c
+        name: "{{ item }}"
         use: makepkg
         state: present
         ignore_arch: yes
+      loop:
+        - azure-cli
+        - avro-c
+        - brave-bin
+        - dbeaver-git
+        - google-chrome
+        - kcat-cli
+        - microsoft-edge-stable-bin
+        - themix-gui-git
+        - themix-plugin-base16-git
+        - themix-icons-numix-git
+        - themix-theme-oomox-git
+        - themix-export-spotify-git
+        - themix-icons-archdroid-git
+        - themix-icons-gnome-colors-git
+        - themix-icons-papirus-git
+        - themix-icons-suru-plus-git
+        - themix-icons-suru-plus-aspromauros-git
+        - themix-import-images-git
+        - themix-full-git
+        - virtualbox-guest-iso-dev
+        - visual-studio-code-bin
+
       become: yes
       become_user: aur_builder
-
-    - name: Install kafkacat
-      aur:
-        name: kcat-cli
-        use: makepkg
-        state: present
-        ignore_arch: yes
-      become: yes
-      become_user: aur_builder
-
-#    - name: Install azure-cli-bin
-#      aur:
-#        name: azure-cli
-#        use: makepkg
-#        state: present
-#        ignore_arch: yes
-#      become: yes
-#      become_user: aur_builder
 
     - name: Create Hack font directory
       become: yes
@@ -171,48 +177,14 @@
         state: directory
         mode: '0755'
 
-    - name: Install hack regular font
+    - name: Install hack font
       become: yes
       copy:
         src: files/Hack-Regular.ttf
         dest: /usr/share/fonts/Hack
         force: no
-
-    - name: Install hack bold font
-      become: yes
-      copy:
-        src: files/Hack-Bold.ttf
-        dest: /usr/share/fonts/Hack
-        force: no
-
-    - name: Install hack italic font
-      become: yes
-      copy:
-        src: files/Hack-Italic.ttf
-        dest: /usr/share/fonts/Hack
-        force: no
-
-    - name: Install hack bold italic font
-      become: yes
-      copy:
-        src: files/Hack-BoldItalic.ttf
-        dest: /usr/share/fonts/Hack
-        force: no
-
-    - name: Install visual-studio-code-bin
-      aur:
-        name: visual-studio-code-bin
-        use: makepkg
-        state: present
-        ignore_arch: yes
-      become: yes
-      become_user: aur_builder
-
-    - name: Install brave-bin
-      aur:
-        name: brave-bin
-        use: makepkg
-        state: present
-        ignore_arch: yes
-      become: yes
-      become_user: aur_builder
+      loop:
+        - files/Hack-Regular.ttf
+        - files/Hack-Bold.ttf
+        - files/Hack-Italic.ttf
+        - files/Hack-BoldItalic.ttf

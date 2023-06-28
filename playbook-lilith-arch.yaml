@@ -13,11 +13,12 @@
     #   file: "{{ secret_dir }}/passwds.yml"
 
     - name: Upgrade system
+      become: true
       community.general.pacman:
         update_cache: yes
         upgrade: yes
 
-    - name: Remove packages
+    - name: Remove pacman packages
       become: true
       pacman:
         name:
@@ -25,9 +26,10 @@
           - virtualbox-host-modules-arch
           - kodi
           - virtualbox-host-dkms
+          - vivaldi
         state: absent
 
-    - name: Install packages
+    - name: Install pacman packages
       become: true
       pacman:
         name:
@@ -39,6 +41,9 @@
           - bluez
           - bluez-utils
           - bluez-tools
+          - brightnessctl
+          - ca-certificates
+          - ca-certificates-mozilla
           - caja
           - calibre
           - cdrdao
@@ -47,6 +52,7 @@
           - cronie
           - cups
           - dmenu
+          - docker
           - dvd+rw-tools
           - fakeroot
           - fuse2fs
@@ -66,12 +72,13 @@
           - i3status
           - k3b
           - keepass
-#- autofs
+         #- autofs
           - sshfs
           - jdk11-openjdk
           - network-manager-applet
           - mplayer
           - pasystray
+          - postfix
           - texlive-bin
           - texlive-core
           - texlive-langextra
@@ -93,6 +100,10 @@
           - npm
           - pipewire
           - python-protobuf
+#          - python-grpcio-tools
+#          - python-pylint
+#          - python-setuptools
+#          - python-virtualenv
           - ncurses
           - ntp
           - boost-libs
@@ -109,54 +120,44 @@
           - python-setuptools
           - vim
           - vlc
+          - wget
           - zsh
         state: present
 
-    - name: Python install packages
-      become: true
-      pip:
-        name:
-          - virtualenv
-          - pylint
-        state: present
-
-          #    - name: install OKI filter
-          #      become: yes
-          # copy:
-          #src: files/whitetulip/OK400PCL.ppd
-          #     dest: /usr/share/ppd
-          #       mode: 0444
-
-          #   - name: install OKI filter
-          #    become: yes
-          #  copy:
-          #     src: files/whitetulip/rastertookimonochrome
-          #     dest: /usr/lib/cups/filter/
-          #     mode: 0755
-
     - name: enable cron
+      become: yes
       service:
         name: cronie
         enabled: yes
         state: started
 
     - name: enable bluetooth
+      become: yes
       service:
         name: bluetooth
         enabled: yes
         state: started
 
     - name: enable ssh
+      become: yes
       service:
         name: sshd
         enabled: yes
         state: started
 
     - name: enable ntp
+      become: yes
       service:
         name: ntpd
         enabled: yes
         state: started
+
+    - name: Enable docker
+      become: yes
+      service:
+        name: docker
+        state: started
+        enabled: yes
 
     - name: Print server service running
       become: true
@@ -173,36 +174,41 @@
         enabled: yes
 
     - name: Create Hack font directory
+      become: yes
       ansible.builtin.file:
         path: /usr/share/fonts/Hack
         state: directory
         mode: '0755'
 
     - name: Install hack regular font
+      become: yes
       copy:
         src: files/Hack-Regular.ttf
         dest: /usr/share/fonts/Hack
         force: no
 
     - name: Install hack bold font
+      become: yes
       copy:
         src: files/Hack-Bold.ttf
         dest: /usr/share/fonts/Hack
         force: no
 
     - name: Install hack italic font
+      become: yes
       copy:
         src: files/Hack-Italic.ttf
         dest: /usr/share/fonts/Hack
         force: no
 
     - name: Install hack bold italic font
+      become: yes
       copy:
         src: files/Hack-BoldItalic.ttf
         dest: /usr/share/fonts/Hack
         force: no
 
-# ---- AUR packages
+      # ---- AUR packages
 
     - name: Create the `aur_builder` user
       become: yes
@@ -219,43 +225,64 @@
         create: yes
         validate: 'visudo -cf %s'
 
-    - name: Install vscode
+    - name: Disable lid auto suspend
+      become: yes
+      ansible.builtin.lineinfile:
+        path: /etc/systemd/logind.conf
+        line: 'HandleLidSwitch=ignore'
+      register: logindchange
+
+    - name: restart logind
+      become: true
+      service:
+        name: systemd-logind
+        state: restarted
+        enabled: yes
+      when: logindchange.changed
+
+    - name: Install aur packages
       aur:
         name: visual-studio-code-bin
         use: makepkg
-        state: present
+        state: latest
+      loop:
+        - brave-bin
+        - dbeaver-git
+        - postman-bin
+        - visual-studio-code-bin
       become: yes
       become_user: aur_builder
 
-        #    - name: Install ncurses
-        #      aur:
-        #        name: ncurses
-        #        use: makepkg
-        #        state: present
-        #      become: yes
-        #      become_user: aur_builder
+    - name: Install php82
+      aur:
+        name: "{{ item }}"
+        use: makepkg
+        state: present
+        ignore_arch: yes
+      loop:
+        - c-client
+        - php82
+        - php82-cli
+        - php82-curl
+        - php82-phar
+        - php82-pear
+        - php82-mysql
+        - php82-dba
+        - php82-composer
+      become: yes
+      become_user: aur_builder
 
-        #    - name: Install ncurses5-compat-libs
-        #      aur:
-        #        name: ncurses5-compat-libs
-        #        use: makepkg
-        #        state: present
-        #      become: yes
-        #      become_user: aur_builder
-
-#      - name: Install autofs
-#      aur:
-#        name: autofs
-#        use: makepkg
-#        state: present
-#      become: yes
-#      become_user: aur_builder
+    - name: php symlink
+      ansible.builtin.file:
+        src: /usr/bin/php82
+        dest: /usr/bin/php
+        state: link
+      become: yes
 
   roles:
-  - { role: acehko.docker, become: yes }
-  - { role: gantsign.minikube, become: yes }
-  - { role: andrewrothstein.kubectl, become: yes }
-  - { role: andrewrothstein.go, become: yes }
+    - { role: andrewrothstein.kubectl, become: yes }
+    - { role: andrewrothstein.go, become: yes }
+#    - { role: acehko.docker, become: yes }
   tasks:
     #    - name: Create a zxyxy
     #      become: true
@@ -277,26 +304,24 @@
 
 # -------- autofs
 
-    - name: whitetulip storage01 directory
+    - name: whitetulip storage directorys
       become: true
       file:
-        path: /mnt/whitetulip/storage01
+        path: "{{ item }}"
         state: directory
         mode: 0777
+      loop:
+        - /mnt/whitetulip/storage01
+        - /mnt/whitetulip/storage02
+        - /mnt/whitetulip/storage03
 
-    - name: whitetulip storage02 directory
-      become: true
-      file:
-        path: /mnt/whitetulip/storage02
-        state: directory
-        mode: 0777
-
-    - name: whitetulip storage02 directory
-      become: true
-      file:
-        path: /mnt/whitetulip/storage02
-        state: directory
-        mode: 0777
+    - name: backlight.rules to enable brigness settings
+      become: yes
+      copy:
+        src: files/lilith/backlight.rules
+        dest: /etc/udev/rules.d/backlight.rules
+        owner: root
+        mode: 0644
 
 #    - name: authorized_keys for zxyxy
 #      become: yes
