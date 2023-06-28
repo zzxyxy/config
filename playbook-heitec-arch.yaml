@@ -64,6 +64,13 @@
           - wget
         state: present
 
+    - name: Install docker packages
+      become: true
+      pacman:
+        name:
+          - docker
+        state: present
+#        extra_args: "--noconfirm"
 #    - name: Python install packages
 #      become: true
 #      pip:
