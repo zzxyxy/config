@@ -148,10 +148,22 @@
         - azure-cli
         - avro-c
         - brave-bin
+        - c-client
         - dbeaver-git
         - google-chrome
+        - httpfs2-2gbplus
+        - httpdirfs
         - kcat-cli
         - microsoft-edge-stable-bin
+        - php82
+        - php82-cli
+        - php82-curl
+        - php82-phar
+        - php82-pear
+        - php82-mysql
+        - php82-dba
+        - php82-composer
+        - postman-bin
         - themix-gui-git
         - themix-plugin-base16-git
         - themix-icons-numix-git
@@ -164,20 +176,9 @@
         - themix-icons-suru-plus-aspromauros-git
         - themix-import-images-git
         - themix-full-git
+        - 7-zip-full
         - virtualbox-guest-iso-dev
         - visual-studio-code-bin
-        - c-client
-        - php82
-        - php82-cli
-        - php82-curl
-        - php82-phar
-        - php82-pear
-        - php82-mysql
-        - php82-dba
-        - php82-composer
-        - 7-zip-full
-        - httpfs2-2gbplus
-        - httpdirfs
 #        - ttf-ms-win10-auto
 #        - ttf-ms-win11-auto
 #        - ttf-ms-fonts
