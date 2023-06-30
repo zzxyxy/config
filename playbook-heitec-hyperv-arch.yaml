@@ -112,6 +112,16 @@
 #  - { role: buluma.azure_cli, become: yes }
 
   tasks:
+    - name: Copy samba config
+      become: true
+      ansible.builtin.copy:
+        src: files/dmg/smb.conf
+        dest: /etc/samba/smb.conf
+        owner: root
+        group: root
+        mode: 0770
+      register: sambeconfig
+
     - name: Enable services
       become: yes
       service:
@@ -121,6 +131,19 @@
       loop:
         - docker
         - sshd
+        - smb
+        - nmb
+
+    - name: restart samba
+      become: true
+      service:
+        name: "{{ item }}"
+        state: restarted
+        enabled: yes
+      loop:
+        - smb
+        - nmb
+      when: sambeconfig.changed
 
 # create aur_builder to install aur packages
     - name: Create the `aur_builder` user
@@ -182,7 +205,6 @@
 #        - ttf-ms-win10-auto
 #        - ttf-ms-win11-auto
 #        - ttf-ms-fonts
-
       become: yes
       become_user: aur_builder
 
