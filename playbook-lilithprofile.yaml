@@ -56,22 +56,20 @@
         owner: "{{ user }}"
         mode: 0600
 
-    - name: copy ssh
+    - name: ansible create transmission directory
+      become: true
+      file:
+        path: "{{ item }}"
+        state: directory
+        mode: 0755
+      loop:
+        - /storage02/kube/torrent-a/toDownload
+
+    - name: copying config files
       copy:
-        src: /mnt/c/Users/{{ user }}/.ssh
-        dest: /home/{{ user }}
-        directory_mode: "0700"
-        mode: "0600"
-      tags:
-        - dircontent
-
-    - name: Insert/Update aliases in bashrc
-      blockinfile:
-        path: /home/{{ user }}/.bashrc
-        block: "{{ envs }}"
-
-    - name: Insert/Update aliases in profile
-      blockinfile:
-        path: /home/{{ user }}/.profile
-        block: "{{ envs }}"
-        create: "true"
+        src: "{{ item.src }}"
+        dest: "{{ item.dest }}"
+        owner: "{{ user }}"
+        mode: 0655
+      loop:
+        - { src: "files/{{ user }}/settings.ini", dest: "/home/{{ user }}/.config/gtk-3.0/settings.ini" }

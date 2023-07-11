@@ -57,6 +57,7 @@
           - fakeroot
           - fuse2fs
           - fuse2
+          - filezilla
           - linux-lts-headers
           - xf86-video-intel
           - xterm
