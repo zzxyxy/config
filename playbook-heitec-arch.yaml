@@ -68,29 +68,20 @@
       become: true
       pacman:
         name:
+          - bridge-utils
+          - containerd
           - docker
+          - runc
         state: present
-#        extra_args: "--noconfirm"
-#    - name: Python install packages
-#      become: true
-#      pip:
-#        name:
-#          - google
-#        state: absent
-#
-#    - name: Python install packages
-#      become: true
-#      pip:
-#        name:
-#          - ansible
-#          - grpcio-tools
-#          - protobuf
-#          - pylint
-#          - pywinrm
-#          - scons
-#          - virtualenv
-#          - xmltodict
-#        state: present
+
+    - name: Enable services
+      become: yes
+      service:
+        name: "{{ item }}"
+        state: started
+        enabled: yes
+      loop:
+        - docker
 
   collections:
     - kewlfft.aur
