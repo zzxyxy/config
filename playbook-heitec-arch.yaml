@@ -160,3 +160,12 @@
       loop:
         - { src: "/usr/bin/php82", dest: "/usr/bin/php"}
         - { src: "/usr/bin/composer82", dest: "/usr/bin/composer"}
+
+    - name: Install aur packages
+      aur:
+        name: "{{ item }}"
+        use: makepkg
+        state: present
+        ignore_arch: yes
+      loop:
+        - brave-bin
