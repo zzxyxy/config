@@ -20,4 +20,4 @@ lilithprofile:
 	ansible-playbook playbook-lilithprofile.yaml --ask-become-pass
 
 req:
-	ansible-galaxy install -r requirements.yaml
+	ansible-galaxy install -r requirements.yaml -f

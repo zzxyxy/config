@@ -35,6 +35,8 @@
           - boost
           - boost-libs
           - clang
+          - docker
+          - docker-compose
           - gtk2
           - gperf
           - junit
