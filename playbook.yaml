@@ -35,6 +35,7 @@
           - nfs-utils
           - prometheus-node-exporter
           - rsync
+          - transmission-cli
           - vim
           - samba
 
@@ -224,47 +225,91 @@
         state: directory
         mode: 0770
 
+# transmission
     - name: ansible create transmission directory
       become: true
       file:
-        path: /storage02/kube/torrent-z/download
+        path: /storage02/torrent/downloaded
         state: directory
         mode: 0777
 
     - name: ansible create transmission directory
       become: true
       file:
-        path: /storage02/kube/torrent-z/incomplette
+        path: /storage02/torrent/incomplette
         state: directory
         mode: 0777
 
     - name: ansible create transmission directory
       become: true
       file:
-        path: /storage02/kube/torrent-z/toDownload
+        path: /storage02/torrent/toDownload
         state: directory
         mode: 0777
 
     - name: ansible create transmission directory
       become: true
       file:
-        path: /storage02/kube/torrent-a/download
+        path: /etc/transmission-daemon
         state: directory
-        mode: 0777
+        mode: 0775
+        owner: transmission
 
-    - name: ansible create transmission directory
+    - name: stop transmission-service
+      become: true
+      service:
+        name: transmission
+        state: stopped
+        enabled: yes
+
+    - name: Set the transmission config dit to /etc
+      become: true
+      ansible.builtin.lineinfile:
+        path: /usr/lib/systemd/system/transmission.service
+        regexp: '^ExecStart'
+        line: ExecStart=/usr/bin/transmission-daemon -f --log-level=info -g /etc/transmission-daemon
+
+    - name: Copy transmission config
+      become: true
+      ansible.builtin.copy:
+        src: files/freya/transsettings.json
+        dest: /etc/transmission-daemon/settings.json
+        owner: transmission
+        group: root
+        mode: 0770
+      register: transmissionconfig
+
+    - name: start transmission-service
+      become: true
+      service:
+        name: transmission
+        state: started
+        enabled: yes
+        daemon_reload: true
+
+# XMLDownload
+
+    - name: root/bin
       become: true
       file:
-        path: /storage02/kube/torrent-a/incomplette
+        path: /root/bin
         state: directory
-        mode: 0777
+        mode: 0770
+        owner: root
 
-    - name: ansible create transmission directory
+    - name: get XMLDownload
       become: true
-      file:
-        path: /storage02/kube/torrent-a/toDownload
-        state: directory
-        mode: 0777
+      ansible.builtin.get_url:
+        url: https://raw.githubusercontent.com/szemere/XMLDownload/master/XMLDownload.py
+        dest: /root/bin/XMLDownload.py
+        mode: '0770'
+
+    - name: XMLDownload schedule
+      become: true
+      ansible.builtin.cron:
+        name: "XMLDownload"
+        minute: "*/5"
+        job: "python /root/bin/XMLDownload.py --db /root/XMLDownload.db --cache /root/rss.xml --file /storage02/torrent/toDownload/ --rss https://ncore.pro/bookmarks/fcc9f495abbd4b4a10c1ca5d759e8491113707 >/dev/null 2>&1"
 
 # create aur_builder to install aur packages
     - name: Create the `aur_builder` user
