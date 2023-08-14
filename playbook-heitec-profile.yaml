@@ -133,7 +133,6 @@
         dest: "{{ item.dest }}"
         owner: "{{ user }}"
         mode: 0755
-        create: true
       loop:
         - { src: "files/dmg/gitconfig", dest: "/home/{{ user }}/.gitconfig" }
         - { src: "files/dmg/xo", dest: "/home/{{ user }}/bin/xo" }
