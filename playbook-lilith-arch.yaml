@@ -55,12 +55,14 @@
           - docker
           - dvd+rw-tools
           - fakeroot
+          - flameshot
           - fuse2fs
           - fuse2
           - filezilla
           - linux-lts-headers
           - xf86-video-intel
           - xterm
+          - libreoffice
           - lightdm
           - i3-wm
           - lightdm-gtk-greeter
@@ -244,13 +246,13 @@
 
     - name: Install aur packages
       aur:
-        name: visual-studio-code-bin
         use: makepkg
         state: latest
       loop:
         - brave-bin
         - dbeaver-git
         - postman-bin
+        - thunderbird-bin
         - visual-studio-code-bin
       become: yes
       become_user: aur_builder
