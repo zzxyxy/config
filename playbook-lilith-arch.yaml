@@ -80,6 +80,7 @@
           - mplayer
           - pasystray
           - postfix
+          - rust
           - texlive-bin
           - texlive-core
           - texlive-langextra

@@ -52,6 +52,7 @@
           - ntp
           - openssh
           - python-setuptools
+          - rust
           - sudo
           - sshfs
           - terraform
@@ -124,12 +125,15 @@
       become: yes
       become_user: aur_builder
 
-    - name: Install kafkacat
+    - name: Install aur packages
       aur:
-        name: kcat-cli
+        name: "{{ item }}"
         use: makepkg
         state: present
         ignore_arch: yes
+      loop:
+        - intellij-idea-ce
+        - kcat-cli
       become: yes
       become_user: aur_builder
 
