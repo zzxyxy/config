@@ -132,7 +132,7 @@
         state: present
         ignore_arch: yes
       loop:
-        - intellij-idea-ce
+#        - intellij-idea-ce
         - kcat-cli
       become: yes
       become_user: aur_builder
