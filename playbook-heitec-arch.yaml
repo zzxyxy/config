@@ -37,6 +37,7 @@
           - clang
           - docker
           - docker-compose
+          - dnsmasq
           - gtk2
           - gperf
           - junit
@@ -85,6 +86,7 @@
         enabled: yes
       loop:
         - docker
+        - dnsmasq
 
   collections:
     - kewlfft.aur
@@ -114,6 +116,32 @@
         line: 'aur_builder ALL=(ALL) NOPASSWD: /usr/bin/pacman'
         create: yes
         validate: 'visudo -cf %s'
+
+    - name: disable resolv.conf generation
+      become: yes
+      ansible.builtin.blockinfile:
+        path: /etc/wsl.conf
+        block: |
+          [network]
+          generateResolvConf = true
+          nameserver 127.0.0.1
+          nameserver 172.31.48.1
+
+    - name: Insert/Update addresses to /etc/dnsmasq.conf
+      become: yes
+      ansible.builtin.blockinfile:
+        path: /etc/dnsmasq.conf
+        block: |
+          address=/z.local/172.21.0.2
+      register: dnsmasqchange
+
+    - name: restart dnsmasq
+      become: true
+      service:
+        name: dnsmasq
+        state: restarted
+        enabled: yes
+      when: dnsmasqchange.changed
 
 # kcat-cli
     - name: Install avro-c
