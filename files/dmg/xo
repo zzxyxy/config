@@ -3,6 +3,7 @@ import subprocess
 import sys
 
 envs = {
+    "local":     {"cluster": "k3d-z",                "namespace": "default"},
     "wedev":     {"cluster": "wiqAksDevCluster",     "namespace": "wedev"},
     "wetest":    {"cluster": "wiqAksStagingCluster", "namespace": "wetest"},
     "wedemo":    {"cluster": "wiqAksStagingCluster", "namespace": "wedemo"},
