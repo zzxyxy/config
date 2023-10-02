@@ -48,6 +48,7 @@
           - linux-lts-headers
           - mc
           - mosquitto
+          - ninja
           - npm
           - ncurses
           - ntp
@@ -161,7 +162,10 @@
         ignore_arch: yes
       loop:
 #        - intellij-idea-ce
+        - grpcurl-bin
         - kcat-cli
+        - paho-mqtt-c
+        - paho-mqtt-cpp-git
       become: yes
       become_user: aur_builder
 
