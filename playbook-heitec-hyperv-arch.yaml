@@ -60,6 +60,7 @@
           - python-pylint
           - python-setuptools
           - python-virtualenv
+          - python-psycopg2
           - protobuf
           - samba
           - scons
@@ -76,6 +77,8 @@
           - zip
           - wget
         state: present
+        update_cache: true
+        force: true
 
     - name: Install X packages
       become: true

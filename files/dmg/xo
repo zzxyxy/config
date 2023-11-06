@@ -3,20 +3,55 @@ import subprocess
 import sys
 
 envs = {
-    "local":     {"cluster": "k3d-z",                "namespace": "default"},
-    "wedev":     {"cluster": "wiqAksDevCluster",     "namespace": "wedev"},
-    "wetest":    {"cluster": "wiqAksStagingCluster", "namespace": "wetest"},
-    "wedemo":    {"cluster": "wiqAksStagingCluster", "namespace": "wedemo"},
-    "welive":    {"cluster": "wiqAksLiveCluster",    "namespace": "welive"},
-    "wepreprod": {"cluster": "wiqAksPreprodCluster", "namespace": "wepreprod"},
-    "weservice": {"cluster": "wiqAksServiceCluster", "namespace": "weservice"},
-    "wegreen":   {"cluster": "wiqAksGreenCluster",   "namespace": "wegreen"},
+    "local": {
+        "cluster": "k3d-z",
+        "namespace": "default",
+        "azacc": None
+    },
+    "wedev": {
+        "cluster": "wiqAksDevCluster",
+        "namespace": "wedev",
+        "azacc": None
+    },
+    "wetest": {
+        "cluster": "wiqAksStagingCluster",
+        "namespace": "wetest",
+        "azacc": None
+    },
+    "wedemo": {
+        "cluster": "wiqAksDemoCluster",
+        "namespace": "wedemo",
+        "azacc": "d2e315e0-7fd8-4279-b4b9-063efc125b0c"
+    },
+    "welive": {
+        "cluster": "wiqAksLiveCluster",
+        "namespace": "welive",
+        "azacc": None
+    },
+    "wepreprod": {
+        "cluster": "wiqAksPreprodCluster",
+        "namespace": "wepreprod",
+        "azacc": "my DMG MORI PROD"
+    },
+    "weservice": {
+        "cluster": "wiqAksServiceCluster",
+        "namespace": "weservice",
+        "azacc": None
+    },
+    "wegreen": {
+        "cluster": "wiqAksGreenCluster",
+        "namespace": "wegreen",
+        "azacc": "d2e315e0-7fd8-4279-b4b9-063efc125b0c"
+    },
 }
 
 req = sys.argv[1]
 
 try:
     print(envs[req]["cluster"])
+    if envs[req]["azacc"] is not None:
+        subprocess.run(["az", "account", "set", "--subscription", envs[req]["azacc"]])
+
     subprocess.run(["kubectx", envs[req]["cluster"]])
     subprocess.run(["kubens", envs[req]["namespace"]])
 except:
