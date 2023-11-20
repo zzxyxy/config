@@ -1,0 +1,11 @@
+host my
+  HostName 192.168.98.2
+  Port 22
+  User ameszely
+  IdentityFile C:\Users\ameszely\.ssh\id_rsa
+
+host zhome
+  HostName zxyxyhome.duckdns.org
+  Port 22
+  User zxyxy
+  LocalForward 13389 172.21.0.11:3389

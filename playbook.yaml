@@ -2,6 +2,7 @@
 - name: Manage kubernetes servers
   hosts:
   - Freya
+  - Hella
   collections:
     - kewlfft.aur
   pre_tasks:
@@ -64,7 +65,7 @@
     - name: Copy duck script
       become: true
       ansible.builtin.copy:
-        src: files/freya/duck.sh
+        src: "files/{{ hostname }}/duck.sh"
         dest: /root/bin/duck.sh
         owner: root
         group: root
@@ -81,7 +82,7 @@
     - name: Copy samba config
       become: true
       ansible.builtin.copy:
-        src: files/freya/smb.conf
+        src: "files/{{ hostname }}/smb.conf"
         dest: /etc/samba/smb.conf
         owner: root
         group: root
@@ -122,7 +123,7 @@
     - name: Copy sshd jail config
       become: true
       ansible.builtin.copy:
-        src: files/freya/sshd.local
+        src: "files/{{ hostname }}/sshd.local"
         dest: /etc/fail2ban/jail.d/sshd.local
         owner: root
         group: root
@@ -148,7 +149,7 @@
     - name: Add nfs exports
       become: true
       ansible.builtin.copy:
-        src: files/freya/exports
+        src: "files/{{ hostname }}/exports"
         dest: /etc/exports
         owner: root
         group: root

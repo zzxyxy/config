@@ -20,7 +20,9 @@
           - cabal-install
           - ghc
           - ghc-static
-          - ghc-libs
+          - ghc-lib
+          - haskel
+          - keepass
           - protobuf
           - virtualbox-host-modules-arch
         state: absent
