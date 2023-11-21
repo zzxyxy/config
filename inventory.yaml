@@ -3,7 +3,6 @@ all:
     server:
       hosts:
         Freya: {}
-        Hella: {}
     router:
       hosts:
         vmrouter: {}
