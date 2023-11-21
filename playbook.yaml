@@ -37,6 +37,8 @@
           - net-tools
           - nfs-utils
           - prometheus-node-exporter
+          - python
+          - python-docker
           - rsync
           - transmission-cli
           - vim
@@ -165,6 +167,7 @@
         - { path: "/etc/transmission-daemon", mode: "0775", owner: "transmission"}
         - { path: "/storage03", mode: "0777", owner: "root"}
         - { path: "/storage03", mode: "0777", owner: "root"}
+        - { path: "/srv/docker", mode: "0777", owner: "root"}
 
     - name: stop transmission-service
       become: true
@@ -264,7 +267,6 @@
         state: restarted
       when: wsddconfig.changed
 
-
     - name: Enable services
       become: yes
       service:
@@ -279,3 +281,21 @@
         - fail2ban
         - prometheus-node-exporter
         - wsdd2
+
+    - name: Add docker compose file
+      become: true
+      ansible.builtin.copy:
+        src: "files/{{ hostname }}/docker-compose.yaml"
+        dest: /srv/docker
+        owner: root
+        group: root
+        mode: 0770
+        decrypt: true
+      register: dockercomposer
+
+    - name: Run `docker-compose up`
+      become: true
+      ansible.builtin.command: "docker-compose up -d"
+      args:
+        chdir: /srv/docker
+      when: dockercomposer.changed
