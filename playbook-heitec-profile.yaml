@@ -144,7 +144,5 @@
       loop:
         - { src: "files/dmg/gitconfig", dest: "/home/{{ user }}/.gitconfig" }
         - { src: "files/dmg/xo", dest: "/home/{{ user }}/bin/xo" }
-        - { src: "files/dmg/i3config", dest: "/home/{{ user }}/.config/i3/config" }
-        - { src: "files/dmg/i3status.conf", dest: "/home/{{ user }}/.i3status.conf" }
         - { src: "files/dmg/vimrc", dest: "/home/{{ user }}/.vimrc" }
-        - { src: "files/{{ user }}/settings.ini", dest: "/home/{{ user }}/.config/gtk-3.0/settings.ini" }
+        - { src: "files/dmg/zwiq", dest: "/home/{{ user }}/bin/zwiq" }

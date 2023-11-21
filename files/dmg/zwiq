@@ -159,8 +159,8 @@ def main():
     parser = argparse.ArgumentParser()
     commandparser = parser.add_subparsers(help = 'command')
 
-    deploy = commandparser.add_parser('deploy', help='deploy image from current directory')
-    deploy.set_defaults(action=deploy)
+    deploycmd = commandparser.add_parser('deploy', help='deploy image from current directory')
+    deploycmd.set_defaults(action=deploy)
 
     deploycommit = commandparser.add_parser('deploycommit', help='commit value file to the git repository')
     deploycommit.add_argument('-t', '--ticket', required=True, help='ticket number')
