@@ -1,5 +1,5 @@
 ---
-- name: manage packages
+- name: Manage packages
   hosts: localhost
   vars:
     docker_distribution: archlinux
@@ -8,12 +8,12 @@
     - name: Upgrade system
       become: true
       community.general.pacman:
-        update_cache: yes
-        upgrade: yes
+        update_cache: true
+        upgrade: true
 
     - name: Remove packages
       become: true
-      pacman:
+      community.general.pacman:
         name:
           - blueman
           - cabal-fmt
@@ -25,19 +25,18 @@
           - keepass
           - mosquitto
           - protobuf
-          - python
-          - python-setuptools
-          - python-virtualenv
           - virtualbox-host-modules-arch
           - vlc
         state: absent
-        force: yes
+        force: true
 
     - name: Install packages
       become: true
-      pacman:
+      community.general.pacman:
         name:
           - ant
+          - ansible
+          - ansible-lint
           - base-devel
           - boost
           - boost-libs
@@ -59,6 +58,9 @@
           - ncurses
           - ntp
           - openssh
+          - python
+          - python-setuptools
+          - python-virtualenv
           - rust
           - sudo
           - sshfs
@@ -75,7 +77,7 @@
 
     - name: Install docker packages
       become: true
-      pacman:
+      community.general.pacman:
         name:
           - bridge-utils
           - containerd
@@ -83,61 +85,55 @@
           - runc
         state: present
 
+
+    - name: Create directories
+      become: true
+      ansible.builtin.file:
+        path: "{{ item.path }}"
+        mode: "{{ item.mode }}"
+        owner: "{{ item.owner }}"
+        state: directory
+      loop:
+        - { path: "/srv/docker", mode: "0777", owner: "root"}
+
     - name: Enable services
-      become: yes
-      service:
+      become: true
+      ansible.builtin.service:
         name: "{{ item }}"
         state: started
-        enabled: yes
+        enabled: true
       loop:
         - docker
         - dnsmasq
 
-    - name: download local install files
-      ansible.builtin.get_url:
-        url: "{{ item.src }}"
-        dest: "/tmp/{{ item.dest }}"
-        owner: "{{ user }}"
-        mode: 0755
-      loop:
-        - { src: "https://archive.archlinux.org/packages/p/python/python-3.10.10-1-x86_64.pkg.tar.zst", dest: "python-3.10.10-1-x86_64.pkg.tar.zst" }
-
-    - name: Install docker packages
-      become: true
-      pacman:
-        name:
-          - /tmp/python-3.10.10-1-x86_64.pkg.tar.zst
-        state: present
-
-  collections:
-    - kewlfft.aur
   roles:
-  - { role: andrewrothstein.go, become: yes }
-  - { role: andrewrothstein.k3d, became: yes }
-  - { role: andrewrothstein.k9s, become: yes }
-  - { role: andrewrothstein.kubernetes-helm, become: yes }
-  - { role: andrewrothstein.kubelogin, become: yes }
-  - { role: andrewrothstein.istio, become: yes }
+    - { role: andrewrothstein.go, become: true }
+    - { role: andrewrothstein.k3d, become: true }
+    - { role: andrewrothstein.k9s, become: true }
+    - { role: andrewrothstein.kubernetes-helm, become: true }
+    - { role: andrewrothstein.kubelogin, become: true }
+    - { role: andrewrothstein.istio, become: true }
 
   tasks:
 # create aur_builder to install aur packages
     - name: Create the `aur_builder` user
-      become: yes
+      become: true
       ansible.builtin.user:
         name: aur_builder
-        create_home: yes
+        create_home: true
         group: wheel
 
     - name: Allow the `aur_builder` user to run `sudo pacman` without a password
-      become: yes
+      become: true
       ansible.builtin.lineinfile:
         path: /etc/sudoers.d/11-install-aur_builder
         line: 'aur_builder ALL=(ALL) NOPASSWD: /usr/bin/pacman'
-        create: yes
+        create: true
         validate: 'visudo -cf %s'
+        mode: "0440"
 
-    - name: disable resolv.conf generation
-      become: yes
+    - name: Disable resolv.conf generation
+      become: true
       ansible.builtin.blockinfile:
         path: /etc/wsl.conf
         block: |
@@ -147,52 +143,43 @@
           nameserver 172.31.48.1
 
     - name: Insert/Update addresses to /etc/dnsmasq.conf
-      become: yes
+      become: true
       ansible.builtin.blockinfile:
         path: /etc/dnsmasq.conf
         block: |
           address=/z.local/172.21.0.2
-      register: dnsmasqchange
-
-    - name: restart dnsmasq
-      become: true
-      service:
-        name: dnsmasq
-        state: restarted
-        enabled: yes
-      when: dnsmasqchange.changed
+      notify: Restart dnsmasq
 
 # kcat-cli
     - name: Install avro-c
-      aur:
+      kewlfft.aur.aur:
         name: avro-c
         use: makepkg
         state: present
-        ignore_arch: yes
-      become: yes
+        ignore_arch: true
+      become: true
       become_user: aur_builder
 
     - name: Install aur packages
-      aur:
+      kewlfft.aur.aur:
         name: "{{ item }}"
         use: makepkg
         state: present
-        ignore_arch: yes
+        ignore_arch: true
       loop:
-        - python310
         - grpcurl-bin
         - kcat-cli
         - paho-mqtt-c
         - paho-mqtt-cpp-git
-      become: yes
+      become: true
       become_user: aur_builder
 
 #    - name: Install php82
-#      aur:
+#      kewlfft.aur.aur:
 #        name: "{{ item }}"
 #        use: makepkg
 #        state: present
-#        ignore_arch: yes
+#        ignore_arch: true
 #      loop:
 #        - c-client
 #        - php82
@@ -203,7 +190,7 @@
 #        - php82-mysql
 #        - php82-dba
 #        - php82-composer
-#      become: yes
+#      become: true
 #      become_user: aur_builder
 #
 #    - name: php symlink
@@ -211,17 +198,44 @@
 #        src: "{{ item.src }}"
 #        dest: "{{ item.dest }}"
 #        state: link
-#        force: yes
-#      become: yes
+#        force: true
+#      become: true
 #      loop:
 #        - { src: "/usr/bin/php82", dest: "/usr/bin/php"}
 #        - { src: "/usr/bin/composer82", dest: "/usr/bin/composer"}
 
-    - name: user ameszely
+    - name: User ameszely
       become: true
       ansible.builtin.user:
         name: ameszely
         group: users
         home: /home/ameszely
         groups: root, bin, docker
-        append: yes
+        append: true
+
+    - name: Add docker compose file
+      become: true
+      ansible.builtin.copy:
+        src: "files/dmg/docker-compose.yaml"
+        dest: /srv/docker
+        owner: root
+        group: root
+        mode: "0770"
+        decrypt: true
+      register: dockercomposer
+      notify: Docker-compose
+
+  handlers:
+    - name: Docker-compose
+      become: true
+      ansible.builtin.command: "docker-compose up -d"
+      args:
+        chdir: /srv/docker
+      changed_when: true
+
+    - name: Restart dnsmasq
+      become: true
+      ansible.builtin.service:
+        name: dnsmasq
+        state: restarted
+        enabled: true
