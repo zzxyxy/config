@@ -54,6 +54,7 @@
           - linux-lts-headers
           - mc
           - ninja
+          - nodejs
           - npm
           - ncurses
           - ntp
@@ -85,6 +86,15 @@
           - runc
         state: present
 
+    - name: Install npm packages
+      become: true
+      community.general.npm:
+        name: "{{ item.name }}"
+        version: "{{ item.version }}"
+        global: true
+      loop:
+        - name: "@angular/cli"
+          version: 17.0.2
 
     - name: Create directories
       become: true
