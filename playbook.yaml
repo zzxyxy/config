@@ -44,14 +44,11 @@
           - vim
           - samba
 
-<<<<<<< HEAD
-=======
   roles:
     - { role: andrewrothstein.k3d, became: yes }
     - { role: andrewrothstein.kubernetes-helm, become: yes }
     - { role: andrewrothstein.kubectl, become: yes }
 
->>>>>>> bb3548061559753cc09d8c9273af5c879c43e208
   tasks:
     - name: create /root/bin
       become: true
