@@ -14,7 +14,7 @@ lilith:
 	ansible-playbook playbook-lilith-arch.yaml
 
 lilithwsl:
-	sudo ansible-playbook playbook-lilwsl.yaml
+	ansible-playbook playbook-lilwsl.yaml
 
 lilithprofile:
 	ansible-playbook playbook-lilithprofile.yaml --ask-become-pass

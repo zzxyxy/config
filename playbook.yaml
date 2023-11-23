@@ -23,6 +23,8 @@
         name:
           - base-devel
           - cronie
+          - docker
+          - docker-compose
           - fail2ban
           - fakeroot
           - git
@@ -38,12 +40,6 @@
           - transmission-cli
           - vim
           - samba
-
-  roles:
-    - { role: geerlingguy.docker, become: yes }
-    - { role: andrewrothstein.k3d, became: yes }
-    - { role: andrewrothstein.kubernetes-helm, become: yes }
-    - { role: andrewrothstein.kubectl, become: yes }
 
   tasks:
     - name: create /root/bin

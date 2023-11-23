@@ -4,11 +4,7 @@
   hosts:
     - localhost
   roles:
-    - { role: andrewrothstein.kubectl, become: yes }
     - { role: andrewrothstein.go, become: yes }
-    - { role: andrewrothstein.k3d, become: yes }
-  collections:
-    - kewlfft.aur
   pre_tasks:
     - name: Upgrade system
       become: true
@@ -49,7 +45,12 @@
           - ncurses
           - ntp
           - openssh
+          - python
+          - python-jedi
+          - python-pylint
+          - python-pylint-venv
           - python-setuptools
+          - python-virtualenv
           - sudo
           - sshfs
           - terraform
@@ -64,31 +65,14 @@
           - wget
         state: present
 
-    - name: install python virtual env
-      become: true
-      pip:
-        name:
-          - virtualenv
-          - pylint
-          - jedi
-          - ansible
-
-    - name: Ensure group "global-users" exists with correct gid
-      ansible.builtin.group:
-        name: global-users
-        state: present
-        gid: 100
-
-    - name: Add the user 'zxyxy'
-      ansible.builtin.user:
-        name: zxyxy
-        comment: zxyxy
-        uid: 10000
-        group: global-users
-        groups: root,wheel,audio,tty,git,daemon,network
-        shell: /bin/zsh
+#    - name: Ensure group "global-users" exists with correct gid
+#      ansible.builtin.group:
+#        name: global-users
+#        state: present
+#        gid: 100
 
     - name: enable wheel group in sudoers
+      become: true
       ansible.builtin.lineinfile:
         path: /etc/sudoers
         regexp: '^%wheel ALL=(ALL:ALL) ALL'

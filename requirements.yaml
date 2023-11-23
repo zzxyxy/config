@@ -15,10 +15,10 @@ roles:
 - name: mrlesmithjr.nodejs
 - name: andrewrothstein.kubectl
 - name: andrewrothstein.go
+- name: andrewrothstein.unarchivedeps
 - name: andrewrothstein.k9s
 - name: andrewrothstein.kubernetes-helm
 - name: andrewrothstein.kubelogin
 - name: buluma.azure_cli
 - name: andrewrothstein.k3d
 - name: andrewrothstein.istio
-- name: acehko.docker
