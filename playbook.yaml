@@ -2,6 +2,7 @@
 - name: Manage kubernetes servers
   hosts:
   - Freya
+  - Hella
   collections:
     - kewlfft.aur
   pre_tasks:
@@ -36,11 +37,21 @@
           - net-tools
           - nfs-utils
           - prometheus-node-exporter
+          - python
+          - python-docker
           - rsync
           - transmission-cli
           - vim
           - samba
 
+<<<<<<< HEAD
+=======
+  roles:
+    - { role: andrewrothstein.k3d, became: yes }
+    - { role: andrewrothstein.kubernetes-helm, become: yes }
+    - { role: andrewrothstein.kubectl, become: yes }
+
+>>>>>>> bb3548061559753cc09d8c9273af5c879c43e208
   tasks:
     - name: create /root/bin
       become: true
@@ -48,19 +59,11 @@
         path: /root/bin
         state: directory
 
-# CRON
-    - name: cron-service
-      become: true
-      service:
-        name: cronie
-        state: started
-        enabled: yes
-
 # DUCKDNS
     - name: Copy duck script
       become: true
       ansible.builtin.copy:
-        src: files/freya/duck.sh
+        src: "files/{{ hostname }}/duck.sh"
         dest: /root/bin/duck.sh
         owner: root
         group: root
@@ -77,26 +80,12 @@
     - name: Copy samba config
       become: true
       ansible.builtin.copy:
-        src: files/freya/smb.conf
+        src: "files/{{ hostname }}/smb.conf"
         dest: /etc/samba/smb.conf
         owner: root
         group: root
         mode: 0770
       register: sambeconfig
-
-    - name: smb-service
-      become: true
-      service:
-        name: smb
-        state: started
-        enabled: yes
-
-    - name: nmb-service
-      become: true
-      service:
-        name: nmb
-        state: started
-        enabled: yes
 
     - name: smb-service
       become: true
@@ -118,19 +107,12 @@
     - name: Copy sshd jail config
       become: true
       ansible.builtin.copy:
-        src: files/freya/sshd.local
+        src: "files/{{ hostname }}/sshd.local"
         dest: /etc/fail2ban/jail.d/sshd.local
         owner: root
         group: root
         mode: 0770
       register: sshdjail
-
-    - name: fail2ban-service
-      become: true
-      service:
-        name: fail2ban
-        state: started
-        enabled: yes
 
     - name: fail2ban-service
       become: true
@@ -144,7 +126,7 @@
     - name: Add nfs exports
       become: true
       ansible.builtin.copy:
-        src: files/freya/exports
+        src: "files/{{ hostname }}/exports"
         dest: /etc/exports
         owner: root
         group: root
@@ -164,14 +146,6 @@
         state: started
         enabled: yes
 
-# prometheus exporter
-    - name: prometheus-node-exporter-service
-      become: true
-      service:
-        name: prometheus-node-exporter
-        state: started
-        enabled: yes
-
 # Folders to create
     - name: Create vault group
       become: true
@@ -179,77 +153,24 @@
         name: vault
         state: present
 
-    - name: ansible create storage01 directory
-      become: true
-      file:
-        path: /storage01
+    - name: create directories
+      become: yes
+      ansible.builtin.file:
+        path: "{{ item.path }}"
+        mode: "{{ item.mode }}"
+        owner: "{{ item.owner }}"
         state: directory
-        mode: 0777
-
-    - name: ansible create storage02 directory
-      become: true
-      file:
-        path: /storage02
-        state: directory
-        mode: 0777
-
-    - name: ansible create storage03 directory
-      become: true
-      file:
-        path: /storage03
-        state: directory
-        mode: 0777
-
-    - name: ansible create kube prometheus directory
-      become: true
-      file:
-        path: /storage01/kube/prometheus
-        state: directory
-        mode: 0777
-
-    - name: ansible create kube grafana directory
-      become: true
-      file:
-        path: /storage01/kube/grafana
-        state: directory
-        mode: 0777
-
-    - name: ansible create prometheus directory
-      become: true
-      file:
-        path: /storage01/prometheus
-        state: directory
-        mode: 0770
-
-# transmission
-    - name: ansible create transmission directory
-      become: true
-      file:
-        path: /storage02/torrent/downloaded
-        state: directory
-        mode: 0777
-
-    - name: ansible create transmission directory
-      become: true
-      file:
-        path: /storage02/torrent/incomplette
-        state: directory
-        mode: 0777
-
-    - name: ansible create transmission directory
-      become: true
-      file:
-        path: /storage02/torrent/toDownload
-        state: directory
-        mode: 0777
-
-    - name: ansible create transmission directory
-      become: true
-      file:
-        path: /etc/transmission-daemon
-        state: directory
-        mode: 0775
-        owner: transmission
+      loop:
+        - { path: "/storage01", mode: "0777", owner: "root"}
+        - { path: "/storage02", mode: "0777", owner: "root"}
+        - { path: "/storage03", mode: "0777", owner: "root"}
+        - { path: "/storage02/torrent/downloaded", mode: "0777", owner: "root"}
+        - { path: "/storage02/torrent/incomplette", mode: "0777", owner: "root"}
+        - { path: "/storage02/torrent/toDownload", mode: "0777", owner: "root"}
+        - { path: "/etc/transmission-daemon", mode: "0775", owner: "transmission"}
+        - { path: "/storage03", mode: "0777", owner: "root"}
+        - { path: "/storage03", mode: "0777", owner: "root"}
+        - { path: "/srv/docker", mode: "0777", owner: "root"}
 
     - name: stop transmission-service
       become: true
@@ -268,7 +189,7 @@
     - name: Copy transmission config
       become: true
       ansible.builtin.copy:
-        src: files/freya/transsettings.json
+        src: files/{{ hostname }}/transsettings.json
         dest: /etc/transmission-daemon/settings.json
         owner: transmission
         group: root
@@ -346,12 +267,38 @@
       become: true
       service:
         name: wsdd2
-        state: started
-        enabled: yes
-
-    - name: wsdd-service
-      become: true
-      service:
-        name: wsdd2
         state: restarted
       when: wsddconfig.changed
+
+    - name: Enable services
+      become: yes
+      service:
+        name: "{{ item }}"
+        state: started
+        enabled: yes
+      loop:
+        - docker
+        - cronie
+        - smb
+        - nmb
+        - fail2ban
+        - prometheus-node-exporter
+        - wsdd2
+
+    - name: Add docker compose file
+      become: true
+      ansible.builtin.copy:
+        src: "files/{{ hostname }}/docker-compose.yaml"
+        dest: /srv/docker
+        owner: root
+        group: root
+        mode: 0770
+        decrypt: true
+      register: dockercomposer
+
+    - name: Run `docker-compose up`
+      become: true
+      ansible.builtin.command: "docker-compose up -d"
+      args:
+        chdir: /srv/docker
+      when: dockercomposer.changed

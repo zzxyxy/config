@@ -1,0 +1,40 @@
+version: '3.1'
+services:
+  nginx:
+    image: nginx
+    restart: always
+    volumes:
+      - ./config/:/etc/nginx/conf.d/
+#      - /root/.acme.sh/*.zxyxyhome.duckdns.org_ecc/:/etc/ssl/certs/nginx/
+    ports:
+      - 80:80
+      - 10080:80
+      - 443:443
+
+  postgres:
+    image: postgres:16.0
+    environment:
+      - POSTGRES_PASSWORD=postgressecret
+      - PGDATA=/data
+    volumes:
+      - /srv/postgres:/data
+    ports:
+      - 5432:5432
+
+  jupiter:
+    image: quay.io/jupyter/datascience-notebook:2023-10-20
+    volumes:
+      - ~/jupiter:/home/jovyan/work
+    ports:
+      - 10000:8888
+
+  mongo:
+    image: mongo
+    restart: always
+    ports:
+      - 27017:27017
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: MongoPass41
+    volumes:
+      - /srv/mongodb:/data/db

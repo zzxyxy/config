@@ -2,10 +2,10 @@ all:
 	ansible-playbook -i inventory.yaml playbook.yaml  --ask-vault-password
 
 dmgwsl:
-	ansible-playbook playbook-heitec-arch.yaml
+	ansible-playbook playbook-heitec-arch.yaml  --ask-vault-password
 
 dmg:
-	ansible-playbook playbook-heitec-hyperv-arch.yaml
+	ansible-playbook playbook-heitec-hyperv-arch.yaml  --ask-vault-password
 
 dmgprofile:
 	ansible-playbook playbook-heitec-profile.yaml

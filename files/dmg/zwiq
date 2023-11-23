@@ -1,0 +1,177 @@
+#!/usr/bin/env python
+import os
+import subprocess
+import re
+import sys
+import logging
+import argparse
+
+
+if os.environ.get('ZWIQ_LOG_PATH') is None:
+    print("ZWIQ_LOG_PATH is not defined")
+    sys.exit(1)
+
+if os.environ.get('CLUSTER_REPO') is None:
+    print("CLUSTER_REPO is not defined")
+    sys.exit(1)
+
+service_data = {
+    "authservice": {
+        "chart-postfix": "auth-service-chart",
+        "oci": "oci://wiqregistry.azurecr.io/helm/authservice",
+        "mode": "oci",
+        "fb": "backend"
+    },
+    "businessservice": {
+        "chart-postfix": "business-service-chart",
+        "oci": "oci://wiqregistry.azurecr.io/helm/businessservice",
+        "mode": "oci",
+        "fb": "backend"
+    },
+    "business-service-sof": {
+        "chart-postfix": "business-service-sof-chart",
+        "oci": "oci://wiqregistry.azurecr.io/helm/business-service-sof",
+        "mode": "oci",
+        "fb": "backend"
+    },
+    "customerportal":  {
+        "chart-postfix": "customer-portal-chart",
+        "oci": "oci://wiqregistry.azurecr.io/helm/customerportal",
+        "mode": "oci",
+        "fb": "backend"
+    },
+    "strimzi-internal-chart":  {
+        "chart": "wiq-kafka",
+        "mode": "local",
+        "fb": "backend"
+    },
+    "ng-customerportal":  {
+        "chart-postfix": "ng-customerportal-chart",
+        "mode": "local",
+        "fb": "frontend"
+    },
+    "cp-dashboard":  {
+        "chart-postfix": "cp-dashboard-chart",
+        "mode": "oci",
+        "oci": "oci://wiqregistry.azurecr.io/helm/cp-dashboard",
+        "fb": "frontend"
+    },
+    "sofcdmcustomerimporter":  {
+        "chart-postfix": "sof-cdm-customer-importer-chart",
+        "mode": "oci",
+        "oci": "oci://wiqregistry.azurecr.io/helm/sofcdmcustomerimporter",
+        "fb": "backend"
+    }
+}
+
+
+logging.basicConfig(filename=os.environ['ZWIQ_LOG_PATH'],
+                    filemode='a',
+                    format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
+                    datefmt='%H:%M:%S',
+                    level=logging.DEBUG)
+
+
+def get_current_namespace() -> str:
+    return subprocess.Popen("kubectl config view --minify -o jsonpath='{..namespace}'",
+                            stdout=subprocess.PIPE,
+                            shell=True
+                            ).stdout.read().decode("utf-8")
+
+
+def get_image_tag(namespace: str) -> str:
+    filename = f"values-{namespace}.yaml"
+    try:
+        f = open(filename)
+        lines = f.readlines()
+        for line in lines:
+            x = re.match(r"\s*tag:\s*([\w\-\.]+)", line)
+            if x is not None:
+                return x[1]
+        return ""
+    except FileNotFoundError:
+        print(f"value file not found : {filename}")
+
+
+def get_chart_name(servicebasepath) -> str:
+    ns = get_current_namespace()
+    if "chart-postfix" in service_data[servicebasepath]:
+        chart_postfix = service_data[servicebasepath]["chart-postfix"]
+        return f"{ns}-{chart_postfix}"
+    elif "chart" in service_data[servicebasepath]:
+        return service_data[servicebasepath]["chart"]
+    return ""
+
+
+def deploy():
+    try:
+        cmd = ""
+        ns = get_current_namespace()
+        tag = get_image_tag(ns)
+        cwd = os.getcwd()
+        servicebasepath = os.path.basename(cwd)
+        chart =  get_chart_name(servicebasepath)
+        if service_data[servicebasepath]["mode"] == "oci":
+            oci = service_data[servicebasepath]["oci"]
+            cmd = f"helm upgrade {chart} {oci} --version {tag} -f ./values-{ns}.yaml --install"
+        elif service_data[servicebasepath]["mode"] == "local":
+            cmd = f"helm upgrade {chart} . -f ./values-{ns}.yaml --install"
+        logging.info(cmd)
+        helm = subprocess.Popen(cmd, shell=True)
+        helm.wait()
+    except KeyError:
+        errormsg = f"I have no data for service {servicebasepath}"
+        print(errormsg)
+        logging.error(errormsg)
+        sys.exit(1)
+
+
+def deploy_commit(ticket_num):
+    if ticket_num is None:
+        print ("--ticket must be set")
+
+    ns = get_current_namespace()
+    cmd = f"git add values-{ns}.yaml"
+    logging.info(cmd)
+    add = subprocess.Popen(cmd, shell=True)
+    add.wait()
+
+    cwd = os.getcwd()
+    servicebasepath = os.path.basename(cwd)
+    fb = service_data[servicebasepath]["fb"]
+    tag = get_image_tag(ns)
+    cmd = f"git commit -m \"[{fb}][{servicebasepath}][{ticket_num}]new image customerportal:{tag} for {ns}\""
+    logging.info(cmd)
+    commit = subprocess.Popen(cmd, shell=True)
+    commit.wait()
+
+
+def deploy_slack_message(ticketurl):
+    ns = get_current_namespace()
+    tag = get_image_tag(ns)
+    cwd = os.getcwd()
+    servicebasepath = os.path.basename(cwd)
+    ticket=ticketurl.split('/')[-1]
+    print(f":rocket: new image `{servicebasepath}:{tag}` is coming for [{ticket}]({ticketurl})")
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    commandparser = parser.add_subparsers(help = 'command')
+
+    deploycmd = commandparser.add_parser('deploy', help='deploy image from current directory')
+    deploycmd.set_defaults(action=deploy)
+
+    deploycommit = commandparser.add_parser('deploycommit', help='commit value file to the git repository')
+    deploycommit.add_argument('-t', '--ticket', required=True, help='ticket number')
+    deploycommit.set_defaults(action=lambda: deploy_commit(args.ticket))
+
+    deploymsg = commandparser.add_parser('deploymsg', help='generate message to slack live channel')
+    deploymsg.add_argument('-u', '--ticketurl', required=True, help='ticket number')
+    deploymsg.set_defaults(action=lambda: deploy_slack_message(args.ticketurl))
+
+    args = parser.parse_args()
+    args.action()
+
+
+if __name__ == "__main__": main()
