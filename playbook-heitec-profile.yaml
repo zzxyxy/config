@@ -1,5 +1,5 @@
 ---
-- name: wsl profile setting
+- name: Wsl profile setting
   hosts:
     - localhost
 
@@ -59,38 +59,50 @@
       export ZWIQ_LOG_PATH="/home/ameszely/log/deploy.log"
 
   tasks:
-    - name: change user shell to zsh
-      become: yes
-      user:
+    - name: Change user shell to zsh
+      become: true
+      ansible.builtin.user:
         name: "{{ user }}"
         shell: /bin/zsh
 
-    - name: ansible create directory Devel
-      file:
-        path: "/home/{{ user }}/Devel"
+    - name: Create directories
+      become: true
+      ansible.builtin.file:
+        path: "{{ item.path }}"
+        mode: "{{ item.mode }}"
+        owner: "{{ item.owner }}"
         state: directory
+      loop:
+        - { path: "/home/{{ user }}/Devel", mode: "0755", owner: "{{ user }}"}
+        - { path: "/home/{{ user }}/Oper", mode: "0755", owner: "{{ user }}"}
+        - { path: "/home/{{ user }}/.ssh", mode: "0700", owner: "{{ user }}"}
+        - { path: "/home/{{ user }}/bin", mode: "0700", owner: "{{ user }}"}
+        - { path: "/home/{{ user }}/log", mode: "0700", owner: "{{ user }}"}
+        - { path: "/home/{{ user }}/mount/freya", mode: "0700", owner: "{{ user }}"}
 
     - name: Clone a github repository
-      git:
+      ansible.builtin.git:
         repo: https://github.com/ohmyzsh/ohmyzsh.git
         dest: "/home/{{ user }}/.oh-my-zsh"
-        clone: yes
-        update: yes
+        clone: true
+        update: true
+        version: master
 
     - name: Clone a powerlevel10k repository
-      git:
-        repo:  https://github.com/romkatv/powerlevel10k.git
+      ansible.builtin.git:
+        repo: https://github.com/romkatv/powerlevel10k.git
         dest: "/home/{{ user }}/.oh-my-zsh/custom/themes/powerline10k"
-        clone: yes
-        update: yes
+        clone: true
+        update: true
+        version: v1.19.0
 
-    - name: zshrc
-      become: yes
-      copy:
+    - name: Zshrc
+      become: true
+      ansible.builtin.copy:
         src: files/zshrc
         dest: "/home/{{ user }}/.zshrc"
         owner: "{{ user }}"
-        mode: 0644
+        mode: "0644"
 
 #    - name: copy ssh
 #      copy:
@@ -102,47 +114,43 @@
 #        - dircontent
 
     - name: Insert/Update aliases in bashrc
-      blockinfile:
+      ansible.builtin.blockinfile:
         path: /home/{{ user }}/.bashrc
         block: "{{ envs }}"
         create: true
+        mode: "0644"
 
     - name: Insert/Update aliases in bashrc
-      blockinfile:
+      ansible.builtin.blockinfile:
         path: /home/{{ user }}/.zshrc
         block: "{{ envs }}"
         create: true
+        mode: "0644"
 
     - name: Insert/Update aliases in profile
-      blockinfile:
+      ansible.builtin.blockinfile:
         path: /home/{{ user }}/.profile
         block: "{{ envs }}"
         create: true
+        mode: "0644"
 
-    - local_action: replace dest=/home/{{ user }}/.zshrc regexp="\r"
+    - name: Fix zsh conf ending
+      ansible.builtin.replace:
+        path: /home/{{ user }}/.zshrc
+        regexp: "\r"
+        replace: ""
 
-    - name: whitetulip bin
-      become:
-      file:
-        path: ~/bin
-        state: directory
-        mode: 0770
+#      local_action: replace dest=/home/{{ user }}/.zshrc regexp="\r"
 
-    - name: log directory
-      become:
-      file:
-        path: ~/log
-        state: directory
-        mode: 0770
-
-    - name: copying config files
-      copy:
+    - name: Copying config files
+      ansible.builtin.copy:
         src: "{{ item.src }}"
         dest: "{{ item.dest }}"
         owner: "{{ user }}"
-        mode: 0755
+        mode: "0700"
       loop:
         - { src: "files/dmg/gitconfig", dest: "/home/{{ user }}/.gitconfig" }
         - { src: "files/dmg/xo", dest: "/home/{{ user }}/bin/xo" }
         - { src: "files/dmg/vimrc", dest: "/home/{{ user }}/.vimrc" }
         - { src: "files/dmg/zwiq", dest: "/home/{{ user }}/bin/zwiq" }
+        - { src: "files/dmg/ssh/config", dest: "/home/{{ user }}/.ssh/config" }
