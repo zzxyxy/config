@@ -205,6 +205,16 @@
       register: dockercomposer
       notify: Docker-compose
 
+    - name: Get lokicli
+      become: true
+      ansible.builtin.get_url:
+        url: https://github.com/grafana/loki/releases/download/v2.9.2/logcli-linux-amd64.zip
+        dest: /tmp/logcli-linux-amd64.zip
+        mode: '0440'
+      notify:
+        - Unzip logcli
+        - Move logcli
+
   handlers:
     - name: Docker-compose
       become: true
@@ -219,3 +229,19 @@
         name: dnsmasq
         state: restarted
         enabled: true
+
+    - name: Unzip logcli
+      become: true
+      ansible.builtin.unarchive:
+        src: /tmp/logcli-linux-amd64.zip
+        dest: /tmp/
+      notify: Move logcli
+
+    - name: Move logcli
+      become: true
+      ansible.builtin.copy:
+        src: /tmp/logcli-linux-amd64
+        dest: /usr/local/bin/logcli
+        mode: '0755'
+        owner: root
+        group: root
