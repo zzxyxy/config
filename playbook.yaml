@@ -1,10 +1,8 @@
 ---
 - name: Manage kubernetes servers
   hosts:
-  - Freya
-  - Hella
-  collections:
-    - kewlfft.aur
+    - Freya
+
   pre_tasks:
     - name: Set hostname
       become: true
@@ -14,12 +12,12 @@
     - name: Upgrade system
       become: true
       community.general.pacman:
-        update_cache: yes
-        upgrade: yes
+        update_cache: true
+        upgrade: true
 
-    - name: install packages
+    - name: Install packages
       become: true
-      pacman:
+      community.general.pacman:
         state: present
         name:
           - base-devel
@@ -45,16 +43,17 @@
           - samba
 
   roles:
-    - { role: andrewrothstein.k3d, became: yes }
-    - { role: andrewrothstein.kubernetes-helm, become: yes }
-    - { role: andrewrothstein.kubectl, become: yes }
+    - { role: andrewrothstein.k3d, become: true }
+    - { role: andrewrothstein.kubernetes-helm, become: true }
+    - { role: andrewrothstein.kubectl, become: true }
 
   tasks:
-    - name: create /root/bin
+    - name: Create /root/bin
       become: true
-      file:
+      ansible.builtin.file:
         path: /root/bin
         state: directory
+        mode: "0755"
 
 # DUCKDNS
     - name: Copy duck script
@@ -64,7 +63,7 @@
         dest: /root/bin/duck.sh
         owner: root
         group: root
-        mode: 0700
+        mode: '0700'
 
     - name: Duckdns schedule
       become: true
@@ -81,26 +80,11 @@
         dest: /etc/samba/smb.conf
         owner: root
         group: root
-        mode: 0770
-      register: sambeconfig
+        mode: '0770'
+      notify:
+        - Smb-service-restart
+        - Nmb-service-restart
 
-    - name: smb-service
-      become: true
-      service:
-        name: smb
-        state: restarted
-        enabled: yes
-      when: sambeconfig.changed
-
-    - name: nmb-service
-      become: true
-      service:
-        name: nmb
-        state: restarted
-        enabled: yes
-      when: sambeconfig.changed
-
-# FAIL2BAN
     - name: Copy sshd jail config
       become: true
       ansible.builtin.copy:
@@ -108,18 +92,9 @@
         dest: /etc/fail2ban/jail.d/sshd.local
         owner: root
         group: root
-        mode: 0770
-      register: sshdjail
+        mode: '0770'
+      notify: Fail2ban service restart
 
-    - name: fail2ban-service
-      become: true
-      service:
-        name: fail2ban
-        state: restarted
-        enabled: yes
-      when: sshdjail.changed
-
-# NFS SHARE
     - name: Add nfs exports
       become: true
       ansible.builtin.copy:
@@ -127,31 +102,25 @@
         dest: /etc/exports
         owner: root
         group: root
-        mode: 0770
-      register: nfs
+        mode: '0770'
+      notify: Reload nfs exports
 
-    - name: Reload nfs exports
+    - name: NFS-service
       become: true
-      ansible.builtin.command:
-        cmd: /usr/bin/exportfs -arv
-      when: nfs.changed
-
-    - name: nfs-service
-      become: true
-      service:
+      ansible.builtin.service:
         name: nfs-server
         state: started
-        enabled: yes
+        enabled: true
 
 # Folders to create
     - name: Create vault group
       become: true
-      group:
+      ansible.builtin.group:
         name: vault
         state: present
 
-    - name: create directories
-      become: yes
+    - name: Create directories
+      become: true
       ansible.builtin.file:
         path: "{{ item.path }}"
         mode: "{{ item.mode }}"
@@ -169,12 +138,12 @@
         - { path: "/storage03", mode: "0777", owner: "root"}
         - { path: "/srv/docker", mode: "0777", owner: "root"}
 
-    - name: stop transmission-service
+    - name: Stop transmission-service
       become: true
-      service:
+      ansible.builtin.service:
         name: transmission
         state: stopped
-        enabled: yes
+        enabled: true
 
     - name: Set the transmission config dit to /etc
       become: true
@@ -190,28 +159,28 @@
         dest: /etc/transmission-daemon/settings.json
         owner: transmission
         group: root
-        mode: 0770
+        mode: '0770'
       register: transmissionconfig
 
-    - name: start transmission-service
+    - name: Start transmission-service
       become: true
-      service:
+      ansible.builtin.service:
         name: transmission
         state: started
-        enabled: yes
+        enabled: true
         daemon_reload: true
 
 # XMLDownload
 
-    - name: root/bin
+    - name: Root/bin
       become: true
-      file:
+      ansible.builtin.file:
         path: /root/bin
         state: directory
-        mode: 0770
+        mode: '0770'
         owner: root
 
-    - name: get XMLDownload
+    - name: Get XMLDownload
       become: true
       ansible.builtin.get_url:
         url: https://raw.githubusercontent.com/szemere/XMLDownload/master/XMLDownload.py
@@ -223,32 +192,38 @@
       ansible.builtin.cron:
         name: "XMLDownload"
         minute: "*/5"
-        job: "python /root/bin/XMLDownload.py --db /root/XMLDownload.db --cache /root/rss.xml --file /storage02/torrent/toDownload/ --rss https://ncore.pro/bookmarks/fcc9f495abbd4b4a10c1ca5d759e8491113707 >/dev/null 2>&1"
+        job: >-
+          python /root/bin/XMLDownload.py --db /root/XMLDownload.db
+          --cache /root/rss.xml
+          --file /storage02/torrent/toDownload/
+          --rss https://ncore.pro/bookmarks/fcc9f495abbd4b4a10c1ca5d759e8491113707 >/dev/null 2>&1
+
 
 # create aur_builder to install aur packages
     - name: Create the `aur_builder` user
-      become: yes
+      become: true
       ansible.builtin.user:
         name: aur_builder
-        create_home: yes
+        create_home: true
         group: wheel
 
     - name: Allow the `aur_builder` user to run `sudo pacman` without a password
-      become: yes
+      become: true
       ansible.builtin.lineinfile:
         path: /etc/sudoers.d/11-install-aur_builder
         line: 'aur_builder ALL=(ALL) NOPASSWD: /usr/bin/pacman'
-        create: yes
+        mode: '0700'
+        create: true
         validate: 'visudo -cf %s'
 
 # WSDD2
     - name: Install wsdd2
-      aur:
+      kewlfft.aur.aur:
         name: wsdd2
         use: makepkg
         state: present
-        ignore_arch: yes
-      become: yes
+        ignore_arch: true
+      become: true
       become_user: aur_builder
 
     - name: WSDD config
@@ -257,22 +232,16 @@
         path: /etc/wsdd.conf
         regexp: '^WSDD_PARAMS='
         line: "WSDD_PARAMS=-n freya.int.zxyxy.net -p -H 4"
-        create: yes
-      register: wsddconfig
-
-    - name: wsdd-service
-      become: true
-      service:
-        name: wsdd2
-        state: restarted
-      when: wsddconfig.changed
+        mode: '0644'
+        create: true
+      notify: Wsdd service restart
 
     - name: Enable services
-      become: yes
-      service:
+      become: true
+      ansible.builtin.service:
         name: "{{ item }}"
         state: started
-        enabled: yes
+        enabled: true
       loop:
         - docker
         - cronie
@@ -289,13 +258,49 @@
         dest: /srv/docker
         owner: root
         group: root
-        mode: 0770
+        mode: '0770'
         decrypt: true
-      register: dockercomposer
+      notify: Docker-compose run
 
-    - name: Run `docker-compose up`
+  handlers:
+    - name: Fail2ban service restart
+      become: true
+      ansible.builtin.service:
+        name: fail2ban
+        state: restarted
+        enabled: true
+
+    - name: Smb-service-restart
+      become: true
+      ansible.builtin.service:
+        name: smb
+        state: restarted
+        enabled: true
+
+    - name: Nmb-service-restart
+      become: true
+      ansible.builtin.service:
+        name: nmb
+        state: restarted
+        enabled: true
+
+    - name: Reload nfs exports
+      become: true
+      ansible.builtin.command:
+        cmd: /usr/bin/exportfs -arv
+      register: out
+      changed_when: out.rc != 0
+
+    - name: Wsdd service restart
+      become: true
+      ansible.builtin.service:
+        name: wsdd2
+        state: restarted
+
+    - name: Docker-compose run
       become: true
       ansible.builtin.command: "docker-compose up -d"
       args:
         chdir: /srv/docker
-      when: dockercomposer.changed
+      register: out
+      changed_when: out.rc != 0
