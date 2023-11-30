@@ -137,6 +137,24 @@
         - { path: "/storage03", mode: "0777", owner: "root"}
         - { path: "/storage03", mode: "0777", owner: "root"}
         - { path: "/srv/docker", mode: "0777", owner: "root"}
+        - { path: "/srv/ingress", mode: "0755", owner: "root"}
+        - { path: "/srv/mosquitto", mode: "0755", owner: "root"}
+        - { path: "/srv/grafana", mode: "0755", owner: "root"}
+        - { path: "/srv/prometheus", mode: "0755", owner: "root"}
+
+    - name: Copying files
+      become: true
+      ansible.builtin.copy:
+        src: "{{ item.src }}"
+        dest: "{{ item.dest }}"
+        owner: "root"
+        mode: "0755"
+      loop:
+        - { src: "files/Freya/nginxdefault.conf", dest: "/srv/ingress/default.conf" }
+        - { src: "files/Freya/mosquitto.conf", dest: "/srv/mosquitto/mosquitto.conf" }
+        - { src: "files/Freya/passwd.conf", dest: "/srv/mosquitto/passwd.conf" }
+        - { src: "files/Freya/prometheus.yml", dest: "/srv/prometheus/prometheus.yml" }
+        - { src: "files/Freya/alerts.yml", dest: "/srv/prometheus/alerts.yml" }
 
     - name: Stop transmission-service
       become: true
