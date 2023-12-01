@@ -3,6 +3,9 @@
   hosts:
     - Freya
 
+  vars:
+    dockercomposerpath: /srv/docker
+
   pre_tasks:
     - name: Set hostname
       become: true
@@ -128,6 +131,10 @@
         state: directory
       loop:
         - { path: "/storage01", mode: "0777", owner: "root"}
+        - { path: "/storage01/calibredb", mode: "0777", owner: "root"}
+        - { path: "/storage01/calibreweb", mode: "0777", owner: "root"}
+        - { path: "/storage01/calibreweb/books", mode: "0777", owner: "root"}
+        - { path: "/storage01/calibreweb/config", mode: "0777", owner: "root"}
         - { path: "/storage02", mode: "0777", owner: "root"}
         - { path: "/storage03", mode: "0777", owner: "root"}
         - { path: "/storage02/torrent/downloaded", mode: "0777", owner: "root"}
@@ -136,7 +143,7 @@
         - { path: "/etc/transmission-daemon", mode: "0775", owner: "transmission"}
         - { path: "/storage03", mode: "0777", owner: "root"}
         - { path: "/storage03", mode: "0777", owner: "root"}
-        - { path: "/srv/docker", mode: "0777", owner: "root"}
+        - { path: "{{ dockercomposerpath }}", mode: "0777", owner: "root"}
         - { path: "/srv/ingress", mode: "0755", owner: "root"}
         - { path: "/srv/mosquitto", mode: "0755", owner: "root"}
         - { path: "/srv/grafana", mode: "0755", owner: "root"}
@@ -150,7 +157,6 @@
         owner: "root"
         mode: "0755"
       loop:
-        - { src: "files/Freya/nginxdefault.conf", dest: "/srv/ingress/default.conf" }
         - { src: "files/Freya/mosquitto.conf", dest: "/srv/mosquitto/mosquitto.conf" }
         - { src: "files/Freya/passwd.conf", dest: "/srv/mosquitto/passwd.conf" }
         - { src: "files/Freya/prometheus.yml", dest: "/srv/prometheus/prometheus.yml" }
@@ -273,12 +279,21 @@
       become: true
       ansible.builtin.copy:
         src: "files/{{ hostname }}/docker-compose.yaml"
-        dest: /srv/docker
+        dest: "{{ dockercomposerpath }}"
         owner: root
         group: root
         mode: '0770'
         decrypt: true
       notify: Docker-compose run
+
+    - name: Copying nginx config
+      become: true
+      ansible.builtin.copy:
+        src: "files/Freya/nginxdefault.conf"
+        dest: "/srv/ingress/default.conf"
+        owner: "root"
+        mode: "0755"
+      notify: Restart nginx
 
   handlers:
     - name: Fail2ban service restart
@@ -319,6 +334,13 @@
       become: true
       ansible.builtin.command: "docker-compose up -d"
       args:
-        chdir: /srv/docker
+        chdir: "{{ dockercomposerpath }}"
       register: out
       changed_when: out.rc != 0
+
+    - name: Restart nginx
+      become: true
+      ansible.builtin.command: "docker-compose restart -t 10 nginx"
+      args:
+        chdir: "{{ dockercomposerpath }}"
+      changed: true
