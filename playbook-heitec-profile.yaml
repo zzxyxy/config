@@ -50,6 +50,7 @@
       alias k="kubectl"
       alias t="terraform"
       alias nodes='kubectl get nodes -o json | jq ".items[]|{name:.metadata.name, version:.status.nodeInfo.kubeletVersion, taints:.spec.taints}"'
+      alias php='docker run -it --rm --name my-running-script -v "$PWD":/usr/src/myapp -w /usr/src/myapp php:8.2-cli php'
       export TF_VAR_tags='{"DMGMoriScope"   = "DIGITAL-Services", "DMGMoriService" = "WERKBLiQ"}'
       export HELM_EXPERIMENTAL_OCI=1
       export EDITOR=vim

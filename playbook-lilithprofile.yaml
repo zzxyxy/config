@@ -1,5 +1,5 @@
 ---
-- name: wsl profile setting
+- name: Wsl profile setting
   hosts:
     - localhost
 
@@ -14,62 +14,64 @@
       alias h="helm"
       alias k="kubectl"
       alias t="terraform"
+      alias php='docker run -it --rm --name my-running-script -v "$PWD":/usr/src/myapp -w /usr/src/myapp php:8.2-cli php'
       EDITOR=vim
 
   tasks:
-    - name: change user shell to zsh
-      become: yes
-      user:
+    - name: Change user shell to zsh
+      become: true
+      ansible.builtin.user:
         name: "{{ user }}"
         shell: /bin/zsh
 
-    - name: ansible create directory Devel
-      file:
+    - name: Ansible create directory Devel
+      ansible.builtin.file:
         path: "/home/{{ user }}/Devel"
         state: directory
+        mode: "0755"
 
     - name: Clone a github repository
-      git:
+      ansible.builtin.git:
         repo: https://github.com/ohmyzsh/ohmyzsh.git
         dest: "/home/{{ user }}/.oh-my-zsh"
-        clone: yes
-        update: yes
+        clone: true
+        update: true
 
     - name: Clone a powerlevel10k repository
-      git:
-        repo:  https://github.com/romkatv/powerlevel10k.git
+      ansible.builtin.git:
+        repo: https://github.com/romkatv/powerlevel10k.git
         dest: "/home/{{ user }}/.oh-my-zsh/custom/themes/powerline10k"
-        clone: yes
-        update: yes
+        clone: true
+        update: true
 
-    - name: zshrc
-      copy:
+    - name: Zshrc
+      ansible.builtin.copy:
         src: files/zshrc
         dest: "/home/{{ user }}/.zshrc"
         owner: "{{ user }}"
-        mode: 0644
+        mode: "0644"
 
-    - name: gitconfig
-      copy:
+    - name: Gitconfig
+      ansible.builtin.copy:
         src: files/zxyxy/gitconfig
         dest: "/home/{{ user }}/.gitconfig"
         owner: "{{ user }}"
-        mode: 0600
+        mode: "0600"
 
-    - name: ansible create transmission directory
+    - name: Ansible create transmission directory
       become: true
-      file:
+      ansible.builtin.file:
         path: "{{ item }}"
         state: directory
-        mode: 0755
+        mode: "0755"
       loop:
         - /storage02/kube/torrent-a/toDownload
 
-    - name: copying config files
-      copy:
+    - name: Copying config files
+      ansible.builtin.copy:
         src: "{{ item.src }}"
         dest: "{{ item.dest }}"
         owner: "{{ user }}"
-        mode: 0655
+        mode: "0655"
       loop:
         - { src: "files/{{ user }}/settings.ini", dest: "/home/{{ user }}/.config/gtk-3.0/settings.ini" }
