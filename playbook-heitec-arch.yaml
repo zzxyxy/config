@@ -41,6 +41,7 @@
           - boost
           - boost-libs
           - clang
+          - composer
           - docker
           - docker-compose
           - dnsmasq
@@ -214,6 +215,16 @@
       notify:
         - Unzip logcli
         - Move logcli
+
+    - name: Copying files
+      become: true
+      ansible.builtin.copy:
+        src: "{{ item.src }}"
+        dest: "{{ item.dest }}"
+        owner: "root"
+        mode: "0755"
+      loop:
+        - { src: "files/dmg/php", dest: "/usr/local/bin/php" }
 
   handlers:
     - name: Docker-compose
