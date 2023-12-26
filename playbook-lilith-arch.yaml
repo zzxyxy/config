@@ -271,29 +271,24 @@
           dest: "/etc/udev/rules.d/backlight.rules"
           mode: "0644"
 
-#    - block:
-#      - name: /etc/autofs/auto.master
-#        become: true
-#        ansible.builtin.blockinfile:
-#          path: /etc/autofs/auto.master
-#          block: |
-#            /mnt/freya  /etc/autofs/auto.freya    --timeout=600
-#          create: true
-#          changed_when: true
-#
-#      - name: /etc/autofs/auto.freya
-#        become: true
-#        ansible.builtin.blockinfile:
-#          path: /etc/autofs/auto.freya
-#          block: |
-#            storage01 -rw,soft,rsize=8192,wsize=8192 freya.int.zxyxy.net:/storage01
-#            storage02 -rw,soft,rsize=8192,wsize=8192 freya.int.zxyxy.net:/storage02
-#            storage03 -rw,soft,rsize=8192,wsize=8192 freya.int.zxyxy.net:/storage03
-#          create: true
-#          changed_when: true
-#
-#      notify: Restart autofs
-#
+    - name: Line to /etc/autofs/auto.master
+      become: true
+      ansible.builtin.blockinfile:
+        path: /etc/autofs/auto.master
+        block: |
+          /mnt/freya  /etc/autofs/auto.freya    --timeout=600
+        create: true
+        mode: "0644"
+
+    - name: Copy /etc/autofs/auto.freya
+      become: true
+      ansible.builtin.copy:
+        src: files/lilith/auto.freya
+        dest: /etc/autofs/auto.master
+        force: false
+        mode: '0755'
+      notify: Restart autofs
+
     - name: Enable services
       become: true
       ansible.builtin.service:

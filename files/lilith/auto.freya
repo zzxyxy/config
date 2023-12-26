@@ -1,0 +1,3 @@
+storage01 -rw,soft,rsize=8192,wsize=8192 freya.int.zxyxy.net:/storage01
+storage02 -rw,soft,rsize=8192,wsize=8192 freya.int.zxyxy.net:/storage02
+storage03 -rw,soft,rsize=8192,wsize=8192 freya.int.zxyxy.net:/storage03
