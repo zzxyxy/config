@@ -255,9 +255,7 @@
         state: directory
         mode: '0777'
       loop:
-        - /mnt/freya/storage01
-        - /mnt/freya/storage02
-        - /mnt/freya/storage03
+        - /mnt/freya
 
     - name: Copying files
       become: true
@@ -271,22 +269,20 @@
           dest: "/etc/udev/rules.d/backlight.rules"
           mode: "0644"
 
-    - name: Line to /etc/autofs/auto.master
+    - name: Copy /etc/autofs/auto.master
       become: true
-      ansible.builtin.blockinfile:
-        path: /etc/autofs/auto.master
-        block: |
-          /mnt/freya  /etc/autofs/auto.freya    --timeout=600
-        create: true
-        mode: "0644"
+      ansible.builtin.copy:
+        src: files/lilith/auto.master
+        dest: /etc/autofs/auto.master
+        mode: '0644'
+      notify: Restart autofs
 
     - name: Copy /etc/autofs/auto.freya
       become: true
       ansible.builtin.copy:
         src: files/lilith/auto.freya
-        dest: /etc/autofs/auto.master
-        force: false
-        mode: '0755'
+        dest: /etc/autofs/auto.freya
+        mode: '0644'
       notify: Restart autofs
 
     - name: Enable services
