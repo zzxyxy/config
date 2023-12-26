@@ -1,8 +1,6 @@
 ---
-- name: manage packages
+- name: Manage packages
   hosts: localhost
-  collections:
-    - kewlfft.aur
   vars:
     secret_dir: "{{ lookup('env','SECRET_DIR') }}"
     docker_distribution: archlinux
@@ -15,12 +13,12 @@
     - name: Upgrade system
       become: true
       community.general.pacman:
-        update_cache: yes
-        upgrade: yes
+        update_cache: true
+        upgrade: true
 
     - name: Remove pacman packages
       become: true
-      pacman:
+      community.general.pacman:
         name:
           - virtualbox
           - virtualbox-host-modules-arch
@@ -31,10 +29,14 @@
 
     - name: Install pacman packages
       become: true
-      pacman:
+      community.general.pacman:
         name:
+          - ansible
+          - ansible-lint
+          - accountsservice
           - arandr
           - avahi
+          - alsa-utils
           - base-devel
           - boost
           - blueman
@@ -65,17 +67,19 @@
           - libreoffice
           - lightdm
           - i3-wm
+          - i3status
           - lightdm-gtk-greeter
           - libmtp
           - mate-terminal
           - net-tools
+          - nvidia-settings
+          - rdesktop
+          - remmina
           - sudo
           - mc
           - mtpfs
-          - i3status
           - k3b
           - keepass
-         #- autofs
           - sshfs
           - jdk11-openjdk
           - network-manager-applet
@@ -103,11 +107,16 @@
           - llvm
           - npm
           - pipewire
+          - python
+          - python-attrs
+          - python-packaging
           - python-protobuf
-#          - python-grpcio-tools
-#          - python-pylint
-#          - python-setuptools
-#          - python-virtualenv
+          - python-platformdirs
+          - python-grpcio-tools
+          - python-pygments
+          - python-pylint
+          - python-setuptools
+          - python-virtualenv
           - ncurses
           - ntp
           - boost-libs
@@ -126,143 +135,94 @@
           - vlc
           - wget
           - zsh
-        state: present
-
-    - name: enable cron
-      become: yes
-      service:
-        name: cronie
-        enabled: yes
-        state: started
-
-    - name: enable bluetooth
-      become: yes
-      service:
-        name: bluetooth
-        enabled: yes
-        state: started
-
-    - name: enable ssh
-      become: yes
-      service:
-        name: sshd
-        enabled: yes
-        state: started
-
-    - name: enable ntp
-      become: yes
-      service:
-        name: ntpd
-        enabled: yes
-        state: started
-
-    - name: Enable docker
-      become: yes
-      service:
-        name: docker
-        state: started
-        enabled: yes
-
-    - name: Print server service running
-      become: true
-      service:
-        name: cups
-        state: started
-        enabled: yes
-
-    - name: avahi service running
-      become: true
-      service:
-        name: avahi-daemon
-        state: started
-        enabled: yes
+#          - xorg
+#          - xorg-init
+          - xf86-video-intel
+        state: latest
 
     - name: Create Hack font directory
-      become: yes
+      become: true
       ansible.builtin.file:
         path: /usr/share/fonts/Hack
         state: directory
         mode: '0755'
 
     - name: Install hack regular font
-      become: yes
-      copy:
+      become: true
+      ansible.builtin.copy:
         src: files/Hack-Regular.ttf
         dest: /usr/share/fonts/Hack
-        force: no
+        force: false
+        mode: '0755'
 
     - name: Install hack bold font
-      become: yes
-      copy:
+      become: true
+      ansible.builtin.copy:
         src: files/Hack-Bold.ttf
         dest: /usr/share/fonts/Hack
-        force: no
+        force: false
+        mode: '0755'
 
     - name: Install hack italic font
-      become: yes
-      copy:
+      become: true
+      ansible.builtin.copy:
         src: files/Hack-Italic.ttf
         dest: /usr/share/fonts/Hack
-        force: no
+        force: false
+        mode: '0755'
 
     - name: Install hack bold italic font
-      become: yes
-      copy:
+      become: true
+      ansible.builtin.copy:
         src: files/Hack-BoldItalic.ttf
         dest: /usr/share/fonts/Hack
-        force: no
+        force: false
+        mode: '0755'
 
       # ---- AUR packages
 
     - name: Create the `aur_builder` user
-      become: yes
+      become: true
       ansible.builtin.user:
         name: aur_builder
-        create_home: yes
+        create_home: true
         group: wheel
 
     - name: Allow the `aur_builder` user to run `sudo pacman` without a password
-      become: yes
+      become: true
       ansible.builtin.lineinfile:
         path: /etc/sudoers.d/11-install-aur_builder
         line: 'aur_builder ALL=(ALL) NOPASSWD: /usr/bin/pacman'
-        create: yes
+        create: true
         validate: 'visudo -cf %s'
+        mode: '0755'
 
     - name: Disable lid auto suspend
-      become: yes
+      become: true
       ansible.builtin.lineinfile:
         path: /etc/systemd/logind.conf
         line: 'HandleLidSwitch=ignore'
-      register: logindchange
-
-    - name: restart logind
-      become: true
-      service:
-        name: systemd-logind
-        state: restarted
-        enabled: yes
-      when: logindchange.changed
+      notify: Restart logind
 
     - name: Install aur packages
-      aur:
+      kewlfft.aur.aur:
+        name: "{{ item }}"
         use: makepkg
         state: latest
       loop:
         - brave-bin
-        - dbeaver-git
-        - postman-bin
-        - thunderbird-bin
+#        - dbeaver-git
         - visual-studio-code-bin
-      become: yes
+        - xrdp
+      become: true
       become_user: aur_builder
 
     - name: Install php82
-      aur:
+      kewlfft.aur.aur:
         name: "{{ item }}"
         use: makepkg
         state: present
-        ignore_arch: yes
+        ignore_arch: true
       loop:
         - c-client
         - php82
@@ -273,91 +233,95 @@
         - php82-mysql
         - php82-dba
         - php82-composer
-      become: yes
+      become: true
       become_user: aur_builder
 
-    - name: php symlink
+    - name: Php symlink
       ansible.builtin.file:
         src: /usr/bin/php82
         dest: /usr/bin/php
         state: link
-      become: yes
+      become: true
 
   roles:
-    - { role: andrewrothstein.kubectl, become: yes }
-    - { role: andrewrothstein.go, become: yes }
-#    - { role: acehko.docker, become: yes }
+    - { role: andrewrothstein.kubectl, become: true }
+    - { role: andrewrothstein.go, become: true }
+
   tasks:
-    #    - name: Create a zxyxy
-    #      become: true
-    #      user:
-    #        name: zxyxy
-    #        password: "{{ zxyxy_pwd }}"
-    #        group: users
-    #        groups:
-    #          - users
-    #          - wheel
-    #          - docker
-    #          - vboxusers
-    #        state: present
-    #        shell: /bin/zsh
-    #        system: no
-    #        createhome: yes
-    #        home: /home/zxyxy
-    #        uid: 10000
-
-# -------- autofs
-
-    - name: whitetulip storage directorys
+    - name: Freya storage directorys
       become: true
-      file:
+      ansible.builtin.file:
         path: "{{ item }}"
         state: directory
-        mode: 0777
+        mode: '0777'
       loop:
-        - /mnt/whitetulip/storage01
-        - /mnt/whitetulip/storage02
-        - /mnt/whitetulip/storage03
+        - /mnt/freya/storage01
+        - /mnt/freya/storage02
+        - /mnt/freya/storage03
 
-    - name: backlight.rules to enable brigness settings
-      become: yes
-      copy:
-        src: files/lilith/backlight.rules
-        dest: /etc/udev/rules.d/backlight.rules
-        owner: root
-        mode: 0644
+    - name: Copying files
+      become: true
+      ansible.builtin.copy:
+        src: "{{ item.src }}"
+        dest: "{{ item.dest }}"
+        owner: "root"
+        mode: "{{ item.mode }}"
+      loop:
+        - src: "files/lilith/backlight.rules"
+          dest: "/etc/udev/rules.d/backlight.rules"
+          mode: "0644"
 
-#    - name: authorized_keys for zxyxy
-#      become: yes
-#      copy:
-#        src: files/Lilith/autowhitetulip
-#        dest: /etc/autofs/autowhitetulip
-#        owner: root
-#        mode: 0644
+#    - block:
+#      - name: /etc/autofs/auto.master
+#        become: true
+#        ansible.builtin.blockinfile:
+#          path: /etc/autofs/auto.master
+#          block: |
+#            /mnt/freya  /etc/autofs/auto.freya    --timeout=600
+#          create: true
+#          changed_when: true
+#
+#      - name: /etc/autofs/auto.freya
+#        become: true
+#        ansible.builtin.blockinfile:
+#          path: /etc/autofs/auto.freya
+#          block: |
+#            storage01 -rw,soft,rsize=8192,wsize=8192 freya.int.zxyxy.net:/storage01
+#            storage02 -rw,soft,rsize=8192,wsize=8192 freya.int.zxyxy.net:/storage02
+#            storage03 -rw,soft,rsize=8192,wsize=8192 freya.int.zxyxy.net:/storage03
+#          create: true
+#          changed_when: true
+#
+#      notify: Restart autofs
+#
+    - name: Enable services
+      become: true
+      ansible.builtin.service:
+        name: "{{ item }}"
+        state: started
+        enabled: true
+      loop:
+        - autofs
+        - avahi-daemon
+        - bluetooth
+        - cups
+        - cronie
+        - docker
+        - ntpd
+        - sshd
+        - xrdp
 
+  handlers:
+    - name: Restart autofs
+      become: true
+      ansible.builtin.service:
+        name: autofs
+        state: restarted
+        enabled: true
 
- #    - name: nfs master setting
- #     become: true
- #     lineinfile:
- #       name: /etc/auto.master
- #       regexp: '^/mnt/nfs'
- #       line: /mnt/nfs	/etc/auto.nfs --timeout=30,--ghost
- #       state: present
- #
- #   - name: copy auto.nfs
- #     become: true
- #     ansible.builtin.copy:
- #       src: files/Lilith/auto.nfs
- #       dest: /etc
- #     register: nfs_mount
- #
- #   - name: Autofs enable
- #     become: true
- #     service:
- #       name: autofs
- #       enabled: yes
- #       state: restarted
- #     when: nfs_mount.changed
- #
- # roles:
- # - z-virtualbox
+    - name: Restart logind
+      become: true
+      ansible.builtin.service:
+        name: systemd-logind
+        state: restarted
+        enabled: true

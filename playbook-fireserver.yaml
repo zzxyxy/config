@@ -1,0 +1,114 @@
+---
+- name: Manage fireserver servers
+  hosts:
+  - fireserver
+
+#  vars:
+
+  roles:
+    - role: geerlingguy.docker
+      become: yes
+
+  tasks:
+    - name: Configure DNS servers
+      lineinfile:
+        path: /etc/resolv.conf
+        line: "nameserver 172.21.0.1"
+
+    - name: Restart network service
+      service:
+        name: networking
+        state: restarted
+
+    - name: adding existing user zxyxy to group sudo
+      become: true
+      user:
+        name: zxyxy
+        groups: sudo, docker
+        append: yes
+
+          #    - name: Remove apt packages
+          #      become: true
+          #      apt:
+          #        name:
+          #        state: absent
+
+    - name: install apt packages
+      become: true
+      apt:
+        state: present
+        name:
+          - build-essential
+          - libssl-dev
+          - libncursesw5-dev
+          - libsqlite3-dev
+          - tk-dev
+          - libgdbm-dev
+          - libc6-dev
+          - libbz2-dev
+          - libffi-dev
+          - mc
+          - vim
+          - vim-gtk3
+          - python3-all
+          - python3-pip
+          - python3-docker
+          - pipx
+
+    - name: create directories
+      become: true
+      file:
+        path: '{{ item }}'
+        state: directory
+      loop:
+        - /srv/mariadb
+        - /var/www/html
+        - /srv/nginx/conf.d/
+        - /srv/php
+
+    - name: create docker compose dir
+      become: true
+      file:
+        path: /docker
+        state: directory
+
+    - name: www.conf
+      become: yes
+      copy:
+        src: files/fireserver/php-www.conf
+        dest: /srv/php/www.conf
+        owner: root
+        mode: 0644
+      register: php
+
+    - name: ngnx-default
+      become: yes
+      copy:
+        src: files/fireserver/ngnx-default.conf
+        dest: /srv/nginx/conf.d/default.conf
+        owner: root
+        mode: 0644
+      register: nginx
+
+    - name: docker-compose
+      become: yes
+      copy:
+        src: files/fireserver/docker-compose.yaml
+        dest: /docker/docker-compose.yaml
+        owner: root
+        mode: 0644
+      register: dockercompose
+
+    - name: stop docker compose
+      become: yes
+      ansible.builtin.shell: docker-compose down
+      args:
+        chdir: /docker
+      when: dockercompose.changed or php.changed or nginx.changed
+
+    - name: start docker compose
+      become: yes
+      ansible.builtin.shell: docker-compose up -d
+      args:
+        chdir: /docker
+      when: dockercompose.changed or php.changed or nginx.changed

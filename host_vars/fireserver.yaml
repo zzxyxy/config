@@ -1,0 +1,6 @@
+hostname: fireserver
+ansible_host: 172.21.10.54
+ansible_user: zxyxy
+
+# 78.131.75.138
+# 192.168.6.15
