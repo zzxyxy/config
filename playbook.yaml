@@ -43,7 +43,9 @@
           - rsync
           - transmission-cli
           - vim
+          - syslog-ng
           - samba
+          - promtail
 
   roles:
     - { role: andrewrothstein.k3d, become: true }
@@ -87,6 +89,28 @@
       notify:
         - Smb-service-restart
         - Nmb-service-restart
+
+    - name: Fail2ban log setting
+      become: true
+      ansible.builtin.lineinfile:
+        path: /etc/fail2ban/fail2ban.conf
+        regexp: '^logtarget'
+        line: "logtarget = SYSTEMD-JOURNAL"
+        owner: root
+        group: root
+        mode: '0744'
+      notify: Fail2ban service restart
+
+    - name: Journald persist setting
+      become: true
+      ansible.builtin.lineinfile:
+        path: /etc/systemd/journald.conf
+        insertafter: '^[Journal]'
+        line: "Storage=persistent"
+        owner: root
+        group: root
+        mode: '0744'
+      notify: Journald service restart
 
     - name: Copy sshd jail config
       become: true
@@ -135,6 +159,7 @@
         - { path: "/storage01/calibreweb", mode: "0777", owner: "root"}
         - { path: "/storage01/calibreweb/books", mode: "0777", owner: "root"}
         - { path: "/storage01/calibreweb/config", mode: "0777", owner: "root"}
+        - { path: "/storage01/loki", mode: "0777", owner: "root"}
         - { path: "/storage02", mode: "0777", owner: "root"}
         - { path: "/storage03", mode: "0777", owner: "root"}
         - { path: "/storage02/torrent/downloaded", mode: "0777", owner: "root"}
@@ -148,6 +173,12 @@
         - { path: "/srv/mosquitto", mode: "0755", owner: "root"}
         - { path: "/srv/grafana", mode: "0755", owner: "root"}
         - { path: "/srv/prometheus", mode: "0755", owner: "root"}
+        - { path: "/srv/proxysetting", mode: "0755", owner: "root"}
+        - { path: "/srv/squid", mode: "0755", owner: "root"}
+        - { path: "/srv/squid/log", mode: "0777", owner: "root"}
+        - { path: "/srv/squid/data", mode: "0777", owner: "root"}
+        - { path: "/srv/squid/configsnippet", mode: "0777", owner: "root"}
+
 
     - name: Copying files
       become: true
@@ -161,6 +192,27 @@
         - { src: "files/Freya/passwd.conf", dest: "/srv/mosquitto/passwd.conf" }
         - { src: "files/Freya/prometheus.yml", dest: "/srv/prometheus/prometheus.yml" }
         - { src: "files/Freya/alerts.yml", dest: "/srv/prometheus/alerts.yml" }
+        - { src: "files/Freya/wpad.dat", dest: "/srv/proxysetting/wpad.dat" }
+
+    - name: Copy promtail config
+      become: true
+      ansible.builtin.copy:
+        src: files/{{ hostname }}/promtail.yaml
+        dest: /etc/loki/promtail.yaml
+        owner: promtail
+        group: root
+        mode: '0770'
+      notify: Restart promtail
+
+    - name: Copy syslog-ng config
+      become: true
+      ansible.builtin.copy:
+        src: files/{{ hostname }}/syslog-ng.conf
+        dest: /etc/syslog-ng/syslog-ng.conf
+        owner: root
+        group: root
+        mode: '0755'
+      notify: Restart syslog-ng
 
     - name: Stop transmission-service
       become: true
@@ -274,6 +326,8 @@
         - fail2ban
         - prometheus-node-exporter
         - wsdd2
+        - promtail
+        - syslog-ng@default.service
 
     - name: Add docker compose file
       become: true
@@ -343,4 +397,23 @@
       ansible.builtin.command: "docker-compose restart -t 10 nginx"
       args:
         chdir: "{{ dockercomposerpath }}"
-      changed: true
+      register: out
+      changed_when: out.rc != 0
+
+    - name: Restart promtail
+      become: true
+      ansible.builtin.service:
+        name: promtail
+        state: restarted
+
+    - name: Restart syslog-ng
+      become: true
+      ansible.builtin.service:
+        name: syslog-ng@default.service
+        state: restarted
+
+    - name: Journald service restart
+      become: true
+      ansible.builtin.service:
+        name: systemd-journald
+        state: restarted

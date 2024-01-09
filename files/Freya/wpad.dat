@@ -1,0 +1,9 @@
+function FindProxyForURL(url, host)
+{
+   if (shExpMatch(host, "127.0.0.1" )) {return "DIRECT";}
+   if (shExpMatch(host, "*/localhost*" )) {return "DIRECT";}
+   if (isInNet(host, "192.0.0.0", "255.0.0.0")) {return "DIRECT";}
+   if (isInNet(host, "10.0.0.0", "255.0.0.0")) {return "DIRECT";}
+   if (isInNet(host, "172.21.0.0", "255.255.0.0")) {return "DIRECT";}
+   return "PROXY proxy.zxyxyhome.duckdns.org:3128";
+}
