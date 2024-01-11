@@ -155,3 +155,11 @@
         - { src: "files/dmg/vimrc", dest: "/home/{{ user }}/.vimrc" }
         - { src: "files/dmg/zwiq", dest: "/home/{{ user }}/bin/zwiq" }
         - { src: "files/dmg/ssh/config", dest: "/home/{{ user }}/.ssh/config" }
+        - { src: "files/ameszely/homebackup.sh", dest: "/home/{{ user }}/bin/homebackup.sh" }
+
+    - name: Backup of home directory
+      ansible.builtin.cron:
+        name: "home backup"
+        minute: "0"
+        hour: "13"
+        job: "/home/{{ user }}/bin/homebackup.sh > /dev/null"

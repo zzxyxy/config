@@ -42,8 +42,10 @@
           - boost-libs
           - clang
           - composer
+          - cronie
           - docker
           - docker-compose
+          - duplicity
           - dnsmasq
           - gtk2
           - gperf
@@ -63,6 +65,7 @@
           - python
           - python-setuptools
           - python-virtualenv
+          - rsync
           - rust
           - sudo
           - sshfs
@@ -114,6 +117,7 @@
         state: started
         enabled: true
       loop:
+        - cronie
         - docker
         - dnsmasq
 
