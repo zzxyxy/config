@@ -160,6 +160,7 @@
         - { path: "/storage01/calibreweb/books", mode: "0777", owner: "root"}
         - { path: "/storage01/calibreweb/config", mode: "0777", owner: "root"}
         - { path: "/storage01/loki", mode: "0777", owner: "root"}
+        - { path: "/storage01/gitlab/storage", mode: "0777", owner: "root"}
         - { path: "/storage02", mode: "0777", owner: "root"}
         - { path: "/storage03", mode: "0777", owner: "root"}
         - { path: "/storage02/torrent/downloaded", mode: "0777", owner: "root"}
@@ -333,7 +334,7 @@
       become: true
       ansible.builtin.copy:
         src: "files/{{ hostname }}/docker-compose.yaml"
-        dest: "{{ dockercomposerpath }}"
+        dest: "{{ dockercomposerpath }}/docker-compose.yaml"
         owner: root
         group: root
         mode: '0770'

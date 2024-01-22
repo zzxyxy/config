@@ -54,6 +54,7 @@
           - kubectx
           - kubens
           - kubectl
+          - links
           - linux-lts-headers
           - mc
           - ninja

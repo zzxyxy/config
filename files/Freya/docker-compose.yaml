@@ -163,3 +163,13 @@ services:
     volumes:
       - /storage01/loki:/loki
     restart: unless-stopped
+
+  gitlab:
+    image: gitlab/gitlab-ce:16.8.0-ce.0
+    container_name: gitlab
+    ports:
+      - 10180:80
+      - 10022:22
+    volumes:
+      - /storage01/gitlab/storage:/var/opt/gitlab
+    restart: unless-stopped
