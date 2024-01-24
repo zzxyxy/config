@@ -487,6 +487,22 @@
         - { src: "files/Hella/mosquitto.conf", dest: "/srv/mosquitto/mosquitto.conf" }
         - { src: "files/Hella/passwd.conf", dest: "/srv/mosquitto/passwd.conf" }
 
+
+    - name: Copying nginx config
+      become: true
+      ansible.builtin.copy:
+        src: "{{ item.src }}"
+        dest: "{{ item.dest }}"
+        owner: "root"
+        mode: "0755"
+      loop:
+        - src: "files/{{ hostname }}/nginxdefault.conf"
+          dest: "/srv/ingress/default.conf"
+        - src: "files/{{ hostname }}/nginx.conf"
+          dest: "/srv/nginx.conf"
+
+      notify: Restart nginx
+
     - name: Add docker compose file
       become: true
       ansible.builtin.copy:
@@ -502,6 +518,14 @@
     - name: Docker-compose run
       become: true
       ansible.builtin.command: "docker-compose up -d"
+      args:
+        chdir: "{{ dockercomposerpath }}"
+      register: out
+      changed_when: out.rc != 0
+
+    - name: Restart nginx
+      become: true
+      ansible.builtin.command: "docker-compose restart -t 10 nginx"
       args:
         chdir: "{{ dockercomposerpath }}"
       register: out

@@ -113,9 +113,11 @@
           - python-protobuf
           - python-platformdirs
           - python-grpcio-tools
+          - python-paramiko
           - python-pygments
           - python-pylint
           - python-setuptools
+          - python-six
           - python-virtualenv
           - ncurses
           - ntp

@@ -6,6 +6,7 @@ services:
     restart: always
     volumes:
       - /srv/ingress:/etc/nginx/conf.d/
+      - /srv/nginx.conf:/etc/nginx/nginx.conf
       - /root/.acme.sh/*.zxyxyhome.duckdns.org_ecc/:/etc/ssl/certs/nginx/
       - /srv/proxysetting:/srv/proxysetting
     ports:
