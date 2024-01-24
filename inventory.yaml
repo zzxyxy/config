@@ -1,8 +1,10 @@
+---
 all:
   children:
     server:
       hosts:
         Freya: {}
+        Hella: {}
     router:
       hosts:
         vmrouter: {}

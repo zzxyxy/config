@@ -1,0 +1,23 @@
+version: '3.1'
+
+services:
+  nginx:
+    image: nginx
+    restart: always
+    volumes:
+      - /srv/ingress:/etc/nginx/conf.d/
+      - /root/.acme.sh/*.zxyxyhome.duckdns.org_ecc/:/etc/ssl/certs/nginx/
+      - /srv/proxysetting:/srv/proxysetting
+    ports:
+      - 80:80
+      - 443:443
+
+  mosquitto:
+    image: eclipse-mosquitto:2.0.18
+    container_name: mosquitto
+    ports:
+      - 1883:1883
+      - 9001:9001
+    volumes:
+      - /srv/mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf
+      - /srv/mosquitto/passwd.conf:/mosquitto/config/passwd.conf

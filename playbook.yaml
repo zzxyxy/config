@@ -1,10 +1,8 @@
 ---
-- name: Manage kubernetes servers
+- name: Manage All servers
   hosts:
     - Freya
-
-  vars:
-    dockercomposerpath: /srv/docker
+    - Hella
 
   pre_tasks:
     - name: Set hostname
@@ -28,24 +26,81 @@
           - docker
           - docker-compose
           - fail2ban
-          - fakeroot
           - git
           - screen
           - sshfs
           - make
           - mc
-          - nano
           - net-tools
           - nfs-utils
           - prometheus-node-exporter
+          - promtail
           - python
           - python-docker
           - rsync
-          - transmission-cli
           - vim
+          - nano
+
+    - name: Enable services
+      become: true
+      ansible.builtin.service:
+        name: "{{ item }}"
+        state: started
+        enabled: true
+      loop:
+        - docker
+        - cronie
+        - fail2ban
+        - prometheus-node-exporter
+        - promtail
+
+  tasks:
+    - name: Fail2ban log setting
+      become: true
+      ansible.builtin.lineinfile:
+        path: /etc/fail2ban/fail2ban.conf
+        regexp: '^logtarget'
+        line: "logtarget = SYSTEMD-JOURNAL"
+        owner: root
+        group: root
+        mode: '0744'
+      notify: Fail2ban service restart
+
+    - name: Copy sshd jail config
+      become: true
+      ansible.builtin.copy:
+        src: "files/{{ hostname }}/sshd.local"
+        dest: /etc/fail2ban/jail.d/sshd.local
+        owner: root
+        group: root
+        mode: '0770'
+      notify: Fail2ban service restart
+
+  handlers:
+    - name: Fail2ban service restart
+      become: true
+      ansible.builtin.service:
+        name: fail2ban
+        state: restarted
+        enabled: true
+
+- name: Manage Freya
+  hosts:
+    - Freya
+
+  vars:
+    dockercomposerpath: /srv/docker
+
+  pre_tasks:
+    - name: Install packages
+      become: true
+      community.general.pacman:
+        state: present
+        name:
+          - transmission-cli
+          - fakeroot
           - syslog-ng
           - samba
-          - promtail
 
   roles:
     - { role: andrewrothstein.k3d, become: true }
@@ -90,17 +145,6 @@
         - Smb-service-restart
         - Nmb-service-restart
 
-    - name: Fail2ban log setting
-      become: true
-      ansible.builtin.lineinfile:
-        path: /etc/fail2ban/fail2ban.conf
-        regexp: '^logtarget'
-        line: "logtarget = SYSTEMD-JOURNAL"
-        owner: root
-        group: root
-        mode: '0744'
-      notify: Fail2ban service restart
-
     - name: Journald persist setting
       become: true
       ansible.builtin.lineinfile:
@@ -111,16 +155,6 @@
         group: root
         mode: '0744'
       notify: Journald service restart
-
-    - name: Copy sshd jail config
-      become: true
-      ansible.builtin.copy:
-        src: "files/{{ hostname }}/sshd.local"
-        dest: /etc/fail2ban/jail.d/sshd.local
-        owner: root
-        group: root
-        mode: '0770'
-      notify: Fail2ban service restart
 
     - name: Add nfs exports
       become: true
@@ -320,14 +354,9 @@
         state: started
         enabled: true
       loop:
-        - docker
-        - cronie
         - smb
         - nmb
-        - fail2ban
-        - prometheus-node-exporter
         - wsdd2
-        - promtail
         - syslog-ng@default.service
 
     - name: Add docker compose file
@@ -418,3 +447,62 @@
       ansible.builtin.service:
         name: systemd-journald
         state: restarted
+
+
+- name: Manage Hella
+  hosts:
+    - Hella
+
+  vars:
+    dockercomposerpath: /srv/docker
+
+  tasks:
+    - name: Create directories
+      become: true
+      ansible.builtin.file:
+        path: "{{ item.path }}"
+        mode: "{{ item.mode }}"
+        owner: "{{ item.owner }}"
+        state: directory
+      loop:
+        - { path: "{{ dockercomposerpath }}", mode: "0777", owner: "root"}
+        - { path: "/srv/ingress", mode: "0755", owner: "root"}
+        - { path: "/srv/mosquitto", mode: "0755", owner: "root"}
+        - { path: "/srv/grafana", mode: "0755", owner: "root"}
+        - { path: "/srv/prometheus", mode: "0755", owner: "root"}
+        - { path: "/srv/proxysetting", mode: "0755", owner: "root"}
+        - { path: "/srv/squid", mode: "0755", owner: "root"}
+        - { path: "/srv/squid/log", mode: "0777", owner: "root"}
+        - { path: "/srv/squid/data", mode: "0777", owner: "root"}
+        - { path: "/srv/squid/configsnippet", mode: "0777", owner: "root"}
+
+    - name: Copying files
+      become: true
+      ansible.builtin.copy:
+        src: "{{ item.src }}"
+        dest: "{{ item.dest }}"
+        owner: "root"
+        mode: "0755"
+      loop:
+        - { src: "files/Hella/mosquitto.conf", dest: "/srv/mosquitto/mosquitto.conf" }
+        - { src: "files/Hella/passwd.conf", dest: "/srv/mosquitto/passwd.conf" }
+
+    - name: Add docker compose file
+      become: true
+      ansible.builtin.copy:
+        src: "files/{{ hostname }}/docker-compose.yaml"
+        dest: "{{ dockercomposerpath }}/docker-compose.yaml"
+        owner: root
+        group: root
+        mode: '0770'
+        decrypt: true
+      notify: Docker-compose run
+
+  handlers:
+    - name: Docker-compose run
+      become: true
+      ansible.builtin.command: "docker-compose up -d"
+      args:
+        chdir: "{{ dockercomposerpath }}"
+      register: out
+      changed_when: out.rc != 0

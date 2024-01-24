@@ -70,6 +70,7 @@
           - rust
           - sudo
           - sshfs
+          - sshpass
           - terraform
           - traceroute
           - jdk11-openjdk
