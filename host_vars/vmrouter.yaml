@@ -1,7 +1,15 @@
 ---
 hostname: vmrouter
+ansible_connection: ansible.netcommon.network_cli
+ansible_network_os: community.routeros.routeros
 ansible_host: 172.21.0.1   # 172.21.1.1
 ansible_user: admin
-ansible_ssh_private_key_file: vmrouter
+ansible_ssh_pass: !vault |
+        $ANSIBLE_VAULT;1.1;AES256
+        30663264656331396263666637616434303732393236633636633266633164363733626339653636
+        3861633630303264363536633332363135366138656533310a636434613435316461303966306430
+        37343465383636386538623432633063343233623832376533313933306463323462363365633936
+        3461383162353066380a313835333661323264323061356534363661326237376664383236333330
+        3133
 
 ansible_ssh_common_args: '-o ProxyCommand="ssh -W %h:%p -q ansible@zxyxyhome.duckdns.org -i ansible.key"'
