@@ -65,6 +65,7 @@
           - openssh
           - python
           - python-setuptools
+          - python-ansible-compat
           - python-virtualenv
           - rsync
           - rust

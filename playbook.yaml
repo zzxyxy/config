@@ -506,3 +506,13 @@
         chdir: "{{ dockercomposerpath }}"
       register: out
       changed_when: out.rc != 0
+
+- name: Manage vmrouter
+  hosts:
+    - vmrouter
+
+  pre_tasks:
+    - name: Set hostname
+      community.routeros.command:
+        commands:
+          - /system identity set name="{{ inventory_hostname }}"
