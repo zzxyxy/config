@@ -1,4 +1,15 @@
+---
 scrape_configs:
   - job_name: 'freya_monitor'
+    scrape_interval: 30s
     static_configs:
-    - targets: ['172.21.0.2:9100']
+      - targets: ['172.21.0.2:9100']
+        labels:
+          instance: Freya
+
+  - job_name: 'hella_monitor'
+    scrape_interval: 30s
+    static_configs:
+      - targets: ['hella.int.zxyxy.net:9100']
+        labels:
+          instance: Hella

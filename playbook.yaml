@@ -29,6 +29,7 @@
           - git
           - screen
           - sshfs
+          - syslog-ng
           - make
           - mc
           - net-tools
@@ -53,6 +54,7 @@
         - fail2ban
         - prometheus-node-exporter
         - promtail
+        - syslog-ng@default.service
 
   tasks:
     - name: Fail2ban log setting
@@ -76,6 +78,27 @@
         mode: '0770'
       notify: Fail2ban service restart
 
+    - name: Journald persist setting
+      become: true
+      ansible.builtin.lineinfile:
+        path: /etc/systemd/journald.conf
+        insertafter: '^[Journal]'
+        line: "Storage=persistent"
+        owner: root
+        group: root
+        mode: '0744'
+      notify: Journald service restart
+
+    - name: Copy syslog-ng config
+      become: true
+      ansible.builtin.copy:
+        src: files/{{ hostname }}/syslog-ng.conf
+        dest: /etc/syslog-ng/syslog-ng.conf
+        owner: root
+        group: root
+        mode: '0755'
+      notify: Restart syslog-ng
+
   handlers:
     - name: Fail2ban service restart
       become: true
@@ -83,6 +106,18 @@
         name: fail2ban
         state: restarted
         enabled: true
+
+    - name: Journald service restart
+      become: true
+      ansible.builtin.service:
+        name: systemd-journald
+        state: restarted
+
+    - name: Restart syslog-ng
+      become: true
+      ansible.builtin.service:
+        name: syslog-ng@default.service
+        state: restarted
 
 - name: Manage Freya
   hosts:
@@ -99,7 +134,6 @@
         name:
           - transmission-cli
           - fakeroot
-          - syslog-ng
           - samba
 
   roles:
@@ -144,17 +178,6 @@
       notify:
         - Smb-service-restart
         - Nmb-service-restart
-
-    - name: Journald persist setting
-      become: true
-      ansible.builtin.lineinfile:
-        path: /etc/systemd/journald.conf
-        insertafter: '^[Journal]'
-        line: "Storage=persistent"
-        owner: root
-        group: root
-        mode: '0744'
-      notify: Journald service restart
 
     - name: Add nfs exports
       become: true
@@ -225,9 +248,18 @@
       loop:
         - { src: "files/Freya/mosquitto.conf", dest: "/srv/mosquitto/mosquitto.conf" }
         - { src: "files/Freya/passwd.conf", dest: "/srv/mosquitto/passwd.conf" }
-        - { src: "files/Freya/prometheus.yml", dest: "/srv/prometheus/prometheus.yml" }
         - { src: "files/Freya/alerts.yml", dest: "/srv/prometheus/alerts.yml" }
         - { src: "files/Freya/wpad.dat", dest: "/srv/proxysetting/wpad.dat" }
+
+    - name: Copy prometheus config
+      become: true
+      ansible.builtin.copy:
+        src: files/{{ hostname }}/prometheus.yml
+        dest: /srv/prometheus/prometheus.yml
+        owner: root
+        group: root
+        mode: '0775'
+      notify: Restart prometheus
 
     - name: Copy promtail config
       become: true
@@ -238,16 +270,6 @@
         group: root
         mode: '0770'
       notify: Restart promtail
-
-    - name: Copy syslog-ng config
-      become: true
-      ansible.builtin.copy:
-        src: files/{{ hostname }}/syslog-ng.conf
-        dest: /etc/syslog-ng/syslog-ng.conf
-        owner: root
-        group: root
-        mode: '0755'
-      notify: Restart syslog-ng
 
     - name: Stop transmission-service
       become: true
@@ -357,7 +379,6 @@
         - smb
         - nmb
         - wsdd2
-        - syslog-ng@default.service
 
     - name: Add docker compose file
       become: true
@@ -422,32 +443,25 @@
       register: out
       changed_when: out.rc != 0
 
-    - name: Restart nginx
-      become: true
-      ansible.builtin.command: "docker-compose restart -t 10 nginx"
-      args:
-        chdir: "{{ dockercomposerpath }}"
-      register: out
-      changed_when: out.rc != 0
-
     - name: Restart promtail
       become: true
       ansible.builtin.service:
         name: promtail
         state: restarted
 
+    - name: Restart prometheus
+      become: true
+      ansible.builtin.command: "docker-compose restart -t 10 prometheus"
+      args:
+        chdir: "{{ dockercomposerpath }}"
+      register: out
+      changed_when: out.rc != 0
+
     - name: Restart syslog-ng
       become: true
       ansible.builtin.service:
         name: syslog-ng@default.service
         state: restarted
-
-    - name: Journald service restart
-      become: true
-      ansible.builtin.service:
-        name: systemd-journald
-        state: restarted
-
 
 - name: Manage Hella
   hosts:
@@ -514,6 +528,16 @@
         decrypt: true
       notify: Docker-compose run
 
+    - name: Copy promtail config
+      become: true
+      ansible.builtin.copy:
+        src: files/{{ hostname }}/promtail.yaml
+        dest: /etc/loki/promtail.yaml
+        owner: promtail
+        group: root
+        mode: '0770'
+      notify: Restart promtail
+
   handlers:
     - name: Docker-compose run
       become: true
@@ -530,6 +554,12 @@
         chdir: "{{ dockercomposerpath }}"
       register: out
       changed_when: out.rc != 0
+
+    - name: Restart promtail
+      become: true
+      ansible.builtin.service:
+        name: promtail
+        state: restarted
 
 - name: Manage vmrouter
   hosts:
