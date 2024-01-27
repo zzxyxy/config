@@ -22,3 +22,14 @@ services:
     volumes:
       - /srv/mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf
       - /srv/mosquitto/passwd.conf:/mosquitto/config/passwd.conf
+
+  squid:
+    image: elestio/squid:v6.6.0
+    platform: linux/arm64
+    container_name: squid-proxy
+    ports:
+      - 3128:3128
+    volumes:
+      - /storage01/squid/log:/var/log/squid
+      - /storage01/squid/data:/var/spool/squid
+      - /storage01/squid/configsnippet:/etc/squid/conf.d/snippet.conf

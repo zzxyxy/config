@@ -237,7 +237,6 @@
         - { path: "/srv/squid/data", mode: "0777", owner: "root"}
         - { path: "/srv/squid/configsnippet", mode: "0777", owner: "root"}
 
-
     - name: Copying files
       become: true
       ansible.builtin.copy:
@@ -330,7 +329,6 @@
           --cache /root/rss.xml
           --file /storage02/torrent/toDownload/
           --rss https://ncore.pro/bookmarks/fcc9f495abbd4b4a10c1ca5d759e8491113707 >/dev/null 2>&1
-
 
 # create aur_builder to install aur packages
     - name: Create the `aur_builder` user
@@ -485,10 +483,10 @@
         - { path: "/srv/grafana", mode: "0755", owner: "root"}
         - { path: "/srv/prometheus", mode: "0755", owner: "root"}
         - { path: "/srv/proxysetting", mode: "0755", owner: "root"}
-        - { path: "/srv/squid", mode: "0755", owner: "root"}
-        - { path: "/srv/squid/log", mode: "0777", owner: "root"}
-        - { path: "/srv/squid/data", mode: "0777", owner: "root"}
-        - { path: "/srv/squid/configsnippet", mode: "0777", owner: "root"}
+        - { path: "/storage01/squid", mode: "0755", owner: "root"}
+        - { path: "/storage01/squid/log", mode: "0777", owner: "root"}
+        - { path: "/storage01/squid/data", mode: "0777", owner: "root"}
+        - { path: "/storage01/squid/configsnippet", mode: "0777", owner: "root"}
 
     - name: Copying files
       become: true
@@ -500,7 +498,7 @@
       loop:
         - { src: "files/Hella/mosquitto.conf", dest: "/srv/mosquitto/mosquitto.conf" }
         - { src: "files/Hella/passwd.conf", dest: "/srv/mosquitto/passwd.conf" }
-
+        - { src: "files/Hella/wpad.dat", dest: "/srv/proxysetting/wpad.dat" }
 
     - name: Copying nginx config
       become: true
