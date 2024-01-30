@@ -469,6 +469,13 @@
     dockercomposerpath: /srv/docker
 
   tasks:
+    - name: Install packages
+      become: true
+      community.general.pacman:
+        state: present
+        name:
+          - squid
+
     - name: Create directories
       become: true
       ansible.builtin.file:
@@ -515,6 +522,17 @@
 
       notify: Restart nginx
 
+    - name: Add squid compose file
+      become: true
+      ansible.builtin.copy:
+        src: "files/Hella/squid.conf"
+        dest: "/etc/squid/squid.conf"
+        owner: root
+        group: root
+        mode: '0755'
+        decrypt: true
+      notify: Squid restart
+
     - name: Add docker compose file
       become: true
       ansible.builtin.copy:
@@ -535,6 +553,15 @@
         group: root
         mode: '0770'
       notify: Restart promtail
+
+    - name: Enable services
+      become: true
+      ansible.builtin.service:
+        name: "{{ item }}"
+        state: started
+        enabled: true
+      loop:
+        - squid
 
   handlers:
     - name: Docker-compose run
@@ -557,6 +584,12 @@
       become: true
       ansible.builtin.service:
         name: promtail
+        state: restarted
+
+    - name: Squid restart
+      become: true
+      ansible.builtin.service:
+        name: squid
         state: restarted
 
 - name: Manage vmrouter
