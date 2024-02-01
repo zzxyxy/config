@@ -8,12 +8,12 @@
     envs: |
       PATH=$PATH:/home/{{ user }}/bin
       alias gitg="git log --all --decorate --oneline --graph"
-      alias klogf="kubectl logs -f "
+      alias klogf="kubectl logs -f"
       alias egrep='egrep --color=auto'
       alias fgrep='fgrep --color=auto'
       alias grep='grep --color=auto'
-      alias helga='helm list | grep '
-      alias hgv='helm get values '
+      alias helga='helm list | grep'
+      alias hgv='helm get values'
       alias kdcat='kubectl describe deploy'
       alias kddcat='kubectl get -o yaml deploy'
       alias kddown='kubectl scale deploy  --replicas=0'
@@ -156,6 +156,7 @@
         - { src: "files/dmg/vimrc", dest: "/home/{{ user }}/.vimrc" }
         - { src: "files/dmg/zwiq", dest: "/home/{{ user }}/bin/zwiq" }
         - { src: "files/dmg/ssh/config", dest: "/home/{{ user }}/.ssh/config" }
+        - { src: "files/dmg/tmux.conf", dest: "/home/{{ user }}/.tmux.conf" }
         - { src: "files/ameszely/homebackup.sh", dest: "/home/{{ user }}/bin/homebackup.sh" }
 
     - name: Backup of home directory
