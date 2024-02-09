@@ -8,4 +8,6 @@ host zhome
   HostName zxyxyhome.duckdns.org
   Port 22
   User zxyxy
-  LocalForward 13389 172.21.0.11:3389
+	LocalForward 13389 172.21.0.11:3389
+	LocalForward 13390 172.21.11.4:3389
+	

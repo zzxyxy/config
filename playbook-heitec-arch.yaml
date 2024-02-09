@@ -48,6 +48,7 @@
           - docker-compose
           - duplicity
           - dnsmasq
+          - emacs
           - gtk2
           - gperf
           - junit
