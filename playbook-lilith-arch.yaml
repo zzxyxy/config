@@ -56,12 +56,14 @@
           - dmenu
           - docker
           - dvd+rw-tools
+          - emacs
           - fakeroot
           - flameshot
           - fuse2fs
           - fuse2
           - filezilla
           - linux-lts-headers
+          - links
           - xf86-video-intel
           - xterm
           - libreoffice
