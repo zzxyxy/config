@@ -22,3 +22,23 @@ services:
     volumes:
       - /srv/mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf
       - /srv/mosquitto/passwd.conf:/mosquitto/config/passwd.conf
+
+
+
+  plex:
+    image: lscr.io/linuxserver/plex:1.40.0
+    container_name: plex
+    ports:
+      - 8080:80
+      - 32400:32400
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Etc/UTC
+      - VERSION=docker
+      - PLEX_CLAIM=claim-P_e-FLBSM-Uy9rZAq3yM
+    volumes:
+      - /storage02/flexconfig:/config
+      - /storage02/share/Video/:/Video
+      - /storage02/share/Audio/:/Audio
+    restart: unless-stopped
