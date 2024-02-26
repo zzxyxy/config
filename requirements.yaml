@@ -25,3 +25,4 @@ roles:
 - name: andrewrothstein.anaconda
 - name: andrewrothstein.conda_env
 - name: andrewrothstein.azurecli
+- name: andrewrothstein.argo

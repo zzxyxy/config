@@ -46,6 +46,12 @@ service_data = {
         "mode": "oci",
         "fb": "backend"
     },
+    "devicemanagementservice": {
+        "chart-postfix": "sof-device-management-service-chart",
+        "oci": "oci://wiqregistry.azurecr.io/helm/devicemanagementservice",
+        "mode": "oci",
+        "fb": "backend"
+    },
     "feature-registry": {
         "chart-postfix": "feature-registry-chart",
         "oci": "oci://wiqregistry.azurecr.io/helm/feature-registry",
@@ -53,7 +59,7 @@ service_data = {
         "fb": "backend"
     },
     "mydmgmori-2023-frontend": {
-        "chart-postfix": "mydmgmori-frontend-2023-chart",
+        "chart-postfix": "mydmgmori-2023-frontend-chart",
         "oci": "oci://wiqregistry.azurecr.io/helm/mydmgmori-2023-frontend",
         "mode": "oci",
         "fb": "frontend"
@@ -85,8 +91,15 @@ service_data = {
         "mode": "oci",
         "oci": "oci://wiqregistry.azurecr.io/helm/sofcdmcustomerimporter",
         "fb": "backend"
+    },
+    "track-and-trace-adapter": {
+        "chart-postfix": "track-and-trace-adapter-chart",
+        "mode": "oci",
+        "oci": "oci://wiqregistry.azurecr.io/helm/trackandtraceadapter",
+        "fb": "backend"
     }
 }
+
 
 
 logging.basicConfig(filename=os.environ['ZWIQ_LOG_PATH'],
@@ -95,12 +108,15 @@ logging.basicConfig(filename=os.environ['ZWIQ_LOG_PATH'],
                     datefmt='%H:%M:%S',
                     level=logging.DEBUG)
 
-def get_current_chart_version(chart):
-    ver = subprocess.Popen("helm list | grep  welive-business-service-chart | awk '{ print $10 }'",
+def get_current_chart_version():
+    servicebasepath = os.path.basename(os.getcwd())
+    chart = get_chart_name(servicebasepath)
+    print(f"Chart: {chart}")
+    ver = subprocess.Popen("helm list | grep " + chart + " | awk '{ print $10 }'",
                             stdout=subprocess.PIPE,
                             shell=True
                             ).stdout.read().decode('utf-8')
-    print(ver)
+    print(f"Ver: {ver}")
     return(ver)
 
 def get_current_namespace() -> str:
@@ -108,7 +124,6 @@ def get_current_namespace() -> str:
                             stdout=subprocess.PIPE,
                             shell=True
                             ).stdout.read().decode("utf-8")
-
 
 def get_image_tag(namespace: str) -> str:
     filename = f"values-{namespace}.yaml"
@@ -188,7 +203,7 @@ def deploy_slack_message(ticketurl):
 def main():
     parser = argparse.ArgumentParser()
     commandparser = parser.add_subparsers(help = 'command')
-
+    
     deploycmd = commandparser.add_parser('deploy', help='deploy image from current directory')
     deploycmd.add_argument('-c', '--chartversion', required=True, help='The version of the chart to deploy')
     deploycmd.set_defaults(action=lambda: deploy(args.chartversion))
@@ -202,8 +217,7 @@ def main():
     deploymsg.set_defaults(action=lambda: deploy_slack_message(args.ticketurl))
 
     deployversion = commandparser.add_parser('deployversion', help='get the version the deployed helm chart')
-    deployversion.add_argument('-c', '--chart', required=True, help='helm chart name')
-    deployversion.set_defaults(action=lambda: get_current_chart_version(args.chart))
+    deployversion.set_defaults(action=lambda: get_current_chart_version())
 
     args = parser.parse_args()
     args.action()

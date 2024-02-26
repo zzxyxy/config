@@ -50,10 +50,6 @@
       alias k="kubectl"
       alias t="terraform"
       alias nodes='kubectl get nodes -o json | jq ".items[]|{name:.metadata.name, version:.status.nodeInfo.kubeletVersion, taints:.spec.taints}"'
-      alias php='docker run -it --rm --name my-running-script -v "$PWD":/usr/src/myapp -w /usr/src/myapp php:8.2-cli php'
-      alias composer='docker run --rm --interactive --tty --volume $PWD:/app composer'
-      alias az='docker run -u $(id -u):$(id -g) -v /home/ameszely/:/home/az -e HOME=/home/az --rm -it mcr.microsoft.com/azure-cli:latest az'
-      alias wq='docker run  -v /home/ameszely/:/root/ -v /usr/local/bin/kubelogin:/usr/local/bin/kubelogin -it wiqregistry.azurecr.io/wq:latest cluster node-summary'
       export TF_VAR_tags='{"DMGMoriScope"   = "DIGITAL-Services", "DMGMoriService" = "WERKBLiQ"}'
       export HELM_EXPERIMENTAL_OCI=1
       export EDITOR=vim

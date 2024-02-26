@@ -139,7 +139,6 @@
     - { role: andrewrothstein.kubernetes-helm, become: true }
     - { role: andrewrothstein.kubelogin, become: true }
     - { role: andrewrothstein.istio, become: true }
-    - { role: andrewrothstein.argo, become: true }
 
   tasks:
 # create aur_builder to install aur packages
@@ -168,9 +167,6 @@
           generateResolvConf = true
           nameserver 127.0.0.1
           nameserver 172.31.48.1
-
-          [interop]
-          appendWindowsPath = false
 
     - name: Insert/Update addresses to /etc/dnsmasq.conf
       become: true
