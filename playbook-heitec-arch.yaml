@@ -40,10 +40,12 @@
           - base-devel
           - boost
           - boost-libs
+          - chrono-date
           - clang
           - cmake
           - composer
           - cronie
+          - dateutils
           - docker
           - docker-compose
           - duplicity
@@ -59,6 +61,7 @@
           - links
           - linux-lts-headers
           - man
+          - meson
           - mc
           - ninja
           - nodejs
@@ -83,6 +86,7 @@
           - sshfs
           - sshpass
           - terraform
+          - rapidjson
           - traceroute
           - jedi-language-server
           - jdk11-openjdk
@@ -146,6 +150,7 @@
     - { role: andrewrothstein.kubelogin, become: true }
     - { role: andrewrothstein.istio, become: true }
     - { role: andrewrothstein.argo, become: true }
+    - { role: andrewrothstein.docker_buildx, become: true }
 
   tasks:
 # create aur_builder to install aur packages
