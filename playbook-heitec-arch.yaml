@@ -67,9 +67,15 @@
           - ntp
           - openssh
           - python
-          - python-setuptools
           - python-ansible-compat
+          - python-bottle
+          - python-dateutil
+          - python-distro
+          - python-pyjwt
+          - python-requests
+          - python-setuptools
           - python-jedi
+          - python-urllib3
           - python-virtualenv
           - rsync
           - rust
@@ -197,6 +203,9 @@
         state: present
         ignore_arch: true
       loop:
+        - python-patch-ng # conan deplendency
+        - python-pluginbase # conan deplendency
+        - conan
         - grpcurl-bin
         - go-sqlcmd
         - kcat-cli
