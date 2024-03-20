@@ -23,7 +23,7 @@ services:
     restart: unless-stopped
 
   plex:
-    image: lscr.io/linuxserver/plex:1.32.7
+    image: lscr.io/linuxserver/plex:1.40.1
     container_name: plex
     network_mode: host
     environment:
@@ -31,7 +31,9 @@ services:
       - PGID=1000
       - TZ=Etc/UTC
       - VERSION=docker
-      - PLEX_CLAIM= #optional
+      - PLEX_CLAIM=
+    port:
+      -
     volumes:
       - /storage01/flexconfig:/config
       - /storage01/share/Video/:/Video
@@ -57,20 +59,6 @@ services:
       - /storage01/srv/postgres:/data
     ports:
       - 5432:5432
-
-  jenkins:
-    image: zxyxy/jenkins:v0.8.0
-    restart: always
-    privileged: true
-    volumes:
-      - /srv/jenkins:/var/jenkins_home
-      - /var/run/docker.sock:/var/run/docker.sock
-    ports:
-      - 18080:8080
-      - 50000:50000
-    environment:
-      DOCKER_USER: zxyxy
-      DOCKER_PASS: dckr_pat_VnfETnlTHORYKnanqf8WMUtVvxE
 
   mongo:
     image: mongo
@@ -129,32 +117,6 @@ services:
       - 8081:8081
     restart: unless-stopped
 
-  calibre-web:
-    image: lscr.io/linuxserver/calibre-web:0.6.21
-    container_name: calibre-web
-    environment:
-      - PUID=1000
-      - PGID=1000
-      - TZ=Etc/UTC
-      - DOCKER_MODS=linuxserver/mods:universal-calibre #optional
-      - OAUTHLIB_RELAX_TOKEN_SCOPE=1 #optional
-    volumes:
-      - /storage01/calibreweb/config:/config
-      - /storage01/calibreweb/books:/books
-    ports:
-      - 8083:8083
-    restart: unless-stopped
-
-  squid:
-    image: ubuntu/squid:4.10-20.04_edge
-    container_name: squid-proxy
-    ports:
-      - 3128:3128
-    volumes:
-      - /srv/squid/log:/var/log/squid
-      - /srv/squid/data:/var/spool/squid
-      - /srv/squid/configsnippet:/etc/squid/conf.d/snippet.conf
-
   loki:
     image: grafana/loki:main-46fc0be
     container_name: loki
@@ -162,14 +124,4 @@ services:
       - 3100:3100
     volumes:
       - /storage01/loki:/loki
-    restart: unless-stopped
-
-  gitlab:
-    image: gitlab/gitlab-ce:16.8.0-ce.0
-    container_name: gitlab
-    ports:
-      - 10180:80
-      - 10022:22
-    volumes:
-      - /storage01/gitlab/storage:/var/opt/gitlab
     restart: unless-stopped

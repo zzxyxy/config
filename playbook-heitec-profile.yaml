@@ -18,7 +18,7 @@
       export EDITOR=vim
       export CLUSTER_REPO="/home/ameszely/Oper/dev-cluster"
       export OPERATIONS="/home/ameszely/Oper/operations"
-      export PATH=$PATH:/home/ameszely/bin:/home/ameszely/.local/bin:/home/ameszely/.cargo/bin
+      export PATH=$PATH:/home/{{ user }}/bin:/home/{{ user }}/.local/bin:/home/{{ user }}/.cargo/bin::/home/{{ user }}/go/bin
       export ZWIQ_LOG_PATH="/home/ameszely/log/deploy.log"
       export GOPATH=$HOME/go
   tasks:
