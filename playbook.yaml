@@ -1,17 +1,18 @@
 ---
-#- name: Raspberry base
-#  hosts:
-#    - Hella
+- name: Raspberry base
+  hosts:
+    - HellaMaster
+    - HellaNode01
 #    - Thyri
-#
-#  tasks:
-#    - name: Update and upgrade apt packages
-#      become: true
-#      ansible.builtin.apt:
-#        upgrade: yes
-#        update_cache: yes
-#        cache_valid_time: 864000
-#
+
+  tasks:
+    - name: Update and upgrade apt packages
+      become: true
+      ansible.builtin.apt:
+        upgrade: true
+        update_cache: true
+        cache_valid_time: 864000
+
 #    - name: Install packages
 #      become: true
 #      ansible.builtin.apt:
