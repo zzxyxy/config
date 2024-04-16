@@ -13,35 +13,83 @@
         update_cache: true
         cache_valid_time: 864000
 
-#    - name: Install packages
-#      become: true
-#      ansible.builtin.apt:
-#        state: present
-#        name:
-#          #- base-devel
-#          - docker
-#          - docker-compose
-#          - fail2ban
-#          - git
-#          - screen
-#          - sshfs
-#          - syslog-ng
-#          - make
-#          - mc
-#          - net-tools
-#          #- nfs-utils
-#          - prometheus-node-exporter
-#          #- promtail
-#          - python3
-#          - python3-docker
-#          - rsync
-#          - vim
-#          - nano
+    - name: Install packages
+      become: true
+      ansible.builtin.apt:
+        state: present
+        name:
+          - ca-certificates
+          - curl
+          - fail2ban
+          - git
+          - screen
+          - snapd
+          - sshfs
+          - syslog-ng
+          - make
+          - mc
+          - net-tools
+          - prometheus-node-exporter
+          - python3
+          - python3-docker
+          - rsync
+          - vim
+          - nano
 
-#- name: Manage Hella
-#  hosts:
-#    - Hella
-#
+    - name: Install microk8s packages
+      become: true
+      community.general.snap:
+        name: microk8s
+        classic: true
+
+    - name: Copy sshd jail config
+      become: true
+      ansible.builtin.copy:
+        src: "files/Hella/sshd.local"
+        dest: /etc/fail2ban/jail.d/sshd.local
+        owner: root
+        group: root
+        mode: '0770'
+      notify: Fail2ban service restart
+
+  handlers:
+    - name: Fail2ban service restart
+      become: true
+      ansible.builtin.service:
+        name: fail2ban
+        state: restarted
+        enabled: true
+
+- name: Manage Hella
+  hosts:
+    - HellaMaster
+
+  tasks:
+    - name: Create /root/bin
+      become: true
+      ansible.builtin.file:
+        path: /root/bin
+        state: directory
+        mode: "0755"
+
+# DUCKDNS
+    - name: Copy duck script
+      become: true
+      ansible.builtin.copy:
+        src: "files/{{ hostname }}/duck.sh"
+        dest: /root/bin/duck.sh
+        owner: root
+        group: root
+        mode: '0700'
+
+
+    - name: Duckdns schedule
+      become: true
+      ansible.builtin.cron:
+        name: "Duckdns"
+        minute: "*/15"
+        job: "bash /root/bin/duck.sh >/dev/null 2>&1"
+
 #  vars:
 #    dockercomposerpath: /srv/docker
 #
