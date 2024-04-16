@@ -1,3 +1,3 @@
-choco upgrade -y docker
+choco upgrade -y docker-desktop
 
 Set-Service -Name docker -StartupType Automatic -status running
