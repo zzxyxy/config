@@ -1,15 +1,16 @@
 ---
 - name: Raspberry base
   hosts:
-    - Hella
-    - Thyri
+    - HellaMaster
+    - HellaNode01
+#    - Thyri
 
   tasks:
     - name: Update and upgrade apt packages
       become: true
       ansible.builtin.apt:
-        upgrade: yes
-        update_cache: yes
+        upgrade: true
+        update_cache: true
         cache_valid_time: 864000
 
     - name: Install packages
@@ -17,163 +18,41 @@
       ansible.builtin.apt:
         state: present
         name:
-          #- base-devel
-          - docker
-          - docker-compose
+          - ca-certificates
+          - curl
           - fail2ban
           - git
           - screen
+          - snapd
           - sshfs
           - syslog-ng
           - make
           - mc
           - net-tools
-          #- nfs-utils
           - prometheus-node-exporter
-          #- promtail
           - python3
           - python3-docker
           - rsync
           - vim
           - nano
 
-- name: Manage Hella
-  hosts:
-    - Hella
-
-  vars:
-    dockercomposerpath: /srv/docker
-
-  tasks:
-    - name: Install packages
+    - name: Install microk8s packages
       become: true
-      ansible.builtin.apt:
-        state: present
-        name:
-          - squid
+      community.general.snap:
+        name: microk8s
+        classic: true
 
-    - name: Create directories
-      become: true
-      ansible.builtin.file:
-        path: "{{ item.path }}"
-        mode: "{{ item.mode }}"
-        owner: "{{ item.owner }}"
-        state: directory
-      loop:
-        - { path: "{{ dockercomposerpath }}", mode: "0777", owner: "root"}
-        - { path: "/srv/ingress", mode: "0755", owner: "root"}
-        - { path: "/srv/mosquitto", mode: "0755", owner: "root"}
-        - { path: "/srv/grafana", mode: "0755", owner: "root"}
-        - { path: "/srv/prometheus", mode: "0755", owner: "root"}
-        - { path: "/srv/proxysetting", mode: "0755", owner: "root"}
-        - { path: "/storage01/squid", mode: "0755", owner: "root"}
-        - { path: "/storage01/squid/log", mode: "0777", owner: "root"}
-        - { path: "/storage01/squid/data", mode: "0777", owner: "root"}
-        - { path: "/storage01/squid/configsnippet", mode: "0777", owner: "root"}
-
-    - name: Copying files
+    - name: Copy sshd jail config
       become: true
       ansible.builtin.copy:
-        src: "{{ item.src }}"
-        dest: "{{ item.dest }}"
-        owner: "root"
-        mode: "0755"
-      loop:
-        - { src: "files/Hella/mosquitto.conf", dest: "/srv/mosquitto/mosquitto.conf" }
-        - { src: "files/Hella/passwd.conf", dest: "/srv/mosquitto/passwd.conf" }
-        - { src: "files/Hella/wpad.dat", dest: "/srv/proxysetting/wpad.dat" }
-
-    - name: Copying nginx config
-      become: true
-      ansible.builtin.copy:
-        src: "{{ item.src }}"
-        dest: "{{ item.dest }}"
-        owner: "root"
-        mode: "0755"
-      loop:
-        - src: "files/{{ hostname }}/nginxdefault.conf"
-          dest: "/srv/ingress/default.conf"
-        - src: "files/{{ hostname }}/nginx.conf"
-          dest: "/srv/nginx.conf"
-
-      notify: Restart nginx
-
-    - name: Add squid compose file
-      become: true
-      ansible.builtin.copy:
-        src: "files/Hella/squid.conf"
-        dest: "/etc/squid/squid.conf"
-        owner: root
-        group: root
-        mode: '0755'
-        decrypt: true
-      notify: Squid restart
-
-    - name: Add docker compose file
-      become: true
-      ansible.builtin.copy:
-        src: "files/{{ hostname }}/docker-compose.yaml"
-        dest: "{{ dockercomposerpath }}/docker-compose.yaml"
+        src: "files/Hella/sshd.local"
+        dest: /etc/fail2ban/jail.d/sshd.local
         owner: root
         group: root
         mode: '0770'
-        decrypt: true
-      notify: Docker-compose run
-
-#    - name: Copy promtail config
-#      become: true
-#      ansible.builtin.copy:
-#        src: files/{{ hostname }}/promtail.yaml
-#        dest: /etc/loki/promtail.yaml
-#        owner: promtail
-#        group: root
-#        mode: '0770'
-#      notify: Restart promtail
-
-    - name: Enable services
-      become: true
-      ansible.builtin.service:
-        name: "{{ item }}"
-        state: started
-        enabled: true
-      loop:
-        - docker
-        #- cronie
-        - fail2ban
-        - prometheus-node-exporter
-        #- promtail
-        - syslog-ng
-        - squid
+      notify: Fail2ban service restart
 
   handlers:
-    - name: Docker-compose run
-      become: true
-      ansible.builtin.command: "docker-compose up -d"
-      args:
-        chdir: "{{ dockercomposerpath }}"
-      register: out
-      changed_when: out.rc != 0
-
-    - name: Restart nginx
-      become: true
-      ansible.builtin.command: "docker-compose restart -t 10 nginx"
-      args:
-        chdir: "{{ dockercomposerpath }}"
-      register: out
-      changed_when: out.rc != 0
-
-    - name: Restart promtail
-      become: true
-      ansible.builtin.service:
-        name: promtail
-        state: restarted
-
-    - name: Squid restart
-      become: true
-      ansible.builtin.service:
-        name: squid
-        state: restarted
-
     - name: Fail2ban service restart
       become: true
       ansible.builtin.service:
@@ -181,61 +60,231 @@
         state: restarted
         enabled: true
 
-    - name: Smb-service-restart
-      become: true
-      ansible.builtin.service:
-        name: smb
-        state: restarted
-        enabled: true
+- name: Manage Hella
+  hosts:
+    - HellaMaster
 
-    - name: Nmb-service-restart
+  tasks:
+    - name: Create /root/bin
       become: true
-      ansible.builtin.service:
-        name: nmb
-        state: restarted
-        enabled: true
+      ansible.builtin.file:
+        path: /root/bin
+        state: directory
+        mode: "0755"
 
-    - name: Reload nfs exports
+# DUCKDNS
+    - name: Copy duck script
       become: true
-      ansible.builtin.command:
-        cmd: /usr/bin/exportfs -arv
-      register: out
-      changed_when: out.rc != 0
+      ansible.builtin.copy:
+        src: "files/{{ hostname }}/duck.sh"
+        dest: /root/bin/duck.sh
+        owner: root
+        group: root
+        mode: '0700'
 
-    - name: Wsdd service restart
+
+    - name: Duckdns schedule
       become: true
-      ansible.builtin.service:
-        name: wsdd2
-        state: restarted
+      ansible.builtin.cron:
+        name: "Duckdns"
+        minute: "*/15"
+        job: "bash /root/bin/duck.sh >/dev/null 2>&1"
 
-    - name: Docker-compose run
-      become: true
-      ansible.builtin.command: "docker-compose up -d"
-      args:
-        chdir: "{{ dockercomposerpath }}"
-      register: out
-      changed_when: out.rc != 0
-
-    - name: Restart promtail
-      become: true
-      ansible.builtin.service:
-        name: promtail
-        state: restarted
-
-    - name: Restart prometheus
-      become: true
-      ansible.builtin.command: "docker-compose restart -t 10 prometheus"
-      args:
-        chdir: "{{ dockercomposerpath }}"
-      register: out
-      changed_when: out.rc != 0
-
-    - name: Restart syslog-ng
-      become: true
-      ansible.builtin.service:
-        name: syslog-ng@default.service
-        state: restarted
-
+#  vars:
+#    dockercomposerpath: /srv/docker
+#
+#  tasks:
+#    - name: Install packages
+#      become: true
+#      ansible.builtin.apt:
+#        state: present
+#        name:
+#          - squid
+#
+#    - name: Create directories
+#      become: true
+#      ansible.builtin.file:
+#        path: "{{ item.path }}"
+#        mode: "{{ item.mode }}"
+#        owner: "{{ item.owner }}"
+#        state: directory
+#      loop:
+#        - { path: "{{ dockercomposerpath }}", mode: "0777", owner: "root"}
+#        - { path: "/srv/ingress", mode: "0755", owner: "root"}
+#        - { path: "/srv/mosquitto", mode: "0755", owner: "root"}
+#        - { path: "/srv/grafana", mode: "0755", owner: "root"}
+#        - { path: "/srv/prometheus", mode: "0755", owner: "root"}
+#        - { path: "/srv/proxysetting", mode: "0755", owner: "root"}
+#        - { path: "/storage01/squid", mode: "0755", owner: "root"}
+#        - { path: "/storage01/squid/log", mode: "0777", owner: "root"}
+#        - { path: "/storage01/squid/data", mode: "0777", owner: "root"}
+#        - { path: "/storage01/squid/configsnippet", mode: "0777", owner: "root"}
+#
+#    - name: Copying files
+#      become: true
+#      ansible.builtin.copy:
+#        src: "{{ item.src }}"
+#        dest: "{{ item.dest }}"
+#        owner: "root"
+#        mode: "0755"
+#      loop:
+#        - { src: "files/Hella/mosquitto.conf", dest: "/srv/mosquitto/mosquitto.conf" }
+#        - { src: "files/Hella/passwd.conf", dest: "/srv/mosquitto/passwd.conf" }
+#        - { src: "files/Hella/wpad.dat", dest: "/srv/proxysetting/wpad.dat" }
+#
+#    - name: Copying nginx config
+#      become: true
+#      ansible.builtin.copy:
+#        src: "{{ item.src }}"
+#        dest: "{{ item.dest }}"
+#        owner: "root"
+#        mode: "0755"
+#      loop:
+#        - src: "files/{{ hostname }}/nginxdefault.conf"
+#          dest: "/srv/ingress/default.conf"
+#        - src: "files/{{ hostname }}/nginx.conf"
+#          dest: "/srv/nginx.conf"
+#
+#      notify: Restart nginx
+#
+#    - name: Add squid compose file
+#      become: true
+#      ansible.builtin.copy:
+#        src: "files/Hella/squid.conf"
+#        dest: "/etc/squid/squid.conf"
+#        owner: root
+#        group: root
+#        mode: '0755'
+#        decrypt: true
+#      notify: Squid restart
+#
+#    - name: Add docker compose file
+#      become: true
+#      ansible.builtin.copy:
+#        src: "files/{{ hostname }}/docker-compose.yaml"
+#        dest: "{{ dockercomposerpath }}/docker-compose.yaml"
+#        owner: root
+#        group: root
+#        mode: '0770'
+#        decrypt: true
+#      notify: Docker-compose run
+#
+##    - name: Copy promtail config
+##      become: true
+##      ansible.builtin.copy:
+##        src: files/{{ hostname }}/promtail.yaml
+##        dest: /etc/loki/promtail.yaml
+##        owner: promtail
+##        group: root
+##        mode: '0770'
+##      notify: Restart promtail
+#
+#    - name: Enable services
+#      become: true
+#      ansible.builtin.service:
+#        name: "{{ item }}"
+#        state: started
+#        enabled: true
+#      loop:
+#        - docker
+#        #- cronie
+#        - fail2ban
+#        - prometheus-node-exporter
+#        #- promtail
+#        - syslog-ng
+#        - squid
+#
+#  handlers:
+#    - name: Docker-compose run
+#      become: true
+#      ansible.builtin.command: "docker-compose up -d"
+#      args:
+#        chdir: "{{ dockercomposerpath }}"
+#      register: out
+#      changed_when: out.rc != 0
+#
+#    - name: Restart nginx
+#      become: true
+#      ansible.builtin.command: "docker-compose restart -t 10 nginx"
+#      args:
+#        chdir: "{{ dockercomposerpath }}"
+#      register: out
+#      changed_when: out.rc != 0
+#
+#    - name: Restart promtail
+#      become: true
+#      ansible.builtin.service:
+#        name: promtail
+#        state: restarted
+#
+#    - name: Squid restart
+#      become: true
+#      ansible.builtin.service:
+#        name: squid
+#        state: restarted
+#
+#    - name: Fail2ban service restart
+#      become: true
+#      ansible.builtin.service:
+#        name: fail2ban
+#        state: restarted
+#        enabled: true
+#
+#    - name: Smb-service-restart
+#      become: true
+#      ansible.builtin.service:
+#        name: smb
+#        state: restarted
+#        enabled: true
+#
+#    - name: Nmb-service-restart
+#      become: true
+#      ansible.builtin.service:
+#        name: nmb
+#        state: restarted
+#        enabled: true
+#
+#    - name: Reload nfs exports
+#      become: true
+#      ansible.builtin.command:
+#        cmd: /usr/bin/exportfs -arv
+#      register: out
+#      changed_when: out.rc != 0
+#
+#    - name: Wsdd service restart
+#      become: true
+#      ansible.builtin.service:
+#        name: wsdd2
+#        state: restarted
+#
+#    - name: Docker-compose run
+#      become: true
+#      ansible.builtin.command: "docker-compose up -d"
+#      args:
+#        chdir: "{{ dockercomposerpath }}"
+#      register: out
+#      changed_when: out.rc != 0
+#
+#    - name: Restart promtail
+#      become: true
+#      ansible.builtin.service:
+#        name: promtail
+#        state: restarted
+#
+#    - name: Restart prometheus
+#      become: true
+#      ansible.builtin.command: "docker-compose restart -t 10 prometheus"
+#      args:
+#        chdir: "{{ dockercomposerpath }}"
+#      register: out
+#      changed_when: out.rc != 0
+#
+#    - name: Restart syslog-ng
+#      become: true
+#      ansible.builtin.service:
+#        name: syslog-ng@default.service
+#        state: restarted
+#
 
 - name: Manage All servers
   hosts:
@@ -698,6 +747,13 @@
         name: syslog-ng@default.service
         state: restarted
 
+    - name: Restart nginx
+      become: true
+      ansible.builtin.command: "docker-compose restart -t 10 nginx"
+      args:
+        chdir: "{{ dockercomposerpath }}"
+      register: out
+      changed_when: out.rc != 0
 
 - name: Manage vmrouter
   hosts:

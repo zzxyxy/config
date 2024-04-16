@@ -51,6 +51,8 @@
           - duplicity
           - dnsmasq
           - emacs
+          - git
+          - git-crypt
           - gtk2
           - gperf
           - junit
@@ -78,6 +80,8 @@
           - python-requests
           - python-setuptools
           - python-jedi
+          - python-pywinrm
+          - python-xmltodict
           - python-urllib3
           - python-virtualenv
           - rsync

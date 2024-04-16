@@ -61,6 +61,8 @@
           - flameshot
           - fuse2fs
           - fuse2
+          - git
+          - git-crypt
           - filezilla
           - linux-lts-headers
           - links

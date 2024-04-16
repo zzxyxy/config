@@ -4,7 +4,11 @@ all:
     server:
       hosts:
         Freya: {}
-        Hella: {}
+        HellaMaster: {}
+        HellaNode01: {}
         Thyri: {}
     router:
       hosts:
+    windows:
+      hosts:
+        LT000897: {}

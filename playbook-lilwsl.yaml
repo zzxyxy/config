@@ -30,6 +30,8 @@
           - blueman
           - clang
           - composer
+          - git
+          - git-crypt
           - gtk2
           - gperf
           - junit
