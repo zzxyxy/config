@@ -1,7 +1,7 @@
 ---
 - name: Raspberry base
   hosts:
-    - HellaMaster
+    - Gateway
     - HellaNode01
     - Freya
 #    - Thyri
@@ -18,18 +18,29 @@
       ansible.builtin.hostname:
         name: "{{ hostname }}"
 
-    - name: docker key
+    - name: Pre Install packages
+      become: true
+      ansible.builtin.apt:
+        state: present
+        name:
+          - apt-transport-https
+          - ca-certificates
+          - curl
+
+    - name: Docker key
       become: true
       ansible.builtin.get_url:
         url: https://download.docker.com/linux/ubuntu/gpg
         dest: /etc/apt/keyrings/docker.asc
+        mode: 644
 
-    - name: docker repo
+    - name: Docker repo
       become: true
       ansible.builtin.apt_repository:
         repo: "deb [arch={{ [ansible_architecture] | map('extract', deb_architecture) | first }} signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu {{ ansible_facts['lsb']['codename'] }} stable"
         state: present
         filename: docker
+        mode: 644
 
     - name: Update and upgrade apt packages
       become: true
@@ -43,8 +54,6 @@
       ansible.builtin.apt:
         state: present
         name:
-          - ca-certificates
-          - curl
           - docker-ce
           - docker-ce-cli
           - containerd.io
@@ -70,8 +79,16 @@
       become: true
       community.general.snap:
         name: microk8s
+        state: present
+        classic: true
+      when: zxyxy_kubernetes is defined
+
+    - name: Remove microk8s packages
+      become: true
+      community.general.snap:
+        name: microk8s
         state: absent
-#        classic: true
+      when: zxyxy_kubernetes is undefined
 
     - name: Copy sshd jail config
       become: true
@@ -132,10 +149,22 @@
         minute: "*/15"
         job: "bash /root/bin/duck.sh >/dev/null 2>&1"
 
+#    - name: Copy syslog-ng config
+#      become: true
+#      ansible.builtin.copy:
+#        src: files/{{ hostname }}/syslog-ng.conf
+#        dest: /etc/syslog-ng/syslog-ng.conf
+#        owner: root
+#        group: root
+#        mode: '0755'
+#      notify: Restart syslog-ng
 
-- name: Manage All servers
+- name: Manage Freya
   hosts:
     - Freya
+
+  vars:
+    dockercomposerpath: /srv/docker
 
   pre_tasks:
     - name: Install packages
@@ -155,6 +184,10 @@
           - rsync
           - vim
           - nano
+          - transmission-daemon
+          - fakeroot
+          - samba
+          - wsdd2
 
     - name: Enable services
       become: true
@@ -168,8 +201,12 @@
         - prometheus-node-exporter
 #        - syslog-ng@default.service
 
-  tasks:
+  roles:
+    - { role: andrewrothstein.k3d, become: true }
+    - { role: andrewrothstein.kubernetes-helm, become: true }
+    - { role: andrewrothstein.kubectl, become: true }
 
+  tasks:
     - name: Journald persist setting
       become: true
       ansible.builtin.lineinfile:
@@ -181,53 +218,6 @@
         mode: '0744'
       notify: Journald service restart
 
-#    - name: Copy syslog-ng config
-#      become: true
-#      ansible.builtin.copy:
-#        src: files/{{ hostname }}/syslog-ng.conf
-#        dest: /etc/syslog-ng/syslog-ng.conf
-#        owner: root
-#        group: root
-#        mode: '0755'
-#      notify: Restart syslog-ng
-
-  handlers:
-    - name: Journald service restart
-      become: true
-      ansible.builtin.service:
-        name: systemd-journald
-        state: restarted
-
-    - name: Restart syslog-ng
-      become: true
-      ansible.builtin.service:
-        name: syslog-ng@default.service
-        state: restarted
-
-- name: Manage Freya
-  hosts:
-    - Freya
-
-  vars:
-    dockercomposerpath: /srv/docker
-
-  pre_tasks:
-    - name: Install packages
-      become: true
-      ansible.builtin.apt:
-        state: present
-        name:
-          - transmission-cli
-          - transmission-daemon
-          - fakeroot
-          - samba
-
-  roles:
-    - { role: andrewrothstein.k3d, become: true }
-    - { role: andrewrothstein.kubernetes-helm, become: true }
-    - { role: andrewrothstein.kubectl, become: true }
-
-  tasks:
     - name: Create /root/bin
       become: true
       ansible.builtin.file:
@@ -359,23 +349,23 @@
     - name: Stop transmission-service
       become: true
       ansible.builtin.service:
-        name: transmission
+        name: transmission-daemon
         state: stopped
         enabled: true
 
-    - name: Set the transmission config dit to /etc
-      become: true
-      ansible.builtin.lineinfile:
-        path: /usr/lib/systemd/system/transmission.service
-        regexp: '^ExecStart'
-        line: ExecStart=/usr/bin/transmission-daemon -f --log-level=info -g /etc/transmission-daemon
+#    - name: Set the transmission config dit to /etc
+#      become: true
+#      ansible.builtin.lineinfile:
+#        path: /usr/lib/systemd/system/transmission.service
+#        regexp: '^ExecStart'
+#        line: ExecStart=/usr/bin/transmission-daemon -f --log-level=info -g /etc/transmission-daemon
 
     - name: Copy transmission config
       become: true
       ansible.builtin.copy:
         src: files/{{ hostname }}/transsettings.json
         dest: /etc/transmission-daemon/settings.json
-        owner: transmission
+        owner: debian-transmission
         group: root
         mode: '0770'
       register: transmissionconfig
@@ -383,7 +373,7 @@
     - name: Start transmission-service
       become: true
       ansible.builtin.service:
-        name: transmission
+        name: transmission-daemon
         state: started
         enabled: true
         daemon_reload: true
@@ -416,33 +406,7 @@
           --file /storage02/torrent/toDownload/
           --rss https://ncore.pro/bookmarks/fcc9f495abbd4b4a10c1ca5d759e8491113707 >/dev/null 2>&1
 
-# create aur_builder to install aur packages
-    - name: Create the `aur_builder` user
-      become: true
-      ansible.builtin.user:
-        name: aur_builder
-        create_home: true
-        group: wheel
-
-    - name: Allow the `aur_builder` user to run `sudo pacman` without a password
-      become: true
-      ansible.builtin.lineinfile:
-        path: /etc/sudoers.d/11-install-aur_builder
-        line: 'aur_builder ALL=(ALL) NOPASSWD: /usr/bin/pacman'
-        mode: '0700'
-        create: true
-        validate: 'visudo -cf %s'
-
 # WSDD2
-    - name: Install wsdd2
-      kewlfft.aur.aur:
-        name: wsdd2
-        use: makepkg
-        state: present
-        ignore_arch: true
-      become: true
-      become_user: aur_builder
-
     - name: WSDD config
       become: true
       ansible.builtin.lineinfile:
@@ -460,8 +424,8 @@
         state: started
         enabled: true
       loop:
-        - smb
-        - nmb
+        - smbd
+        - nmbd
         - wsdd2
 
     - name: Add docker compose file
@@ -521,7 +485,7 @@
 
     - name: Docker-compose run
       become: true
-      ansible.builtin.command: "docker-compose up -d"
+      ansible.builtin.command: "docker-compose up -d --remove-orphans"
       args:
         chdir: "{{ dockercomposerpath }}"
       register: out
@@ -554,6 +518,13 @@
         chdir: "{{ dockercomposerpath }}"
       register: out
       changed_when: out.rc != 0
+
+    - name: Journald service restart
+      become: true
+      ansible.builtin.service:
+        name: systemd-journald
+        state: restarted
+
 
 - name: Manage vmrouter
   hosts:

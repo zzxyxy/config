@@ -1,5 +1,5 @@
 ---
-hostname: HellaMaster
+hostname: Gateway
 ansible_host: zxyxyhome.duckdns.org  # 172.21.1.1
 ansible_port: 22
 ansible_user: ansible

@@ -12,7 +12,6 @@ services:
       - 80:80
       - 443:443
 
-
   duckdns:
     image: lscr.io/linuxserver/duckdns:version-b9e2cafd
     container_name: duckdns
@@ -31,9 +30,6 @@ services:
       - PGID=1000
       - TZ=Etc/UTC
       - VERSION=docker
-      - PLEX_CLAIM=
-    port:
-      -
     volumes:
       - /storage01/flexconfig:/config
       - /storage01/share/Video/:/Video
@@ -97,25 +93,6 @@ services:
     volumes:
      - /srv/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
      - /srv/prometheus/alerts.yml:/etc/prometheus/alerts.yml
-
-  calibre:
-    image: lscr.io/linuxserver/calibre:4.23.0-v4
-    container_name: calibre
-    security_opt:
-      - seccomp:unconfined #optional
-    environment:
-      - PUID=1000
-      - PGID=1000
-      - TZ=Etc/UTC
-      - PASSWORD=Calibre4136
-      - CLI_ARGS= #optional
-    volumes:
-      - /storage01/calibredb:/config
-    ports:
-      - 8080:8080
-      - 8181:8181
-      - 8081:8081
-    restart: unless-stopped
 
   loki:
     image: grafana/loki:main-46fc0be
