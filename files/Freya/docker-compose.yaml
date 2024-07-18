@@ -102,3 +102,11 @@ services:
     volumes:
       - /storage01/loki:/loki
     restart: unless-stopped
+
+  artifactory:
+    image: docker.bintray.io/jfrog/artifactory-oss:latest
+    container_name: artifactory
+    ports:
+      - "8081:8081"
+    volumes:
+      - /storage02/artifactory:/var/opt/jfrog/artifactory
