@@ -20,9 +20,10 @@
       become: true
       community.general.pacman:
         name:
+          - jdk11-openjdk
+          - kodi
           - virtualbox
           - virtualbox-host-modules-arch
-          - kodi
           - virtualbox-host-dkms
           - vivaldi
         state: absent
@@ -85,11 +86,12 @@
           - k3b
           - keepass
           - sshfs
-          - jdk11-openjdk
+          - jdk17-openjdk
           - network-manager-applet
           - mplayer
           - pasystray
           - postfix
+          - postgresql-libs
           - rust
           - texlive-bin
           - texlive-core
@@ -137,6 +139,7 @@
           - gvfs-mtp
           - gvfs-smb
           - python-setuptools
+          - unixodbc
           - vim
           - vlc
           - wget
@@ -217,7 +220,8 @@
         state: latest
       loop:
         - brave-bin
-#        - dbeaver-git
+        - handbrake-full
+        - dbeaver-git
         - visual-studio-code-bin
         - xrdp
       become: true
