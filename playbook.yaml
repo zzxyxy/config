@@ -1,4 +1,23 @@
 ---
+- name: Repos for raspberry base
+  hosts:
+    - Gateway
+    - HellaNode01
+
+  become: true
+  tasks:
+    - name: Add Debian Sid repositories to sources.list
+      ansible.builtin.blockinfile:
+        path: /etc/apt/sources.list
+        create: true
+        block: |
+          deb http://ports.ubuntu.com/ubuntu-ports focal main restricted universe multiverse
+          deb http://ports.ubuntu.com/ubuntu-ports focal-updates main restricted universe multiverse
+          deb http://ports.ubuntu.com/ubuntu-ports focal-backports main restricted universe multiverse
+          deb http://ports.ubuntu.com/ubuntu-ports focal-security main restricted universe multiverse
+        mode: 644
+
+
 - name: Raspberry base
   hosts:
     - Gateway
@@ -68,6 +87,8 @@
           - make
           - mc
           - net-tools
+          - nfs-common
+          - nfs-kernel-server
           - prometheus-node-exporter
           - python3
           - python3-docker
@@ -295,6 +316,7 @@
         - { path: "/storage01/loki", mode: "0777", owner: "root"}
         - { path: "/storage01/gitlab/storage", mode: "0777", owner: "root"}
         - { path: "/storage02", mode: "0777", owner: "root"}
+        - { path: "/storage02/artifactory", mode: "0777", owner: "root"}
         - { path: "/storage03", mode: "0777", owner: "root"}
         - { path: "/storage02/torrent/downloaded", mode: "0777", owner: "root"}
         - { path: "/storage02/torrent/incomplette", mode: "0777", owner: "root"}
