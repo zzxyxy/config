@@ -17,7 +17,6 @@
           deb http://ports.ubuntu.com/ubuntu-ports focal-security main restricted universe multiverse
         mode: 644
 
-
 - name: Raspberry base
   hosts:
     - Gateway
@@ -30,6 +29,9 @@
       "aarch64": "arm64",
       "x86_64": "amd64"
     }
+
+  roles:
+    - { role: andrewrothstein.kubernetes, become: true }
 
   pre_tasks:
     - name: Set hostname
