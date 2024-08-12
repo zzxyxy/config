@@ -419,16 +419,27 @@
         dest: /root/bin/XMLDownload.py
         mode: '0770'
 
-    - name: XMLDownload schedule
+    - name: XMLDownload schedule zxyxy
       become: true
       ansible.builtin.cron:
         name: "XMLDownload"
         minute: "*/5"
         job: >-
-          python /root/bin/XMLDownload.py --db /root/XMLDownload.db
+          python3 /root/bin/XMLDownload.py --db /root/XMLDownload.db
           --cache /root/rss.xml
           --file /storage02/torrent/toDownload/
           --rss https://ncore.pro/bookmarks/fcc9f495abbd4b4a10c1ca5d759e8491113707 >/dev/null 2>&1
+
+    - name: XMLDownload schedule default
+      become: true
+      ansible.builtin.cron:
+        name: "XMLDownload def"
+        minute: "*/5"
+        job: >-
+          python3 /root/bin/XMLDownload.py --db /root/XMLDownload_def.db
+          --cache /root/rss_def.xml
+          --file /storage02/torrent/toDownload/
+          --rss https://ncore.pro/bookmarks/fcc9f495abbd4b4a10c1ca5d759e84910 >/dev/null 2>&1
 
 # WSDD2
     - name: WSDD config
@@ -549,6 +560,92 @@
         name: systemd-journald
         state: restarted
 
+- name: Raspberry base
+  hosts:
+    - Gateway
+
+  vars:
+    dockercomposerpath: /srv/docker
+
+  tasks:
+    - name: Create directories
+      become: true
+      ansible.builtin.file:
+        path: "{{ item.path }}"
+        mode: "{{ item.mode }}"
+        owner: "{{ item.owner }}"
+        state: directory
+      loop:
+        - { path: "/srv/docker", mode: "0755", owner: "root"}
+        - { path: "/srv/mosquitto", mode: "0755", owner: "root"}
+        - { path: "/srv/proxysetting", mode: "0755", owner: "root"}
+
+    - name: Copying files
+      become: true
+      ansible.builtin.copy:
+        src: "{{ item.src }}"
+        dest: "{{ item.dest }}"
+        owner: "root"
+        mode: "0755"
+      loop:
+        - { src: "files/Freya/mosquitto.conf", dest: "/srv/mosquitto/mosquitto.conf" }
+        - { src: "files/Freya/passwd.conf", dest: "/srv/mosquitto/passwd.conf" }
+        - { src: "files/Freya/wpad.dat", dest: "/srv/proxysetting/wpad.dat" }
+
+    - name: Add docker compose file
+      become: true
+      ansible.builtin.copy:
+        src: "files/{{ hostname }}/docker-compose.yaml"
+        dest: "{{ dockercomposerpath }}/docker-compose.yaml"
+        owner: root
+        group: root
+        mode: '0770'
+        decrypt: true
+      notify: Docker-compose run
+
+
+  handlers:
+    - name: Fail2ban service restart
+      become: true
+      ansible.builtin.service:
+        name: fail2ban
+        state: restarted
+        enabled: true
+
+    - name: Reload nfs exports
+      become: true
+      ansible.builtin.command:
+        cmd: /usr/bin/exportfs -arv
+      register: out
+      changed_when: out.rc != 0
+
+    - name: Docker-compose run
+      become: true
+      ansible.builtin.command: "docker compose up -d --remove-orphans"
+      args:
+        chdir: "{{ dockercomposerpath }}"
+      register: out
+      changed_when: out.rc != 0
+
+    - name: Restart syslog-ng
+      become: true
+      ansible.builtin.service:
+        name: syslog-ng@default.service
+        state: restarted
+
+    - name: Restart nginx
+      become: true
+      ansible.builtin.command: "docker   compose restart -t 10 nginx"
+      args:
+        chdir: "{{ dockercomposerpath }}"
+      register: out
+      changed_when: out.rc != 0
+
+    - name: Journald service restart
+      become: true
+      ansible.builtin.service:
+        name: systemd-journald
+        state: restarted
 
 - name: Manage vmrouter
   hosts:
