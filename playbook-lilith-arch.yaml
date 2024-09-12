@@ -65,6 +65,7 @@
           - git
           - git-crypt
           - filezilla
+          - intellij-idea-community-edition
           - linux-lts-headers
           - links
           - xf86-video-intel
@@ -92,6 +93,8 @@
           - pasystray
           - postfix
           - postgresql-libs
+          - pulseaudio
+          - pulseaudio-alsa
           - rust
           - texlive-bin
           - texlive-core
@@ -112,7 +115,6 @@
           - gperf
           - llvm
           - npm
-          - pipewire
           - python
           - python-attrs
           - python-packaging
@@ -220,8 +222,10 @@
         state: latest
       loop:
         - brave-bin
+        - noisetorch-bin
         - handbrake-full
         - dbeaver-git
+        - pycharm-community-jre
         - visual-studio-code-bin
         - xrdp
       become: true
