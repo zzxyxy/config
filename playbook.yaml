@@ -265,6 +265,13 @@
         minute: "*/15"
         job: "bash /root/bin/duck.sh >/dev/null 2>&1"
 
+    - name: Run collector
+      become: true
+      ansible.builtin.cron:
+        name: "Collector"
+        hour: "4"
+        job: 'docker run -it -e ZCOLLECTOR_SQL_ADDRESS="172.21.0.2" -e ZCOLLECTOR_SQL_DBNAME="zlive" -e ZCOLLECTOR_SQL_DBUSERNAME="zxyxy" -e ZCOLLECTOR_SQL_DBPASSWORD="DBPassword1111" --rm zxyxy/collector 2>&1'
+
 # SAMBA
     - name: Copy samba config
       become: true
