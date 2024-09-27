@@ -326,6 +326,7 @@
         - { path: "/storage01/gitlab/storage", mode: "0777", owner: "root"}
         - { path: "/storage02", mode: "0777", owner: "root"}
         - { path: "/storage02/artifactory", mode: "0777", owner: "root"}
+        - { path: "/storage02/openproject", mode: "0777", owner: "root"}
         - { path: "/storage03", mode: "0777", owner: "root"}
         - { path: "/storage02/torrent/downloaded", mode: "0777", owner: "root"}
         - { path: "/storage02/torrent/incomplette", mode: "0777", owner: "root"}

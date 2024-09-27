@@ -110,3 +110,16 @@ services:
       - "8081:8081"
     volumes:
       - /storage02/artifactory:/var/opt/jfrog/artifactory
+
+  openproject:
+    image: openproject/openproject:14.5.1
+    ports:
+      - 8085:80
+    volumes:
+      - /storage02/openproject/pgdate:/var/openproject/pgdata
+      - /storage02/openproject/assets:/var/openproject/assets
+    environment:
+      - OPENPROJECT_HOST__NAME=openproject.zxyxyhome.duckdns.org
+      - OPENPROJECT_SECRET_KEY_BASE=Estimator2-Seclusion2-Pessimism6-Sixtyfold6-Riverboat4
+      - OPENPROJECT_HTTPS=true
+      - OPENPROJECT_DEFAULT__LANGUAGE=en
