@@ -60,12 +60,14 @@
           - emacs
           - fakeroot
           - flameshot
+          - filezilla
           - fuse2fs
           - fuse2
           - git
           - git-crypt
-          - filezilla
+          - ghostscript
           - intellij-idea-community-edition
+          - imagemagick
           - linux-lts-headers
           - links
           - xf86-video-intel

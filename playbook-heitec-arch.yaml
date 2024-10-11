@@ -54,7 +54,9 @@
           - git
           - git-crypt
           - gtk2
+          - ghostscript
           - gperf
+          - imagemagick
           - junit
           - jq
           - kubectx
