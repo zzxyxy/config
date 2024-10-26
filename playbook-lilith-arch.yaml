@@ -64,6 +64,7 @@
           - fuse2
           - git
           - git-crypt
+          - hplip
           - filezilla
           - intellij-idea-community-edition
           - linux-lts-headers
@@ -89,6 +90,7 @@
           - sshfs
           - jdk17-openjdk
           - network-manager-applet
+          - man
           - mplayer
           - pasystray
           - postfix
