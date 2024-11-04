@@ -49,12 +49,14 @@
           - docker
           - docker-compose
           - duplicity
-          - dnsmasq
+          # - dnsmasq
           - emacs
           - git
           - git-crypt
           - gtk2
+          - ghostscript
           - gperf
+          - imagemagick
           - junit
           - jq
           - kubectx
@@ -113,17 +115,17 @@
           - runc
         state: present
 
-    - name: Install npm packages
-      become: true
-      community.general.npm:
-        name: "{{ item.name }}"
-        version: "{{ item.version }}"
-        global: true
-      loop:
-        - name: "@angular/cli"
-          version: 17.0.2
-        - name: jira-cl
-          version: latest
+#    - name: Install npm packages
+#      become: true
+#      community.general.npm:
+#        name: "{{ item.name }}"
+#        version: "{{ item.version }}"
+#        global: true
+#      loop:
+#        - name: "@angular/cli"
+#          version: 17.0.2
+#        - name: jira-cl
+#          version: latest
 
     - name: Create directories
       become: true
@@ -144,7 +146,7 @@
       loop:
         - cronie
         - docker
-        - dnsmasq
+     #   - dnsmasq
 
   roles:
     - { role: andrewrothstein.go, become: true }
@@ -187,13 +189,13 @@
           [interop]
           appendWindowsPath = false
 
-    - name: Insert/Update addresses to /etc/dnsmasq.conf
-      become: true
-      ansible.builtin.blockinfile:
-        path: /etc/dnsmasq.conf
-        block: |
-          address=/z.local/172.21.0.2
-      notify: Restart dnsmasq
+#    - name: Insert/Update addresses to /etc/dnsmasq.conf
+#      become: true
+#      ansible.builtin.blockinfile:
+#        path: /etc/dnsmasq.conf
+#        block: |
+#          address=/z.local/172.21.0.2
+#      notify: Restart dnsmasq
 
 # kcat-cli
     - name: Install avro-c

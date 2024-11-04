@@ -60,13 +60,16 @@
           - emacs
           - fakeroot
           - flameshot
+          - filezilla
           - fuse2fs
           - fuse2
           - git
           - git-crypt
           - hplip
           - filezilla
+          - ghostscript
           - intellij-idea-community-edition
+          - imagemagick
           - linux-lts-headers
           - links
           - xf86-video-intel
@@ -105,6 +108,8 @@
           - texstudio
           - tigervnc
           - pulseaudio-bluetooth
+          - pyright                     # for the python language server
+          - python-lsp-server           # for the python language server
           - pavucontrol
           - k3b
           - okular

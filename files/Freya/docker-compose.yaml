@@ -1,5 +1,3 @@
-version: '3.1'
-
 services:
   nginx:
     image: nginx
@@ -123,3 +121,25 @@ services:
       - OPENPROJECT_SECRET_KEY_BASE=Estimator2-Seclusion2-Pessimism6-Sixtyfold6-Riverboat4
       - OPENPROJECT_HTTPS=true
       - OPENPROJECT_DEFAULT__LANGUAGE=en
+
+  #freeipa:
+  #  image: freeipa/freeipa-server:fedora-41-4.12.2
+  #  container_name: freeipa-server
+  #  hostname: ipa.int.zxyxy.net  # Adjust hostname to reflect subdomain
+  #  environment:
+  #    - IPA_SERVER_IP=172.21.0.2    # Your server’s IP within your local network
+  #    - IPA_REALM=INT.ZXYXY.NET     # Set the realm to your subdomain in uppercase
+  #    - IPA_DOMAIN=int.zxyxy.net    # Your subdomain
+  #    - IPA_HOSTNAME=freya.int.zxyxy.net
+  #  volumes:
+  #    - /srv/ipa/data:/data:Z
+  #    - /srv/ipa/config:/config:Z
+  #  ports:
+  #    - "12080:80"
+  #    - "12443:443"
+  #    - "389:389"
+  #    - "636:636"
+  #    - "88:88"    # Kerberos
+  #    - "464:464"  # Kerberos
+  #    - "12053:53/udp"  # DNS (for internal domain resolution)
+  #  restart: unless-stopped

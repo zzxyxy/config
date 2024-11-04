@@ -344,6 +344,8 @@
         - { path: "/srv/squid/log", mode: "0777", owner: "root"}
         - { path: "/srv/squid/data", mode: "0777", owner: "root"}
         - { path: "/srv/squid/configsnippet", mode: "0777", owner: "root"}
+        - { path: "/srv/ipa/data", mode: "0777", owner: "root"}
+        - { path: "/srv/ipa/config", mode: "0777", owner: "root"}
 
     - name: Copying files
       become: true
