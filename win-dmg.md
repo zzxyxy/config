@@ -3,7 +3,7 @@
 set-service -Name LanmanServer -StartupType 'Automatic'
 Start-Service lanmanServer
 
-choco install -y wsl2 adb android-sdk 7zip anki azure-cli azure-data-studio azure-kubelogin AzureStorageExplorer choco-cleaner dbeaver docker-desktop git hackfont keepass kubectx kubens kubernetes-cli kubernetes-helm microsoft-windows-terminal powershell-core sql-server-management-studio vim vlc vscode 
+choco install -y wsl2 adb android-sdk 7zip anki azure-cli azure-data-studio azure-kubelogin AzureStorageExplorer choco-cleaner dbeaver docker-desktop git golang hackfont keepass kubectx kubens kubernetes-cli kubernetes-helm microsoft-windows-terminal powershell-core python3 rust sql-server-management-studio vim vlc vscode
 
 # ansible remote
 Enable-PSRemoting
