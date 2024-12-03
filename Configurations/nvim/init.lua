@@ -28,8 +28,35 @@ require("packer").startup(function(use)
   use 'hrsh7th/cmp-cmdline'     -- Command line source for nvim-cmp
   use 'L3MON4D3/LuaSnip'        -- Snippet engine
   use 'saadparwaiz1/cmp_luasnip'-- Snippet completions
+  use 'scrooloose/nerdtree' -- File explorer
+  use 'nvim-treesitter/nvim-treesitter' -- Enhanced syntax highlighting
+  use 'tpope/vim-fugitive'
 
+  -- Add gitsigns.nvim for Git indicators and hunk management
+  use {
+    'lewis6991/gitsigns.nvim',
+    config = function()
+      require('gitsigns').setup {
+        signs = {
+          add          = {text = '+'},
+          change       = {text = '~'},
+          delete       = {text = '_'},
+          topdelete    = {text = '‾'},
+          changedelete = {text = '~'},
+        },
+      current_line_blame = true, -- Toggle with `:Gitsigns toggle_current_line_blame`
+      numhl = true,              -- Highlights line numbers for changed lines
+      }
+    end
+  }
   -- Automatically set up your configuration after cloning packer.nvim
+
+  use {
+    'f-person/git-blame.nvim',
+    config = function()
+      vim.g.gitblame_enabled = 1
+    end
+  }
   -- Put this at the end after all plugins
   if packer_bootstrap then
     require("packer").sync()
@@ -126,11 +153,33 @@ lspconfig.helm_ls.setup{
     root_dir = lspconfig.util.root_pattern("Chart.yaml"),
 }
 
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = {"python", "lua", "javascript", "yaml", "yamlls"},  -- Replace with the file types you want
+  callback = function()
+    vim.opt_local.tabstop = 4
+    vim.opt_local.shiftwidth = 4
+    vim.opt_local.expandtab = true
+    vim.opt_local.cursorline = true
+    vim.opt_local.smartindent = true
+  end,
+})
+
+require'nvim-treesitter.configs'.setup {
+  ensure_installed = {"python", "yaml", "lua"}, -- or specify languages {"python", "javascript"}
+  highlight = {
+    enable = true,
+  },
+}
+
+vim.g.mapleader = ","
 vim.o.background = "dark"
 vim.cmd("highlight Normal guibg=black")
 vim.cmd("syntax on")
 vim.cmd("set number")
-
+vim.cmd("set listchars=eol:$,tab:>-,trail:~,extends:>,precedes:<")
+vim.cmd("set list")
+vim.api.nvim_set_keymap('n', '<leader>nt', ':NERDTreeToggle<CR>', { noremap = true, silent = true })
+vim.cmd([[command! Nt NERDTreeToggle]])
 
 vim.cmd [[
   augroup helm_syntax

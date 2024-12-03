@@ -72,6 +72,7 @@
           - npm
           - ncurses
           - ntp
+          - neovim
           - openssh
           - python
           - python-ansible-compat
@@ -124,8 +125,10 @@
       loop:
         - name: "@angular/cli"
           version: 17.0.2
-#        - name: jira-cl
-#          version: latest
+        - name: "bash-language-server"
+          version: latest
+        - name: "pyright"
+          version: latest
 
     - name: Create directories
       become: true
