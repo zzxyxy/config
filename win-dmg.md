@@ -20,3 +20,6 @@ ansible_user=your_win_user
 ansible_password=your_win_user_pass
 
 ansible_connection: local
+
+
+Set-ItemProperty -Path "HKCU:\Software\Microsoft\Multimedia\Audio" -Name "UserDuckingPreference" -Value 0

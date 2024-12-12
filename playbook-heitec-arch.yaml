@@ -54,7 +54,7 @@
           - git
           - git-crypt
           - gtk2
-          - ghostscript
+          # - ghostscript
           - gperf
           - imagemagick
           - junit
@@ -225,6 +225,7 @@
         - kcat-cli
         - paho-mqtt-c
         - paho-mqtt-cpp-git
+        - terraform-ls
       become: true
       become_user: aur_builder
 
