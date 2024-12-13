@@ -101,6 +101,9 @@
           - pulseaudio
           - pulseaudio-alsa
           - rust
+          - gimp
+          - neovim
+          - obs-studio
           - texlive-bin
           - texlive-core
           - texlive-langextra
