@@ -11,7 +11,7 @@ services:
       - 443:443
 
   duckdns:
-    image: lscr.io/linuxserver/duckdns:version-b9e2cafd
+    image: linuxserver/duckdns:version-b9e2cafd
     container_name: duckdns
     network_mode: host
     environment:
@@ -20,7 +20,7 @@ services:
     restart: unless-stopped
 
   plex:
-    image: lscr.io/linuxserver/plex:1.40.1
+    image: lscr.io/linuxserver/plex:1.41.2
     container_name: plex
     environment:
       - PUID=10000

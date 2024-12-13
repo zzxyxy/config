@@ -67,6 +67,7 @@ Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Search" 
 # Set the registry value to hide the search box (0 = hidden)
 Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" -Name "TaskbarSearchMode" -Value 0
 
+Set-ItemProperty -Path "HKCU:\Software\Microsoft\Multimedia\Audio" -Name "UserDuckingPreference" -Value 0
 
 # Restart Explorer to apply changes (optional step to make changes effective immediately)
 Stop-Process -Name "explorer" -Force
@@ -74,3 +75,17 @@ Start-Process "explorer"
 
 # Refresh the desktop to apply changes
 RUNDLL32.EXE user32.dll, UpdatePerUserSystemParameters
+
+powercfg /setacvalueindex scheme_current SUB_BUTTONS LIDACTION 0
+powercfg /setdcvalueindex scheme_current SUB_BUTTONS LIDACTION 0
+
+powercfg /setacvalueindex scheme_current SUB_BUTTONS PBUTTONACTION 0
+powercfg /setdcvalueindex scheme_current SUB_BUTTONS PBUTTONACTION 0
+
+powercfg /setacvalueindex scheme_current SUB_BUTTONS SBUTTONACTION 0
+powercfg /setdcvalueindex scheme_current SUB_BUTTONS SBUTTONACTION 0
+
+powercfg /setacvalueindex scheme_current SUB_SLEEP STANDBYIDLE 0
+powercfg /setdcvalueindex scheme_current SUB_SLEEP STANDBYIDLE 0
+
+powercfg /S scheme_current
