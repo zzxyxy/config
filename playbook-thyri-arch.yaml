@@ -66,52 +66,64 @@
           - filezilla
           - fuse2fs
           - fuse2
+          - ghostscript
           - git
           - git-crypt
           - hplip
-          - filezilla
-          - ghostscript
           - intellij-idea-community-edition
           - imagemagick
           - linux-lts-headers
           - links
-          - xf86-video-intel
-          - xterm
           - libreoffice
+          - libva
+          - libva-mesa-driver             # 3d
+          - libva-utils
           - lightdm
           - i3-wm
           - i3status
+          - i3lock
           - lightdm-gtk-greeter
           - libmtp
+          - man
           - mate-terminal
+          - mc
+          - mesa                          # 3d
+          - mplayer
           - net-tools
+          - network-manager-applet
           - nvidia-settings
           - rdesktop
           - remmina
+          - shutter
           - sudo
-          - mc
+          - syncthing
           - mtpfs
           - k3b
           - keepass
+          - kitty
           - sshfs
           - jdk17-openjdk
-          - network-manager-applet
-          - man
-          - mplayer
           - pasystray
           - postfix
           - postgresql-libs
+          - protonmail-bridge-core
           - pulseaudio
           - pulseaudio-alsa
           - rust
           - gimp
           - neovim
+          - neovim-qt
           - obs-studio
           - texlive-bin
           - texlive-core
           - texlive-langextra
           - texlive-pictures
           - texstudio
+          - ttf-nerd-fonts-symbols
+          - ttf-nerd-fonts-symbols-common
+          - ttf-nerd-fonts-symbols-mono
+          - ttf-hack
+          - ttf-hack-nerd
           - tigervnc
           - pulseaudio-bluetooth
           - pyright                     # for the python language server
@@ -158,53 +170,57 @@
           - usbutils                  # arduino
           - vim
           - vlc
+          - vulkan-intel              # 3d
+          - vulkan-tools              # 3d
           - wget
           - zsh
+          - xclip
+          - xterm
 #          - xorg
 #          - xorg-init
           - xf86-video-intel
+          - yubikey-manager
+          - yubikey-personalization
+          - libu2f-server
+          - opensc
+          - pcsc-tools
         state: latest
 
-    - name: Create Hack font directory
+    - name: Create directories
       become: true
       ansible.builtin.file:
-        path: /usr/share/fonts/Hack
+        path: "{{ item.path }}"
+        mode: "{{ item.mode }}"
+        owner: "{{ item.owner }}"
         state: directory
-        mode: '0755'
+      loop:
+        - { path: "/etc/autofs", mode: "0755", owner: "root"}
 
-    - name: Install hack regular font
+    - name: Install npm packages
       become: true
-      ansible.builtin.copy:
-        src: files/Hack-Regular.ttf
-        dest: /usr/share/fonts/Hack
-        force: false
-        mode: '0755'
-
-    - name: Install hack bold font
-      become: true
-      ansible.builtin.copy:
-        src: files/Hack-Bold.ttf
-        dest: /usr/share/fonts/Hack
-        force: false
-        mode: '0755'
-
-    - name: Install hack italic font
-      become: true
-      ansible.builtin.copy:
-        src: files/Hack-Italic.ttf
-        dest: /usr/share/fonts/Hack
-        force: false
-        mode: '0755'
-
-    - name: Install hack bold italic font
-      become: true
-      ansible.builtin.copy:
-        src: files/Hack-BoldItalic.ttf
-        dest: /usr/share/fonts/Hack
-        force: false
-        mode: '0755'
+      community.general.npm:
+        name: "{{ item.name }}"
+        version: "{{ item.version }}"
+        global: true
+      loop:
+        - name: "bash-language-server"
+          version: latest
+        - name: "pyright"
+          version: latest
+        - name: "yaml-language-server"
+          version: latest
 
       # ---- AUR packages
+
+    - name: Set MAKEFLAGS in /etc/makepkg.conf
+      become: true
+      ansible.builtin.lineinfile:
+        path: /etc/makepkg.conf
+        regexp: '^MAKEFLAGS='
+        line: 'MAKEFLAGS="-j$(nproc)"'
+        state: present
+        create: true
+        backup: yes
 
     - name: Create the `aur_builder` user
       become: true
@@ -235,15 +251,18 @@
         use: makepkg
         state: latest
       loop:
+        # - autofs
         - brave-bin
         - noisetorch-bin
         - handbrake-full
         - dbeaver-git
         - pycharm-community-jre
+        - snapd
         - visual-studio-code-bin
         - xrdp
       become: true
       become_user: aur_builder
+      when: aur|default(false)
 
     - name: Install php82
       kewlfft.aur.aur:
@@ -263,6 +282,7 @@
         - php82-composer
       become: true
       become_user: aur_builder
+      when: aur|default(false)
 
     - name: Php symlink
       ansible.builtin.file:
@@ -270,6 +290,7 @@
         dest: /usr/bin/php
         state: link
       become: true
+      when: aur|default(false)
 
   roles:
     - { role: andrewrothstein.kubectl, become: true }
@@ -313,6 +334,19 @@
         mode: '0644'
       notify: Restart autofs
 
+    - name: Install Snap packages
+      become: true
+      community.general.snap:
+        name:
+          - discord
+          - proton-mail
+          - proton-pass
+          - teams-for-linux
+          - thunderbird
+          - skype
+          - spotify
+          - steam
+
     - name: Enable services
       become: true
       ansible.builtin.service:
@@ -320,15 +354,27 @@
         state: started
         enabled: true
       loop:
-        - autofs
         - avahi-daemon
         - bluetooth
         - cups
         - cronie
         - docker
+        - NetworkManager
         - ntpd
         - sshd
         - xrdp
+        - snapd.socket
+
+    - name: Enable services (aur packages)
+      become: true
+      ansible.builtin.service:
+        name: "{{ item }}"
+        state: started
+        enabled: true
+      loop:
+        - autofs
+      when: aur|default(false)
+
 
   handlers:
     - name: Restart autofs

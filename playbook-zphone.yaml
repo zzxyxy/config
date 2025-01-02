@@ -1,0 +1,136 @@
+---
+- name: Manage Android Apps on Android Device
+  hosts: localhost
+  tasks:
+    # Step 1: Start ADB server (idempotent)
+    - name: Ensure ADB server is running
+      ansible.builtin.command:
+        cmd: adb start-server
+      changed_when: false  # Starting the server is always idempotent
+
+    # Step 2: Remove bloatware only if installed
+    - name: Check if bloatware is installed
+      ansible.builtin.command:
+        cmd: adb shell pm list packages | grep {{ item }}
+      register: bloatware_check
+      changed_when: false
+      failed_when: false
+      loop:
+        - com.samsung.android.app.spage
+        - com.facebook.appmanager
+        - com.samsung.android.aremoji
+        - com.samsung.storyservice
+        - com.samsung.android.lool
+        - com.samsung.android.smartsuggestions
+        - com.samsung.android.knox.kpecore
+        - com.samsung.android.dialer
+        - com.samsung.android.bbc.bbcagent
+        - com.samsung.android.ardrawing
+        - com.samsung.android.mdx.quickboard
+        - com.samsung.android.mobileservice
+        - com.samsung.android.forest
+        - com.sec.android.app.samsungapps
+        - com.samsung.android.knox.containercore
+        - com.samsung.android.kidsinstaller
+        - com.samsung.android.game.gametools
+        - com.samsung.android.game.gos
+
+    - name: Uninstall bloatware if installed
+      ansible.builtin.command:
+        cmd: adb shell pm uninstall --user 0 {{ item }}
+      loop: "{{ bloatware_check.results | selectattr('rc', 'eq', 0) | map(attribute='item') | list }}"
+      when: bloatware_check is defined and bloatware_check.results is defined
+
+    # Step 3: Install specified apps via Google Play if not already installed
+    - name: Check if app is already installed
+      ansible.builtin.command:
+        cmd: adb shell pm list packages | grep {{ item }}
+      register: app_check
+      changed_when: false
+      failed_when: false
+      loop:
+        - com.reddit.frontpage
+        - com.spotify.music
+        - com.waze
+        - com.seekingalpha.webwrapper
+        - com.brave.browser
+        - com.shazam.android
+        - com.discord
+        - com.skype.raider
+
+    - name: Install apps via Google Play
+      ansible.builtin.shell:
+        cmd: adb shell am start -a android.intent.action.VIEW -d "market://details?id={{ item }}"
+      loop: "{{ app_check.results | rejectattr('rc', 'eq', 0) | map(attribute='item') | list }}"
+      when: app_check is defined and app_check.results is defined
+
+    # Step 4: Install F-Droid if not already installed
+    - name: Check if F-Droid is installed
+      ansible.builtin.command:
+        cmd: adb shell pm list packages | grep org.fdroid.fdroid
+      register: fdroid_installed
+      changed_when: false
+      failed_when: false
+
+    - name: Download F-Droid APK if not installed
+      ansible.builtin.get_url:
+        url: https://f-droid.org/F-Droid.apk
+        dest: /tmp/F-Droid.apk
+      when: fdroid_installed.rc != 0
+
+    - name: Install F-Droid
+      ansible.builtin.command:
+        cmd: adb install /tmp/F-Droid.apk
+      when: fdroid_installed.rc != 0
+
+    # Step 5: Update F-Droid repositories
+    - name: Update F-Droid repositories
+      ansible.builtin.command:
+        cmd: adb shell am start -a android.intent.action.VIEW -d "fdroid://update"
+      changed_when: false
+
+    # Step 6: Install apps from F-Droid if not already installed
+    - name: Check if F-Droid apps are installed
+      ansible.builtin.command:
+        cmd: adb shell pm list packages | grep {{ item }}
+      register: fdroid_app_check
+      changed_when: false
+      failed_when: false
+      loop:
+        - org.telegram.messenger.forkgram
+        - com.prangesoftwaresolutions.audioanchor
+        - me.hackerchick.catima
+        - net.osmand.plus
+        - com.termux
+        - ch.blinkenlights.android.vanilla
+
+    - name: Install apps via F-Droid
+      ansible.builtin.shell:
+        cmd: adb shell am start -a android.intent.action.VIEW -d "fdroid://details?id={{ item }}"
+      loop: "{{ fdroid_app_check.results | rejectattr('rc', 'eq', 0) | map(attribute='item') | list }}"
+      when: fdroid_app_check is defined and fdroid_app_check.results is defined
+
+
+
+# System Apps:
+#
+# com.android.settings
+# com.android.systemui
+# com.android.providers.downloads
+# com.google.android.gms (Google Play Services)
+# com.samsung.android.dialer
+# com.sec.android.app.camera (Camera)
+# com.android.providers.telephony
+# com.google.android.youtube
+
+# Core Connectivity:
+#
+# com.android.bluetooth
+# com.samsung.android.net.wifi.wifiguider
+# com.android.wifi.resources
+
+# Storage and Backup:
+#
+# com.android.sharedstoragebackup
+# com.android.providers.media
+# com.sec.android.app.myfiles

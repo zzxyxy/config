@@ -12,6 +12,6 @@ ansible_become_password: !vault |
         6537663837613664640a373262643830383730373965363636346466366537666361646236613535
         3666
 
-ansible_ssh_common_args: '-o ProxyCommand="ssh -W %h:%p -q ansible@zxyxyhome.duckdns.org -i ansible.key"'
+# ansible_ssh_common_args: '-o ProxyCommand="ssh -W %h:%p -q ansible@zxyxyhome.duckdns.org -i ansible.key"'
 
 # zxyxy_kubernetes: true

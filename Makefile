@@ -13,11 +13,23 @@ dmgprofile:
 lilith:
 	ansible-playbook playbook-lilith-arch.yaml
 
+thyri:
+	ansible-playbook playbook-thyri-arch.yaml -v
+
+thyri_aur:
+	ansible-playbook playbook-thyri-arch.yaml -v -e aur=true
+
 lilithwsl:
 	ansible-playbook playbook-lilwsl.yaml
 
 lilithprofile:
 	ansible-playbook playbook-lilithprofile.yaml --ask-become-pass
 
+zprofile:
+	ansible-playbook playbook-zprofile.yaml --ask-become-pass
+
 req:
 	ansible-galaxy install -r requirements.yaml -f
+
+zphone:
+	ansible-playbook playbook-zphone.yaml -v

@@ -86,6 +86,7 @@
           - snapd
           - sshfs
           - syslog-ng
+          - syncthing
           - make
           - mc
           - net-tools
@@ -330,27 +331,27 @@
         owner: "{{ item.owner }}"
         state: directory
       loop:
-        - { path: "/storage01", mode: "0777", owner: "root"}
-        - { path: "/storage02", mode: "0777", owner: "root"}
-        - { path: "/storage03", mode: "0777", owner: "root"}
-        - { path: "/storage02/torrent/downloaded", mode: "0777", owner: "root"}
-        - { path: "/storage02/torrent/incomplette", mode: "0777", owner: "root"}
-        - { path: "/storage02/torrent/toDownload", mode: "0777", owner: "root"}
-        - { path: "/etc/transmission-daemon", mode: "0775", owner: "debian-transmission"}
-        - { path: "/storage03", mode: "0777", owner: "root"}
-        - { path: "/storage03", mode: "0777", owner: "root"}
-        - { path: "{{ dockercomposerpath }}", mode: "0777", owner: "root"}
-        - { path: "/srv/ingress", mode: "0755", owner: "root"}
-        - { path: "/srv/mosquitto", mode: "0755", owner: "root"}
-        - { path: "/srv/grafana", mode: "0755", owner: "root"}
-        - { path: "/srv/prometheus", mode: "0755", owner: "root"}
-        - { path: "/srv/proxysetting", mode: "0755", owner: "root"}
-        - { path: "/srv/squid", mode: "0755", owner: "root"}
-        - { path: "/srv/squid/log", mode: "0777", owner: "root"}
-        - { path: "/srv/squid/data", mode: "0777", owner: "root"}
-        - { path: "/srv/squid/configsnippet", mode: "0777", owner: "root"}
-        - { path: "/srv/ipa/data", mode: "0777", owner: "root"}
-        - { path: "/srv/ipa/config", mode: "0777", owner: "root"}
+        - {path: "/storage01", mode: "0777", owner: "root"}
+        - {path: "/storage02", mode: "0777", owner: "root"}
+        - {path: "/storage03", mode: "0777", owner: "root"}
+        - {path: "/storage02/torrent/downloaded", mode: "0777", owner: "root"}
+        - {path: "/storage02/torrent/incomplette", mode: "0777", owner: "root"}
+        - {path: "/storage02/torrent/toDownload", mode: "0777", owner: "root"}
+        - {path: "/etc/transmission-daemon", mode: "0775", owner: "debian-transmission"}
+        - {path: "/storage03", mode: "0777", owner: "root"}
+        - {path: "/storage03", mode: "0777", owner: "root"}
+        - {path: "{{ dockercomposerpath }}", mode: "0777", owner: "root"}
+        - {path: "/srv/ingress", mode: "0755", owner: "root"}
+        - {path: "/srv/mosquitto", mode: "0755", owner: "root"}
+        - {path: "/srv/grafana", mode: "0755", owner: "root"}
+        - {path: "/srv/prometheus", mode: "0755", owner: "root"}
+        - {path: "/srv/proxysetting", mode: "0755", owner: "root"}
+        - {path: "/srv/squid", mode: "0755", owner: "root"}
+        - {path: "/srv/squid/log", mode: "0777", owner: "root"}
+        - {path: "/srv/squid/data", mode: "0777", owner: "root"}
+        - {path: "/srv/squid/configsnippet", mode: "0777", owner: "root"}
+        - {path: "/srv/ipa/data", mode: "0777", owner: "root"}
+        - {path: "/srv/ipa/config", mode: "0777", owner: "root"}
 
     - name: Copying files
       become: true
@@ -360,10 +361,10 @@
         owner: "root"
         mode: "0755"
       loop:
-        - { src: "files/Freya/mosquitto.conf", dest: "/srv/mosquitto/mosquitto.conf" }
-        - { src: "files/Freya/passwd.conf", dest: "/srv/mosquitto/passwd.conf" }
-        - { src: "files/Freya/alerts.yml", dest: "/srv/prometheus/alerts.yml" }
-        - { src: "files/Freya/wpad.dat", dest: "/srv/proxysetting/wpad.dat" }
+        - {src: "files/Freya/mosquitto.conf", dest: "/srv/mosquitto/mosquitto.conf" }
+        - {src: "files/Freya/passwd.conf", dest: "/srv/mosquitto/passwd.conf" }
+        - {src: "files/Freya/alerts.yml", dest: "/srv/prometheus/alerts.yml" }
+        - {src: "files/Freya/wpad.dat", dest: "/srv/proxysetting/wpad.dat" }
 
     - name: Copy prometheus config
       become: true
@@ -385,12 +386,12 @@
 #        mode: '0770'
 #      notify: Restart promtail
 
-    - name: Stop transmission-service
-      become: true
-      ansible.builtin.service:
-        name: transmission-daemon
-        state: stopped
-        enabled: true
+#    - name: Stop transmission-service
+#      become: true
+#      ansible.builtin.service:
+#        name: transmission-daemon
+#        state: stopped
+#        enabled: true
 
 #    - name: Set the transmission config dit to /etc
 #      become: true
@@ -409,13 +410,13 @@
         mode: '0770'
       register: transmissionconfig
 
-    - name: Start transmission-service
-      become: true
-      ansible.builtin.service:
-        name: transmission-daemon
-        state: started
-        enabled: true
-        daemon_reload: true
+#    - name: Start transmission-service
+#      become: true
+#      ansible.builtin.service:
+#        name: transmission-daemon
+#        state: started
+#        enabled: true
+#        daemon_reload: true
 
 # XMLDownload
 

@@ -6,7 +6,7 @@
   vars:
     user: "{{ ansible_facts.env.USER }}"
     envs: |
-      PATH=$PATH:/home/{{ user }}/tools/wq
+      PATH=$PATH:/home/{{ user }}/tools/wq:/home/{{ user }}/bin
       alias gitg="git log --all --decorate --oneline --graph"
       alias klogf="kubectl logs -f "
       alias ls='ls --color=auto'
@@ -77,3 +77,8 @@
         mode: "0655"
       loop:
         - { src: "files/{{ user }}/settings.ini", dest: "/home/{{ user }}/.config/gtk-3.0/settings.ini" }
+
+    - name: Add custom aliases to .zshrc
+      blockinfile:
+        path: "{{ ansible_env.HOME }}/.zshrc"
+        block: "{{ envs }}"

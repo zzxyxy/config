@@ -1,4 +1,12 @@
----
+-    - name: Add custom aliases to .zshrc
+      blockinfile:
+        path: "{{ ansible_env.HOME }}/.zshrc"
+        block: |
+          # Custom Aliases
+          alias ll='ls -alF'
+          alias gs='git status'
+          alias ..='cd ..'
+      state: present--
 - name: Manage packages
   hosts: localhost
   vars:
@@ -128,6 +136,8 @@
         - name: "bash-language-server"
           version: latest
         - name: "pyright"
+          version: latest
+        - name: "yaml-language-server"
           version: latest
 
     - name: Create directories
