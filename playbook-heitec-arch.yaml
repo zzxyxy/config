@@ -1,12 +1,3 @@
--    - name: Add custom aliases to .zshrc
-      blockinfile:
-        path: "{{ ansible_env.HOME }}/.zshrc"
-        block: |
-          # Custom Aliases
-          alias ll='ls -alF'
-          alias gs='git status'
-          alias ..='cd ..'
-      state: present--
 - name: Manage packages
   hosts: localhost
   vars:
@@ -19,7 +10,7 @@
         update_cache: true
         upgrade: true
 
-    - name: Remove packages
+    - name: Remove pacman packages
       become: true
       community.general.pacman:
         name:
