@@ -2,7 +2,7 @@
 - name: Repos for raspberry base
   hosts:
     - Gateway
-    - HellaNode01
+#    - HellaNode01
 
   become: true
   tasks:
@@ -20,7 +20,7 @@
 - name: Raspberry base
   hosts:
     - Gateway
-    - HellaNode01
+#    - HellaNode01
     - Freya
 #    - Thyri
 
@@ -75,20 +75,17 @@
       ansible.builtin.apt:
         state: present
         name:
+          - containerd.io
           - docker-ce
           - docker-ce-cli
-          - containerd.io
           - docker-buildx-plugin
           - docker-compose-plugin
+          - etherwake
           - fail2ban
           - git
-          - screen
-          - snapd
-          - sshfs
-          - syslog-ng
-          - syncthing
           - make
           - mc
+          - nano
           - net-tools
           - nfs-common
           - nfs-kernel-server
@@ -97,8 +94,13 @@
           - python3-docker
           - rsync
           - rinetd
+          - screen
+          - snapd
+          - sshfs
+          - syslog-ng
+          - syncthing
           - vim
-          - nano
+          - wakeonlan
 
     - name: Install microk8s packages
       become: true

@@ -22,6 +22,7 @@
         name:
           - jdk11-openjdk
           - kodi
+          - neovim-qt
           - virtualbox
           - virtualbox-host-modules-arch
           - virtualbox-host-dkms
@@ -61,7 +62,9 @@
           - docker
           - dvd+rw-tools
           - emacs
+          - ethtool
           - fakeroot
+          - flake8
           - flameshot
           - filezilla
           - fuse2fs
@@ -112,7 +115,6 @@
           - rust
           - gimp
           - neovim
-          - neovim-qt
           - obs-studio
           - texlive-bin
           - texlive-core
@@ -142,6 +144,11 @@
           - npm
           - python
           - python-attrs
+          - python-debugpy
+          - python-flake8-black
+          - python-flake8-docstrings
+          - python-flake8-isort
+          - python-pynvim
           - python-packaging
           - python-protobuf
           - python-platformdirs
@@ -152,6 +159,7 @@
           - python-setuptools
           - python-six
           - python-virtualenv
+          - qrencode                  # wifi qr generator
           - ncurses
           - ntp
           - boost-libs
@@ -173,6 +181,7 @@
           - vulkan-intel              # 3d
           - vulkan-tools              # 3d
           - wget
+          - zbar                      # qr barcode reader
           - zsh
           - xclip
           - xterm
@@ -257,6 +266,7 @@
         - handbrake-full
         - dbeaver-git
         - pycharm-community-jre
+        - python310
         - snapd
         - visual-studio-code-bin
         - xrdp
@@ -293,7 +303,6 @@
       when: aur|default(false)
 
   roles:
-    - { role: andrewrothstein.kubectl, become: true }
     - { role: andrewrothstein.go, become: true }
 
   tasks:
