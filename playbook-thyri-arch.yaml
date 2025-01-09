@@ -78,6 +78,7 @@
           - linux-lts-headers
           - links
           - libreoffice
+          - libfido2
           - libva
           - libva-mesa-driver             # 3d
           - libva-utils
