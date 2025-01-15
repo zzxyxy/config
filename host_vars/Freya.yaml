@@ -15,7 +15,7 @@ ansible_become_password: !vault |
 
 
 
-# ansible_ssh_common_args: '-o ProxyCommand="ssh -W %h:%p -q ansible@zxyxyhome.duckdns.org -i ansible.key"'
+ansible_ssh_common_args: '-o ProxyCommand="ssh -W %h:%p -q ansible@zxyxyhome.duckdns.org -i ansible.key"'
 
 nfs_client: false
 nfs_server: true

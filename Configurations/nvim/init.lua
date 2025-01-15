@@ -5,6 +5,8 @@ require('plugins')
 require('gitsigns').setup {}
 
 local builtin = require('telescope.builtin')
+vim.opt.conceallevel = 1
+
 vim.g.mapleader = "."
 vim.keymap.set('n', '<leader>f', vim.lsp.buf.format, { desc = 'Format file' })
 vim.keymap.set('n', '<leader>gd', vim.lsp.buf.definition, { desc = 'Go to definition' })
@@ -14,6 +16,12 @@ vim.keymap.set('n', '<leader>ca', vim.lsp.buf.code_action, { desc = 'Code action
 vim.keymap.set('n', '<leader>f', builtin.find_files, {})
 vim.keymap.set('n', '<leader>b', builtin.buffers, {})
 vim.keymap.set("n", "<leader>tw", ":Twilight<CR>", { noremap = true, silent = true })
+vim.keymap.set("n", "<leader>on", ":ObsidianNew<CR>", { noremap = true, silent = true })
+vim.keymap.set("n", "<leader>ot", ":ObsidianTags<CR>", { noremap = true, silent = true })
+vim.keymap.set("n", "<leader>oj", ":ObsidianToday<CR>", { noremap = true, silent = true })
+vim.keymap.set("n", "<leader>os", ":ObsidianSearch<CR>", { noremap = true, silent = true })
+vim.keymap.set('n', '<leader>cc', '"+y', { noremap = true, silent = true })
+
 vim.g.render_markdown_browser = 'brave'
 vim.cmd("highlight Normal guibg=black")
 vim.cmd("syntax on")

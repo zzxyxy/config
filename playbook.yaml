@@ -603,6 +603,8 @@
         - { path: "/srv/docker", mode: "0755", owner: "root"}
         - { path: "/srv/mosquitto", mode: "0755", owner: "root"}
         - { path: "/srv/proxysetting", mode: "0755", owner: "root"}
+        - { path: "/srv/homeassistant", mode: "0755", owner: "root"}
+        - { path: "/srv/homeassistant/config", mode: "0775", owner: "root"}
 
     - name: Copying files
       become: true
