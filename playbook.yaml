@@ -395,12 +395,12 @@
 #        state: stopped
 #        enabled: true
 
-#    - name: Set the transmission config dit to /etc
-#      become: true
-#      ansible.builtin.lineinfile:
-#        path: /usr/lib/systemd/system/transmission.service
-#        regexp: '^ExecStart'
-#        line: ExecStart=/usr/bin/transmission-daemon -f --log-level=info -g /etc/transmission-daemon
+    - name: Set the transmission config dit to /etci
+      become: true
+      ansible.builtin.lineinfile:
+        path: /usr/lib/systemd/system/transmission-daemon.service
+        regexp: '^ExecStart'
+        line: ExecStart=/usr/bin/transmission-daemon -f --log-level=info -g /etc/transmission-daemon
 
     - name: Copy transmission config
       become: true

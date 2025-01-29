@@ -33,20 +33,22 @@
       become: true
       community.general.pacman:
         name:
+          - accountsservice
+          - alsa-utils
           - android-tools
           - ansible
           - ansible-lint
-          - accountsservice
+          - ant
           - arandr
           - avahi
           - avrdude                        # arduino
-          - alsa-utils
           - base-devel
-          - boost
           - blueman
           - bluez
-          - bluez-utils
           - bluez-tools
+          - bluez-utils
+          - boost
+          - boost-libs
           - brightnessctl
           - ca-certificates
           - ca-certificates-mozilla
@@ -55,126 +57,137 @@
           - cdrdao
           - cdrtools
           - chromium
+          - clang
           - cronie
+          - cuda
           - cups
+          - dejagnu
           - dfu-programmer                # arduino
+          - dkms                          # vmware
           - dmenu
           - docker
+          - doxygen
           - dvd+rw-tools
           - emacs
           - ethtool
           - fakeroot
+          - filezilla
           - flake8
           - flameshot
-          - filezilla
-          - fuse2fs
           - fuse2
+          - fuse2fs
+          - gcr                           # vmware
           - ghostscript
+          - gimp
           - git
           - git-crypt
+          - gperf
+          - gtk2
+          - gtkmm3                        # vmware
+          - gvfs
+          - gvfs-mtp
+          - gvfs-nfs
+          - gvfs-smb
           - hplip
-          - intellij-idea-community-edition
+          - i3-wm
+          - i3lock
+          - i3status
           - imagemagick
-          - linux-lts-headers
-          - links
-          - libreoffice
+          - inetutils
+          - intellij-idea-community-edition
+          - jdk17-openjdk
+          - junit
+          - k3b
+          - k3b
+          - keepass
+          - kitty
+          - libaio                        # vmware
           - libfido2
+          - libmtp
+          - libreoffice
+          - libu2f-server
           - libva
           - libva-mesa-driver             # 3d
           - libva-utils
+          - libxcrypt-compat              # vmware
           - lightdm
-          - i3-wm
-          - i3status
-          - i3lock
           - lightdm-gtk-greeter
-          - libmtp
+          - links
+          - linux-lts-headers
+          - llvm
           - man
           - mate-terminal
           - mc
           - mesa                          # 3d
           - mplayer
+          - mtpfs
+          - ncurses
+          - neovim
+          - neovim
           - net-tools
           - network-manager-applet
+          - nfs-utils
+          - npm
+          - ntp
+          - nvidia
           - nvidia-settings
-          - rdesktop
-          - remmina
-          - shutter
-          - sudo
-          - syncthing
-          - mtpfs
-          - k3b
-          - keepass
-          - kitty
-          - sshfs
-          - jdk17-openjdk
+          - nvidia-utils
+          - obs-studio
+          - okular
+          - opencl-nvidia
+          - opensc
+          - openssh
           - pasystray
+          - pavucontrol
+          - pcsc-tools
           - postfix
           - postgresql-libs
           - protonmail-bridge-core
           - pulseaudio
           - pulseaudio-alsa
-          - rust
-          - gimp
-          - neovim
-          - obs-studio
-          - texlive-bin
-          - texlive-core
-          - texlive-langextra
-          - texlive-pictures
-          - texstudio
-          - ttf-nerd-fonts-symbols
-          - ttf-nerd-fonts-symbols-common
-          - ttf-nerd-fonts-symbols-mono
-          - ttf-hack
-          - ttf-hack-nerd
-          - tigervnc
+          - pulseaudio-bluetooth
           - pulseaudio-bluetooth
           - pyright                     # for the python language server
-          - python-lsp-server           # for the python language server
-          - pavucontrol
-          - k3b
-          - okular
-          - openssh
-          - tmux
-          - screen
-          - xdotool
-          - gtk2
-          - clang
-          - gperf
-          - llvm
-          - npm
           - python
           - python-attrs
           - python-debugpy
           - python-flake8-black
           - python-flake8-docstrings
           - python-flake8-isort
-          - python-pynvim
-          - python-packaging
-          - python-protobuf
-          - python-platformdirs
           - python-grpcio-tools
+          - python-lsp-server           # for the python language server
+          - python-packaging
           - python-paramiko
+          - python-platformdirs
+          - python-protobuf
           - python-pygments
           - python-pylint
+          - python-pynvim
+          - python-setuptools
           - python-setuptools
           - python-six
           - python-virtualenv
           - qrencode                  # wifi qr generator
-          - ncurses
-          - ntp
-          - boost-libs
-          - pulseaudio-bluetooth
-          - zip
-          - ant
-          - junit
-          - neovim
-          - nfs-utils
-          - gvfs
-          - gvfs-nfs
-          - gvfs-mtp
-          - gvfs-smb
-          - python-setuptools
+          - rdesktop
+          - remmina
+          - rust
+          - screen
+          - shutter
+          - sshfs
+          - sudo
+          - syncthing
+          - texlive-bin
+          - texlive-core
+          - texlive-langextra
+          - texlive-pictures
+          - texstudio
+          - tigervnc
+          - tmux
+          - ttf-hack
+          - ttf-hack-nerd
+          - ttf-nerd-fonts-symbols
+          - ttf-nerd-fonts-symbols-common
+          - ttf-nerd-fonts-symbols-mono
           - unixodbc
           - usbutils                  # arduino
           - vim
@@ -182,19 +195,18 @@
           - vulkan-intel              # 3d
           - vulkan-tools              # 3d
           - wget
-          - zbar                      # qr barcode reader
-          - zsh
           - xclip
-          - xterm
-#          - xorg
-#          - xorg-init
+          - xdotool
           - xf86-video-intel
+          - xterm
           - yubikey-manager
           - yubikey-personalization
-          - libu2f-server
-          - opensc
-          - pcsc-tools
+          - zbar                      # qr barcode reader
+          - zip
+          - zsh
         state: latest
+#          - xorg
+#          - xorg-init
 
     - name: Create directories
       become: true
@@ -261,15 +273,20 @@
         use: makepkg
         state: latest
       loop:
+        #        - noisetorch-bin
         # - autofs
+        #- dbeaver-git
+        #- pycharm-community-jre
         - brave-bin
-        - noisetorch-bin
+        - cuda-11.1
+        - cudnn8-cude11.1
         - handbrake-full
-        - dbeaver-git
-        - pycharm-community-jre
+        - ncurses5-compat-libs
         - python310
         - snapd
         - visual-studio-code-bin
+        - vmware-keymaps
+        - vmware-workstation
         - xrdp
       become: true
       become_user: aur_builder
