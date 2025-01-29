@@ -86,6 +86,7 @@
           - python-xmltodict
           - python-urllib3
           - python-virtualenv
+          - ripgrep               # nvim telescope plugin
           - rsync
           - rust
           - sudo
@@ -218,6 +219,7 @@
         state: present
         ignore_arch: true
       loop:
+        - python310
         - python-patch-ng # conan deplendency
         - python-pluginbase # conan deplendency
         - conan
