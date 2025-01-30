@@ -50,6 +50,8 @@
           - duplicity
           # - dnsmasq
           - emacs
+          - fzf
+          - flatpak
           - git
           - git-crypt
           - gtk2
@@ -88,6 +90,7 @@
           - python-virtualenv
           - ripgrep               # nvim telescope plugin
           - rsync
+          - rofi
           - rust
           - sudo
           - sshfs
@@ -104,6 +107,10 @@
           - zip
           - wget
           - whois
+          - xorg
+          - xorg-server
+          - xorg-xwayland
+          - mesa
         state: present
 
     - name: Install docker packages
