@@ -73,6 +73,7 @@
           - fakeroot
           - filezilla
           - flake8
+          - flatpak
           - flameshot
           - fuse2
           - fuse2fs
@@ -147,7 +148,6 @@
           - pulseaudio-alsa
           - pulseaudio-bluetooth
           - pulseaudio-bluetooth
-          - pyright                     # for the python language server
           - python
           - python-attrs
           - python-debugpy
@@ -170,10 +170,12 @@
           - qrencode                  # wifi qr generator
           - rdesktop
           - remmina
+          - rofi
           - rust
           - screen
           - shutter
           - sshfs
+          - sssd
           - sudo
           - syncthing
           - texlive-bin
@@ -205,8 +207,6 @@
           - zip
           - zsh
         state: latest
-#          - xorg
-#          - xorg-init
 
     - name: Create directories
       become: true
@@ -278,8 +278,6 @@
         #- dbeaver-git
         #- pycharm-community-jre
         - brave-bin
-        - cuda-11.1
-        - cudnn8-cude11.1
         - handbrake-full
         - ncurses5-compat-libs
         - python310
@@ -324,6 +322,15 @@
     - { role: andrewrothstein.go, become: true }
 
   tasks:
+    - name: Install multiple packages
+      become: true
+      community.general.flatpak:
+        name:
+          - org.gimp.GIMP
+          - org.inkscape.Inkscape
+          - org.torproject.torbrowser-launcher
+          - com.emqx.MQTTX
+
     - name: Freya storage directorys
       become: true
       ansible.builtin.file:
@@ -361,6 +368,14 @@
         mode: '0644'
       notify: Restart autofs
 
+    - name: Copy sssd.conf
+      become: true
+      ansible.builtin.copy:
+        src: files/thyri/sssd.conf
+        dest: /etc/sssd/sssd.conf
+        mode: '0644'
+      notify: Restart sssd
+
     - name: Install Snap packages
       become: true
       community.general.snap:
@@ -381,16 +396,17 @@
         state: started
         enabled: true
       loop:
+        - NetworkManager
         - avahi-daemon
         - bluetooth
-        - cups
         - cronie
+        - cups
         - docker
-        - NetworkManager
         - ntpd
-        - sshd
-        - xrdp
         - snapd.socket
+        - sshd
+        - sssd
+        - xrdp
 
     - name: Enable services (aur packages)
       become: true
@@ -408,6 +424,13 @@
       become: true
       ansible.builtin.service:
         name: autofs
+        state: restarted
+        enabled: true
+
+    - name: Restart sssd
+      become: true
+      ansible.builtin.service:
+        name: sssd
         state: restarted
         enabled: true
 
