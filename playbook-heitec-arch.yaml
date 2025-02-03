@@ -239,6 +239,20 @@
       become: true
       become_user: aur_builder
 
+    - name: Add the flathub flatpak repository remote to the user installation
+      community.general.flatpak_remote:
+        name: flathub
+        state: present
+        flatpakrepo_url: https://dl.flathub.org/repo/flathub.flatpakrepo
+
+    - name: Update the flatpak packages
+      become: true
+      community.general.flatpak:
+        name: "{{ item }}"
+        state: latest
+      loop:
+        - com.brave.Browser
+
     - name: User ameszely
       become: true
       ansible.builtin.user:

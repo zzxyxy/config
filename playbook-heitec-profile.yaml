@@ -21,15 +21,16 @@
       export PATH=$PATH:/home/{{ user }}/bin:/home/{{ user }}/.local/bin:/home/{{ user }}/.cargo/bin::/home/{{ user }}/go/bin
       export ZWIQ_LOG_PATH="/home/ameszely/log/deploy.log"
       export GOPATH=$HOME/go
+      export DISPLAY=$(grep nameserver /etc/resolv.conf | awk '{print $2}'):0
+      export LIBGL_ALWAYS_INDIRECT=1
+      alias ro='rofi -show combi -combi-modi window,drun -normal-window'
   tasks:
     - name: Change user shell to zsh
-      become: true
       ansible.builtin.user:
         name: "{{ user }}"
         shell: /bin/zsh
 
     - name: Create directories
-      become: true
       ansible.builtin.file:
         path: "{{ item.path }}"
         mode: "{{ item.mode }}"

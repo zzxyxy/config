@@ -29,7 +29,7 @@ zprofile:
 	ansible-playbook playbook-zprofile.yaml --ask-become-pass
 
 req:
-	ansible-galaxy install -r requirements.yaml -f
+	ansible-galaxy install -r requirements.yaml -f --ignore-errors
 
 zphone:
 	ansible-playbook playbook-zphone.yaml -v
