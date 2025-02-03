@@ -1,3 +1,8 @@
+HOSTNAME := $(shell hostnamectl --static)
+
+default:
+	ansible-playbook playbook-$(HOSTNAME).yaml --ask-vault-password
+
 all:
 	ansible-playbook -i inventory.yaml playbook.yaml  --ask-vault-password
 
@@ -33,3 +38,5 @@ req:
 
 zphone:
 	ansible-playbook playbook-zphone.yaml -v
+
+
