@@ -160,6 +160,15 @@
         - docker
      #   - dnsmasq
 
+    - name: Disable service
+      become: true
+      ansible.builtin.services:
+        name: "{{ item }}"
+        state: stopped
+        enabled: false
+      loop:
+        - systemd-resolved
+
   roles:
     - { role: andrewrothstein.go, become: true }
     - { role: andrewrothstein.k3d, become: true }
@@ -195,19 +204,9 @@
         block: |
           [network]
           generateResolvConf = true
-          nameserver 127.0.0.1
-          nameserver 172.31.48.1
 
           [interop]
           appendWindowsPath = false
-
-#    - name: Insert/Update addresses to /etc/dnsmasq.conf
-#      become: true
-#      ansible.builtin.blockinfile:
-#        path: /etc/dnsmasq.conf
-#        block: |
-#          address=/z.local/172.21.0.2
-#      notify: Restart dnsmasq
 
 # kcat-cli
     - name: Install avro-c

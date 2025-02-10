@@ -4,6 +4,9 @@ default:
 	ansible-galaxy install -r requirements.yaml -f --ignore-errors
 	ansible-playbook playbook-$(HOSTNAME).yaml --ask-vault-password
 
+profile:
+	ansible-playbook playbook-$(HOSTNAME)-profile.yaml --ask-vault-password
+
 all:
 	ansible-playbook -i inventory.yaml playbook.yaml  --ask-vault-password
 
