@@ -1,0 +1,445 @@
+---
+- name: Manage packages
+  hosts: localhost
+  vars:
+    secret_dir: "{{ lookup('env','SECRET_DIR') }}"
+    docker_distribution: archlinux
+    docker_ansible_requirements: true
+  pre_tasks:
+    #    - name: get_vars
+    # include_vars:
+    #   file: "{{ secret_dir }}/passwds.yml"
+
+    - name: Upgrade system
+      become: true
+      community.general.pacman:
+        update_cache: true
+        upgrade: true
+
+    - name: Remove pacman packages
+      become: true
+      community.general.pacman:
+        name:
+          - jdk11-openjdk
+          - kodi
+          - neovim-qt
+          - virtualbox
+          - virtualbox-host-modules-arch
+          - virtualbox-host-dkms
+          - vivaldi
+        state: absent
+
+    - name: Install pacman packages
+      become: true
+      community.general.pacman:
+        name:
+          - accountsservice
+          - alsa-utils
+          - android-tools
+          - ansible
+          - ansible-lint
+          - ant
+          - arandr
+          - avahi
+          - avrdude                        # arduino
+          - base-devel
+          - blueman
+          - bluez
+          - bluez-tools
+          - bluez-utils
+          - boost
+          - boost-libs
+          - brightnessctl
+          - ca-certificates
+          - ca-certificates-mozilla
+          - caja
+          - calibre
+          - cdrdao
+          - cdrtools
+          - chromium
+          - clang
+          - cronie
+          - cuda
+          - cups
+          - dejagnu
+          - dfu-programmer                # arduino
+          - dkms                          # vmware
+          - dmenu
+          - docker
+          - docker-compose
+          - doxygen
+          - dvd+rw-tools
+          - emacs
+          - ethtool
+          - fzf
+          - fakeroot
+          - filezilla
+          - flake8
+          - flatpak
+          - flameshot
+          - fuse2
+          - fuse2fs
+          - gcr                           # vmware
+          - ghostscript
+          - gimp
+          - git
+          - git-crypt
+          - gperf
+          - gtk2
+          - gtkmm3                        # vmware
+          - gvfs
+          - gvfs-mtp
+          - gvfs-nfs
+          - gvfs-smb
+          - hplip
+          - i3-wm
+          - i3lock
+          - i3status
+          - imagemagick
+          - inetutils
+          - intellij-idea-community-edition
+          - jdk17-openjdk
+          - junit
+          - k3b
+          - k3b
+          - keepass
+          - kitty
+          - libaio                        # vmware
+          - libfido2
+          - libmtp
+          - libreoffice
+          - libu2f-server
+          - libva
+          - libva-mesa-driver             # 3d
+          - libva-utils
+          - libxcrypt-compat              # vmware
+          - lightdm
+          - lightdm-gtk-greeter
+          - links
+          - linux-lts-headers
+          - llvm
+          - man
+          - mate-terminal
+          - mc
+          - mesa                          # 3d
+          - mplayer
+          - mtpfs
+          - ncurses
+          - neovim
+          - neovim
+          - net-tools
+          - network-manager-applet
+          - nfs-utils
+          - npm
+          - ntp
+          - nvidia
+          - nvidia-container-toolkit
+          - nvidia-settings
+          - nvidia-utils
+          - obs-studio
+          - okular
+          - opencl-nvidia
+          - opensc
+          - openssh
+          - pasystray
+          - pavucontrol
+          - pcsc-tools
+          - postfix
+          - postgresql-libs
+          - protonmail-bridge-core
+          - pulseaudio
+          - pulseaudio-alsa
+          - pulseaudio-bluetooth
+          - pulseaudio-bluetooth
+          - python
+          - python-attrs
+          - python-debugpy
+          - python-flake8-black
+          - python-flake8-docstrings
+          - python-flake8-isort
+          - python-grpcio-tools
+          - python-lsp-server           # for the python language server
+          - python-packaging
+          - python-paramiko
+          - python-platformdirs
+          - python-protobuf
+          - python-pygments
+          - python-pylint
+          - python-pynvim
+          - python-setuptools
+          - python-setuptools
+          - python-six
+          - python-virtualenv
+          - qrencode                  # wifi qr generator
+          - rdesktop
+          - remmina
+          - rofi
+          - rust
+          - screen
+          - shutter
+          - sshfs
+          - sssd
+          - sudo
+          - syncthing
+          - texlive-bin
+          - texlive-core
+          - texlive-langextra
+          - texlive-pictures
+          - texstudio
+          - tigervnc
+          - tmux
+          - ttf-hack
+          - ttf-hack-nerd
+          - ttf-nerd-fonts-symbols
+          - ttf-nerd-fonts-symbols-common
+          - ttf-nerd-fonts-symbols-mono
+          - unixodbc
+          - usbutils                  # arduino
+          - vim
+          - vlc
+          - vulkan-intel              # 3d
+          - vulkan-tools              # 3d
+          - wget
+          - xclip
+          - xdotool
+          - xf86-video-intel
+          - xterm
+          - yubikey-manager
+          - yubikey-personalization
+          - zbar                      # qr barcode reader
+          - zip
+          - zsh
+        state: latest
+
+    - name: Create directories
+      become: true
+      ansible.builtin.file:
+        path: "{{ item.path }}"
+        mode: "{{ item.mode }}"
+        owner: "{{ item.owner }}"
+        state: directory
+      loop:
+        - { path: "/etc/autofs", mode: "0755", owner: "root"}
+
+    - name: Install npm packages
+      become: true
+      community.general.npm:
+        name: "{{ item.name }}"
+        version: "{{ item.version }}"
+        global: true
+      loop:
+        - name: "bash-language-server"
+          version: latest
+        - name: "pyright"
+          version: latest
+        - name: "yaml-language-server"
+          version: latest
+
+      # ---- AUR packages
+
+    - name: Set MAKEFLAGS in /etc/makepkg.conf
+      become: true
+      ansible.builtin.lineinfile:
+        path: /etc/makepkg.conf
+        regexp: '^MAKEFLAGS='
+        line: 'MAKEFLAGS="-j$(nproc)"'
+        state: present
+        create: true
+        backup: yes
+
+    - name: Create the `aur_builder` user
+      become: true
+      ansible.builtin.user:
+        name: aur_builder
+        create_home: true
+        group: wheel
+
+    - name: Allow the `aur_builder` user to run `sudo pacman` without a password
+      become: true
+      ansible.builtin.lineinfile:
+        path: /etc/sudoers.d/11-install-aur_builder
+        line: 'aur_builder ALL=(ALL) NOPASSWD: /usr/bin/pacman'
+        create: true
+        validate: 'visudo -cf %s'
+        mode: '0755'
+
+    - name: Disable lid auto suspend
+      become: true
+      ansible.builtin.lineinfile:
+        path: /etc/systemd/logind.conf
+        line: 'HandleLidSwitch=ignore'
+      notify: Restart logind
+
+    - name: Install aur packages
+      kewlfft.aur.aur:
+        name: "{{ item }}"
+        use: makepkg
+        state: latest
+      loop:
+        #        - noisetorch-bin
+        # - autofs
+        #- dbeaver-git
+        #- pycharm-community-jre
+        - brave-bin
+        - handbrake-full
+        - ncurses5-compat-libs
+        - python310
+        - snapd
+        - visual-studio-code-bin
+        - vmware-keymaps
+        - vmware-workstation
+        - xrdp
+      become: true
+      become_user: aur_builder
+      when: aur|default(false)
+
+    - name: Install php82
+      kewlfft.aur.aur:
+        name: "{{ item }}"
+        use: makepkg
+        state: present
+        ignore_arch: true
+      loop:
+        - c-client
+        - php82
+        - php82-cli
+        - php82-curl
+        - php82-phar
+        - php82-pear
+        - php82-mysql
+        - php82-dba
+        - php82-composer
+      become: true
+      become_user: aur_builder
+      when: aur|default(false)
+
+    - name: Php symlink
+      ansible.builtin.file:
+        src: /usr/bin/php82
+        dest: /usr/bin/php
+        state: link
+      become: true
+      when: aur|default(false)
+
+  roles:
+    - { role: andrewrothstein.go, become: true }
+
+  tasks:
+    - name: Install multiple packages
+      become: true
+      community.general.flatpak:
+        name:
+          - org.gimp.GIMP
+          - org.inkscape.Inkscape
+          - org.torproject.torbrowser-launcher
+          - com.emqx.MQTTX
+
+    - name: Freya storage directorys
+      become: true
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: directory
+        mode: '0777'
+      loop:
+        - /mnt/freya
+
+    - name: Copying files
+      become: true
+      ansible.builtin.copy:
+        src: "{{ item.src }}"
+        dest: "{{ item.dest }}"
+        owner: "root"
+        mode: "{{ item.mode }}"
+      loop:
+        - src: "files/lilith/backlight.rules"
+          dest: "/etc/udev/rules.d/backlight.rules"
+          mode: "0644"
+
+    - name: Copy /etc/autofs/auto.master
+      become: true
+      ansible.builtin.copy:
+        src: files/lilith/auto.master
+        dest: /etc/autofs/auto.master
+        mode: '0644'
+      notify: Restart autofs
+
+    - name: Copy /etc/autofs/auto.freya
+      become: true
+      ansible.builtin.copy:
+        src: files/lilith/auto.freya
+        dest: /etc/autofs/auto.freya
+        mode: '0644'
+      notify: Restart autofs
+
+    - name: Copy sssd.conf
+      become: true
+      ansible.builtin.copy:
+        src: files/thyri/sssd.conf
+        dest: /etc/sssd/sssd.conf
+        mode: '0644'
+      notify: Restart sssd
+
+    - name: Install Snap packages
+      become: true
+      community.general.snap:
+        name:
+          - discord
+          - proton-mail
+          - proton-pass
+          - teams-for-linux
+          - thunderbird
+          - skype
+          - spotify
+          - steam
+
+    - name: Enable services
+      become: true
+      ansible.builtin.service:
+        name: "{{ item }}"
+        state: started
+        enabled: true
+      loop:
+        - NetworkManager
+        - avahi-daemon
+        - bluetooth
+        - cronie
+        - cups
+        - docker
+        - ntpd
+        - snapd.socket
+        - sshd
+        - sssd
+        - xrdp
+
+    - name: Enable services (aur packages)
+      become: true
+      ansible.builtin.service:
+        name: "{{ item }}"
+        state: started
+        enabled: true
+      loop:
+        - autofs
+      when: aur|default(false)
+
+
+  handlers:
+    - name: Restart autofs
+      become: true
+      ansible.builtin.service:
+        name: autofs
+        state: restarted
+        enabled: true
+
+    - name: Restart sssd
+      become: true
+      ansible.builtin.service:
+        name: sssd
+        state: restarted
+        enabled: true
+
+    - name: Restart logind
+      become: true
+      ansible.builtin.service:
+        name: systemd-logind
+        state: restarted
+        enabled: true
