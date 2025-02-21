@@ -25,6 +25,8 @@ require("packer").startup(function(use)
     end
   }
 
+  use 'morhetz/gruvbox'
+
   use {
     -- Autocompletion
     "hrsh7th/nvim-cmp",
@@ -33,7 +35,7 @@ require("packer").startup(function(use)
       'hrsh7th/cmp-buffer',      -- Buffer source for nvim-cmp
       'hrsh7th/cmp-path',        -- Path source for nvim-cmp
       'hrsh7th/cmp-cmdline',     -- Command line source for nvim-cmp
-      'L3MON4Di3/LuaSnip',        -- Snippet engine
+--      'L3MON4Di3/LuaSnip',        -- Snippet engine
       'saadparwaiz1/cmp_luasnip',-- Snippet completions
     },
     config = function()
@@ -137,6 +139,27 @@ require("packer").startup(function(use)
     "folke/twilight.nvim",
     config = function()
       require('config.twilight')
+    end
+  }
+
+  use {
+    "epwalsh/obsidian.nvim",
+    tag = "*",
+    requires = {
+      -- Required.
+      "nvim-lua/plenary.nvim",
+
+      -- see below for full list of optional dependencies 👇
+    },
+    config = function()
+      require('config.obsidian')
+    end
+  }
+
+  use {
+    'hashivim/vim-terraform',
+    config = function()
+      require('config.terraform')
     end
   }
 

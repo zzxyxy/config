@@ -42,3 +42,12 @@ lspconfig.pyright.setup {
         },
     },
 }
+
+-- Setup for Terraform Language Server
+lspconfig.terraformls.setup {
+  cmd = { "terraform-ls", "serve" },
+  filetypes = { "terraform", "tf" },
+  root_dir = lspconfig.util.root_pattern(".terraform", ".git"),
+  settings = {},
+}
+

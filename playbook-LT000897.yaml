@@ -162,7 +162,7 @@
 
     - name: Disable service
       become: true
-      ansible.builtin.services:
+      ansible.builtin.service:
         name: "{{ item }}"
         state: stopped
         enabled: false
@@ -249,8 +249,11 @@
       community.general.flatpak:
         name: "{{ item }}"
         state: latest
+        remote: flathub
       loop:
         - com.brave.Browser
+        - org.torproject.torbrowser-launcher
+
 
     - name: User ameszely
       become: true
@@ -323,3 +326,4 @@
         mode: '0755'
         owner: root
         group: root
+
