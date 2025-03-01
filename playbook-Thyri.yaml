@@ -244,8 +244,9 @@
         regexp: '^MAKEFLAGS='
         line: 'MAKEFLAGS="-j$(nproc)"'
         state: present
+        mode: "0755"
         create: true
-        backup: yes
+        backup: true
 
     - name: Create the `aur_builder` user
       become: true
@@ -275,23 +276,19 @@
         name: "{{ item }}"
         use: makepkg
         state: latest
+        extra_args: "--noconfirm"
       loop:
-        #        - noisetorch-bin
-        # - autofs
-        #- dbeaver-git
-        #- pycharm-community-jre
+        - nvm
+
+        - vscodium
         - brave-bin
-        - handbrake-full
-        - ncurses5-compat-libs
         - python310
         - snapd
-        - visual-studio-code-bin
         - vmware-keymaps
         - vmware-workstation
-        - xrdp
       become: true
       become_user: aur_builder
-      when: aur|default(false)
+      when: aur | default(false)
 
     - name: Install php82
       kewlfft.aur.aur:
@@ -311,7 +308,7 @@
         - php82-composer
       become: true
       become_user: aur_builder
-      when: aur|default(false)
+      when: aur | default(false)
 
     - name: Php symlink
       ansible.builtin.file:
@@ -319,7 +316,7 @@
         dest: /usr/bin/php
         state: link
       become: true
-      when: aur|default(false)
+      when: aur | default(false)
 
   roles:
     - { role: andrewrothstein.go, become: true }
@@ -333,6 +330,7 @@
           - org.inkscape.Inkscape
           - org.torproject.torbrowser-launcher
           - com.emqx.MQTTX
+          - com.brave.Browser
 
     - name: Freya storage directorys
       become: true
@@ -408,8 +406,8 @@
         - ntpd
         - snapd.socket
         - sshd
-        - sssd
-        - xrdp
+        #        - sssd
+        #        - xrdp
 
     - name: Enable services (aur packages)
       become: true
@@ -418,8 +416,8 @@
         state: started
         enabled: true
       loop:
-        - autofs
-      when: aur|default(false)
+        - snapd
+      when: aur | default(false)
 
 
   handlers:
