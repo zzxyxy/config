@@ -2,7 +2,7 @@ HOSTNAME := $(shell hostnamectl --static)
 
 default:
 	ansible-galaxy install -r requirements.yaml -f --ignore-errors
-	ansible-playbook playbook-$(HOSTNAME).yaml --ask-vault-password
+	ansible-playbook playbook-$(HOSTNAME).yaml --ask-vault-password -v
 
 profile:
 	ansible-playbook playbook-$(HOSTNAME)-profile.yaml --ask-vault-password

@@ -67,18 +67,19 @@
           - dmenu
           - docker
           - docker-compose
+          - dotnet-runtime
           - doxygen
           - dvd+rw-tools
           - emacs
           - ethtool
-          - fzf
           - fakeroot
           - filezilla
           - flake8
-          - flatpak
           - flameshot
+          - flatpak
           - fuse2
           - fuse2fs
+          - fzf
           - gcr                           # vmware
           - ghostscript
           - gimp
@@ -280,12 +281,13 @@
       loop:
         - nvm
 
-        - vscodium
         - brave-bin
+        - dotnet-sdk-bin
         - python310
         - snapd
         - vmware-keymaps
         - vmware-workstation
+        - vscodium
       become: true
       become_user: aur_builder
       when: aur | default(false)
