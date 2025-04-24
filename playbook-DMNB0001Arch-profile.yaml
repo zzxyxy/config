@@ -1,0 +1,115 @@
+---
+- name: Wsl profile setting
+  hosts:
+    - localhost
+
+  vars:
+    user: zxyxy
+    envs: |
+      PATH=$PATH:/home/{{ user }}/bin:/home/{{ user }}/go/bin
+      alias gitg="git log --all --decorate --oneline --graph"
+      alias grep='grep --color=auto'
+      alias ll='ls -lah'
+      alias ls='ls --color=auto'
+      alias f="kubectl logs -f `kubectl get po --sort-by=.status.startTime | tail -1 | awk '{ print $1 }'`"
+      alias nodes='kubectl get nodes -o json | jq ".items[]|{name:.metadata.name, version:.status.nodeInfo.kubeletVersion, taints:.spec.taints}"'
+      export HELM_EXPERIMENTAL_OCI=1
+      export EDITOR=nvim
+      export PATH=$PATH:/home/{{ user }}/bin:/home/{{ user }}/.local/bin:/home/{{ user }}/.cargo/bin::/home/{{ user }}/go/bin
+      export GOPATH=$HOME/go
+      export LIBGL_ALWAYS_INDIRECT=1
+      alias ro='rofi -show combi -combi-modi window,drun -normal-window'
+  tasks:
+    #    - name: Change user shell to zsh
+    #      ansible.builtin.user:
+    #        name: "{{ user }}"
+    #        shell: /bin/zsh
+
+    - name: Create directories
+      ansible.builtin.file:
+        path: "{{ item.path }}"
+        mode: "{{ item.mode }}"
+        owner: "{{ item.owner }}"
+        state: directory
+      loop:
+        - { path: "/home/{{ user }}/.ssh", mode: "0700", owner: "{{ user }}"}
+        - { path: "/home/{{ user }}/bin", mode: "0700", owner: "{{ user }}"}
+        - { path: "/home/{{ user }}/log", mode: "0700", owner: "{{ user }}"}
+        - { path: "/home/{{ user }}/mount/freya", mode: "0700", owner: "{{ user }}"}
+
+    - name: Clone a github repository
+      ansible.builtin.git:
+        repo: https://github.com/ohmyzsh/ohmyzsh.git
+        dest: "/home/{{ user }}/.oh-my-zsh"
+        clone: true
+        update: true
+        version: master
+
+    - name: Clone a powerlevel10k repository
+      ansible.builtin.git:
+        repo: https://github.com/romkatv/powerlevel10k.git
+        dest: "/home/{{ user }}/.oh-my-zsh/custom/themes/powerline10k"
+        clone: true
+        update: true
+        version: v1.19.0
+
+    - name: Zshrc
+      ansible.builtin.copy:
+        src: files/zshrc
+        dest: "/home/{{ user }}/.zshrc"
+        owner: "{{ user }}"
+        mode: "0644"
+
+#    - name: copy ssh
+#      copy:
+#        src: /mnt/c/Users/{{ user }}/.ssh
+#        dest: /home/{{ user }}
+#        directory_mode: "0700"
+#        mode: "0600"
+#      tags:
+#        - dircontent
+
+    - name: Insert/Update aliases in bashrc
+      ansible.builtin.blockinfile:
+        path: /home/{{ user }}/.bashrc
+        block: "{{ envs }}"
+        create: true
+        mode: "0644"
+
+    - name: Insert/Update aliases in bashrc
+      ansible.builtin.blockinfile:
+        path: /home/{{ user }}/.zshrc
+        block: "{{ envs }}"
+        create: true
+        mode: "0644"
+
+    - name: Insert/Update aliases in profile
+      ansible.builtin.blockinfile:
+        path: /home/{{ user }}/.profile
+        block: "{{ envs }}"
+        create: true
+        mode: "0644"
+
+    - name: Fix zsh conf ending
+      ansible.builtin.replace:
+        path: /home/{{ user }}/.zshrc
+        regexp: "\r"
+        replace: ""
+
+#      local_action: replace dest=/home/{{ user }}/.zshrc regexp="\r"
+
+        #    - name: Copying config files
+        #      ansible.builtin.copy:
+        #        src: "{{ item.src }}"
+        #        dest: "{{ item.dest }}"
+        #        owner: "{{ user }}"
+        #        mode: "0700"
+        #      loop:
+        #        - { src: "files/dmg/gitconfig", dest: "/home/{{ user }}/.gitconfig" }
+        #        - { src: "files/dmg/xo", dest: "/home/{{ user }}/bin/xo" }
+        #        - { src: "files/dmg/vimrc", dest: "/home/{{ user }}/.vimrc" }
+        #        - { src: "files/dmg/zwiq", dest: "/home/{{ user }}/bin/zwiq" }
+        #        - { src: "files/dmg/ssh/config", dest: "/home/{{ user }}/.ssh/config" }
+        #        - { src: "files/dmg/tmux.conf", dest: "/home/{{ user }}/.tmux.conf" }
+        #        - { src: "files/ameszely/homebackup.sh", dest: "/home/{{ user }}/bin/homebackup.sh" }
+
